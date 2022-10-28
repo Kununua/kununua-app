@@ -5,9 +5,13 @@ import 'package:ionicons/ionicons.dart';
 import 'package:kununua_app/screens/login_screen/animations/change_screen_animation.dart';
 import 'package:kununua_app/screens/login_screen/components/bottom_text.dart';
 import 'package:kununua_app/screens/login_screen/components/top_text.dart';
+import 'package:kununua_app/screens/login_screen/widgets/forgot_password.dart';
+import 'package:kununua_app/screens/login_screen/widgets/logos.dart';
+import 'package:kununua_app/screens/login_screen/widgets/or_divider.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/utils/helper_functions.dart';
-
+import 'package:kununua_app/utils/widgets/button.dart';
+import 'package:kununua_app/utils/widgets/input.dart';
 enum Screens{
   createAccount,
   welcomeBack
@@ -26,136 +30,53 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
   late final List<Widget> createAccountContent;
   late final List<Widget> loginContent;
 
-  Widget inputField(String hint, IconData iconData){
-    return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
-        child: SizedBox(
-          height: 50,
-          child: Material(
-            elevation: 8,
-            shadowColor: Colors.black87,
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(30),
-            child: TextField(
-              textAlignVertical: TextAlignVertical.bottom,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                hintText: hint,
-                prefixIcon: Icon(iconData)
-              ),
-            ),
-          ),
-        ),
-      );
+  void _register() {
+    
   }
 
-  Widget loginButton(String title){
-    return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 135, vertical: 16),
-        child: ElevatedButton(
-          onPressed: (){},
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: const StadiumBorder(),
-            backgroundColor: kSecondaryColor,
-            elevation: 8,
-            shadowColor: Colors.black87,
-          ),
-          child: Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold
-            ),
-          ),
-        ),
-      );
-  }
-
-  Widget orDivider(){
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 130, vertical: 8),
-      child: Row(
-        children: [
-          Flexible(
-            child: Container(
-              height: 1,
-              color: kPrimaryColor,
-              ),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              'or',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Flexible(
-            child: Container(
-              height: 1,
-              color: kPrimaryColor,
-              ),
-          ),
-        ]
-      ),
-    );
-  }
-
-  Widget logos(){
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset('assets/images/facebook.png'),
-          const SizedBox(width: 24),
-          Image.asset('assets/images/google.png'),
-        ],
-      ),
-    );
-  }
-
-  Widget forgotPassword(){
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 110),
-      child: TextButton(
-        onPressed: (){},
-        child: const Text(
-          'Forgot Password?',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: kSecondaryColor,
-          ),
-        ),
-      )
-    );
+  void _login() {
+    
   }
 
   @override
   void initState() {
     createAccountContent = [
-      inputField('Name', Ionicons.person_outline),
-      inputField('Email', Ionicons.mail_outline),
-      inputField('Password', Ionicons.lock_closed_outline),
-      loginButton('Sign Up'),
-      orDivider(),
-      logos()
+      const Input(
+        hint: 'Name', 
+        iconData: Ionicons.person_outline
+      ),
+      const Input(
+        hint: 'Email', 
+        iconData: Ionicons.mail_outline
+      ),
+      const Input(
+        hint: 'Password', 
+        iconData: Ionicons.lock_closed_outline
+      ),
+      Button(
+        text: 'Sign Up', 
+        action: _register,
+        color: kSecondaryColor,  
+      ),
+      const OrDivider(),
+      const Logos(),
     ];
 
     loginContent = [
-      inputField('Email', Ionicons.mail_outline),
-      inputField('Password', Ionicons.lock_closed_outline),
-      loginButton('Log In'),
-      forgotPassword()
+      const Input(
+        hint: 'Email', 
+        iconData: Ionicons.mail_outline
+      ),
+      const Input(
+        hint: 'Password', 
+        iconData: Ionicons.lock_closed_outline
+      ),
+      Button(
+        text: 'Log In', 
+        action: _login,
+        color: kSecondaryColor,  
+      ),
+      const ForgotPassword(),
     ];
 
     ChangeScreenAnimation.initialize(
