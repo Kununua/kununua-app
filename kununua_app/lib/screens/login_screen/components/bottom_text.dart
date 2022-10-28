@@ -34,7 +34,7 @@ class _BottomTextState extends State<BottomText> {
       child: GestureDetector(
         onTap: (){
           if(!ChangeScreenAnimation.isPlaying){
-            ChangeScreenAnimation.currentScreen == Screens.createAccount ?
+            ChangeScreenAnimation.currentScreen == Screens.welcomeBack ?
             ChangeScreenAnimation.forward()
             :
             ChangeScreenAnimation.reverse();
@@ -54,7 +54,7 @@ class _BottomTextState extends State<BottomText> {
               ),
               children: [
                 TextSpan(
-                  text: ChangeScreenAnimation.currentScreen == Screens.createAccount
+                  text: ChangeScreenAnimation.currentScreen == Screens.welcomeBack
                       ? 'Already have an account? '
                       : 'Don\'t have an account? ',
                   style: const TextStyle(
@@ -63,7 +63,7 @@ class _BottomTextState extends State<BottomText> {
                   ),
                 ),
                 TextSpan(
-                  text: ChangeScreenAnimation.currentScreen == Screens.createAccount ? 'Log In' : 'Sign Up',
+                  text: ChangeScreenAnimation.currentScreen == Screens.welcomeBack ? 'Log In' : 'Sign Up',
                   style: const TextStyle(
                     color: kSecondaryColor,
                     fontWeight: FontWeight.bold,

@@ -8,6 +8,7 @@ import 'package:kununua_app/screens/login_screen/components/top_text.dart';
 import 'package:kununua_app/screens/login_screen/widgets/forgot_password.dart';
 import 'package:kununua_app/screens/login_screen/widgets/logos.dart';
 import 'package:kununua_app/screens/login_screen/widgets/or_divider.dart';
+import 'package:kununua_app/screens/welcome_screen/welcome_screen.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/utils/helper_functions.dart';
 import 'package:kununua_app/utils/widgets/button.dart';
@@ -31,11 +32,19 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
   late final List<Widget> loginContent;
 
   void _register() {
-    
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const WelcomeScreen(),
+      ),
+    );
   }
 
   void _login() {
-    
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const WelcomeScreen(),
+      ),
+    );
   }
 
   @override

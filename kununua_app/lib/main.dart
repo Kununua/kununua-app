@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(  
       debugShowCheckedModeBanner: false,        
-      title: 'Login App',
+      title: 'Kununua App',
       theme: ThemeData(           
         scaffoldBackgroundColor: kBackgroundColor,
         textTheme: Theme.of(context).textTheme.apply(

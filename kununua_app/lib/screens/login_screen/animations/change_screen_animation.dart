@@ -2,20 +2,20 @@ import 'package:flutter/animation.dart';
 import 'package:kununua_app/screens/login_screen/components/login_content.dart';
 
 class ChangeScreenAnimation{
-  static late final AnimationController topTextController;
-  static late final Animation<Offset> topTextAnimation;
+  static late AnimationController topTextController;
+  static late Animation<Offset> topTextAnimation;
 
-  static late final AnimationController bottomTextController;
-  static late final Animation<Offset> bottomTextAnimation;
+  static late AnimationController bottomTextController;
+  static late Animation<Offset> bottomTextAnimation;
 
-  static final List<AnimationController> createAccountControllers = [];
-  static final List<Animation<Offset>> createAccountAnimation = [];
+  static List<AnimationController> createAccountControllers = [];
+  static List<Animation<Offset>> createAccountAnimation = [];
 
-  static final List<AnimationController> loginControllers = [];
-  static final List<Animation<Offset>> loginAnimation = [];
+  static List<AnimationController> loginControllers = [];
+  static List<Animation<Offset>> loginAnimation = [];
 
   static var isPlaying = false;
-  static var currentScreen = Screens.createAccount;
+  static var currentScreen = Screens.welcomeBack;
 
   static Animation<Offset> _createAnimation({
     required Offset begin,
@@ -35,6 +35,16 @@ class ChangeScreenAnimation{
     required int createAccountItems,
     required int loginItems
   }){
+
+    createAccountControllers = [];
+    createAccountAnimation = [];
+
+    loginControllers = [];
+    loginAnimation = [];
+
+    isPlaying = false;
+    currentScreen = Screens.welcomeBack;
+
     topTextController = AnimationController(
       vsync: vsync,
       duration: const Duration(milliseconds: 200),
@@ -57,6 +67,19 @@ class ChangeScreenAnimation{
       parent: bottomTextController,
     );
 
+    for(var i = 0; i<loginItems; i++){
+      loginControllers.add(AnimationController(
+        vsync: vsync,
+        duration: const Duration(milliseconds: 200),
+      ));
+
+      loginAnimation.add(_createAnimation(
+        begin: Offset.zero,
+        end: const Offset(-1, 0),
+        parent: loginControllers[i],
+      ));
+    }
+
     for(var i = 0; i<createAccountItems; i++){
       createAccountControllers.add(AnimationController(
         vsync: vsync,
@@ -64,22 +87,9 @@ class ChangeScreenAnimation{
       ));
 
       createAccountAnimation.add(_createAnimation(
-        begin: Offset.zero,
-        end: const Offset(-1, 0),
-        parent: createAccountControllers[i],
-      ));
-    }
-
-    for(var i = 0; i<createAccountItems; i++){
-      loginControllers.add(AnimationController(
-        vsync: vsync,
-        duration: const Duration(milliseconds: 200),
-      ));
-
-      loginAnimation.add(_createAnimation(
         begin: const Offset(1, 0),
         end: Offset.zero,
-        parent: loginControllers[i],
+        parent: createAccountControllers[i],
       ));
     }
   }
@@ -98,7 +108,7 @@ class ChangeScreenAnimation{
     topTextController.forward();
     await bottomTextController.forward();
 
-    for(final controller in [...createAccountControllers, ...loginControllers]){
+    for(final controller in [...loginControllers, ...createAccountControllers]){
       controller.forward();
       await Future.delayed(const Duration(milliseconds: 100));
     }
@@ -116,7 +126,7 @@ class ChangeScreenAnimation{
     topTextController.forward();
     await bottomTextController.forward();
 
-    for(final controller in [...loginControllers.reversed, ...createAccountControllers.reversed]){
+    for(final controller in [...createAccountControllers.reversed, ...loginControllers.reversed]){
       controller.reverse();
       await Future.delayed(const Duration(milliseconds: 100));
     }
