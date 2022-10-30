@@ -55,15 +55,15 @@ class _BottomTextState extends State<BottomText> {
               children: [
                 TextSpan(
                   text: ChangeScreenAnimation.currentScreen == Screens.welcomeBack
-                      ? 'Already have an account? '
-                      : 'Don\'t have an account? ',
+                      ? 'Don\'t have an account? '
+                      : 'Already have an account? ',
                   style: const TextStyle(
                     color: kPrimaryColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 TextSpan(
-                  text: ChangeScreenAnimation.currentScreen == Screens.welcomeBack ? 'Log In' : 'Sign Up',
+                  text: ChangeScreenAnimation.currentScreen == Screens.welcomeBack ? 'Sign Up' : 'Log In',
                   style: const TextStyle(
                     color: kSecondaryColor,
                     fontWeight: FontWeight.bold,

@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 
-class Input extends StatelessWidget {
+class Input extends StatefulWidget {
 
   final String hint;
   final IconData iconData;
+  final TextEditingController inputController;
 
   const Input({
     super.key,
     required this.hint,
     required this.iconData,
+    required this.inputController,
   });
+
+  @override
+  State<Input> createState() => _InputState();
+}
+
+class _InputState extends State<Input> {
+  
+  @override
+  void dispose() {
+    widget.inputController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +37,7 @@ class Input extends StatelessWidget {
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(30),
             child: TextField(
+              controller: widget.inputController,
               textAlignVertical: TextAlignVertical.bottom,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
@@ -33,8 +46,8 @@ class Input extends StatelessWidget {
                 ),
                 filled: true,
                 fillColor: Colors.white,
-                hintText: hint,
-                prefixIcon: Icon(iconData)
+                hintText: widget.hint,
+                prefixIcon: Icon(widget.iconData)
               ),
             ),
           ),

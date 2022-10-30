@@ -1,6 +1,7 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:kununua_app/screens/login_screen/animations/change_screen_animation.dart';
 import 'package:kununua_app/screens/login_screen/components/bottom_text.dart';
@@ -31,15 +32,14 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
   late final List<Widget> createAccountContent;
   late final List<Widget> loginContent;
 
-  void _register() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const WelcomeScreen(),
-      ),
-    );
-  }
+  final TextEditingController _registerEmailController = TextEditingController();
+  final TextEditingController _registerUsernameController = TextEditingController();
+  final TextEditingController _registerPasswordController = TextEditingController();
 
   void _login() {
+
+
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const WelcomeScreen(),
@@ -49,36 +49,71 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
 
   @override
   void initState() {
+
+    String createUser = """
+       mutation createUser(\$username: String!, \$password: String!, \$email: String!){
+        createUser(username: \$username, password: \$password, email: \$email){
+          user{
+            username
+          }
+        }
+      }
+    """;
+
+
     createAccountContent = [
-      const Input(
-        hint: 'Name', 
-        iconData: Ionicons.person_outline
+      Input(
+        hint: 'Username', 
+        iconData: Ionicons.person_outline,
+        inputController: _registerUsernameController,
       ),
-      const Input(
+      Input(
         hint: 'Email', 
-        iconData: Ionicons.mail_outline
+        iconData: Ionicons.mail_outline,
+        inputController: _registerEmailController,
       ),
-      const Input(
+      Input(
         hint: 'Password', 
-        iconData: Ionicons.lock_closed_outline
+        iconData: Ionicons.lock_closed_outline,
+        inputController: _registerPasswordController,
       ),
-      Button(
-        text: 'Sign Up', 
-        action: _register,
-        color: kSecondaryColor,  
+      Mutation(
+        options: MutationOptions(
+          document: gql(createUser),
+          onCompleted: (dynamic resultData) {
+            Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const WelcomeScreen(),
+            ),
+          );
+          },
+        ),
+        builder: (RunMutation runMutation, QueryResult? result) {
+          return Button(
+            text: 'Sign Up', 
+            action: () => runMutation({
+              'username': _registerUsernameController.text,
+              'email': _registerEmailController.text,
+              'password': _registerPasswordController.text,
+            }),
+            color: kSecondaryColor,  
+          );
+        },
       ),
       const OrDivider(),
       const Logos(),
     ];
 
     loginContent = [
-      const Input(
+      Input(
         hint: 'Email', 
-        iconData: Ionicons.mail_outline
+        iconData: Ionicons.mail_outline,
+        inputController: TextEditingController(),
       ),
-      const Input(
+      Input(
         hint: 'Password', 
-        iconData: Ionicons.lock_closed_outline
+        iconData: Ionicons.lock_closed_outline,
+        inputController: TextEditingController(),
       ),
       Button(
         text: 'Log In', 
@@ -120,6 +155,11 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
+
+
+    
+
+
 
     return Stack(
       children: [
