@@ -36,6 +36,9 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
   final TextEditingController _registerUsernameController = TextEditingController();
   final TextEditingController _registerPasswordController = TextEditingController();
 
+  final TextEditingController _loginUsernameController = TextEditingController();
+  final TextEditingController _loginPasswordController = TextEditingController();
+
   void _login() {
 
 
@@ -58,6 +61,14 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
           }
         }
       }
+    """;
+
+    String logUser = """
+       query logUser(\$username: String!, \$password: String!){
+          logUser(username: \$username, password: \$password){
+            username
+          }
+        }
     """;
 
 
@@ -106,19 +117,52 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
 
     loginContent = [
       Input(
-        hint: 'Email', 
-        iconData: Ionicons.mail_outline,
-        inputController: TextEditingController(),
+        hint: 'Username', 
+        iconData: Ionicons.person_outline,
+        inputController: _loginUsernameController,
       ),
       Input(
         hint: 'Password', 
         iconData: Ionicons.lock_closed_outline,
-        inputController: TextEditingController(),
+        inputController: _loginPasswordController,
       ),
-      Button(
-        text: 'Log In', 
-        action: _login,
-        color: kSecondaryColor,  
+      Mutation(
+        options: MutationOptions(
+          document: gql(logUser),
+          onCompleted: (dynamic resultData) {
+
+            if(resultData['logUser'] != null){
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const WelcomeScreen(),
+                ),
+              );
+            }else{
+              showDialog(
+                context: context, 
+                builder: (context) => AlertDialog(
+                  title: const Text('Error'),
+                  content: const Text('Invalid username or password'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(), 
+                      child: const Text('Ok')
+                    )
+                  ],
+              ));
+            }
+          },
+        ),
+        builder: (RunMutation runMutation, QueryResult? result) {
+          return Button(
+            text: 'Log In', 
+            action: () => runMutation({
+              'username': _loginUsernameController.text,
+              'password': _loginPasswordController.text,
+            }),
+            color: kSecondaryColor,  
+          );
+        },
       ),
       const ForgotPassword(),
     ];
