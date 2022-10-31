@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:ionicons/ionicons.dart';
@@ -14,6 +12,8 @@ import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/utils/helper_functions.dart';
 import 'package:kununua_app/utils/widgets/button.dart';
 import 'package:kununua_app/utils/widgets/input.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 enum Screens{
   createAccount,
   welcomeBack
@@ -32,23 +32,15 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
   late final List<Widget> createAccountContent;
   late final List<Widget> loginContent;
 
+  final _registerFormKey = GlobalKey<FormState>();
+  final _loginFormKey = GlobalKey<FormState>();
+
   final TextEditingController _registerEmailController = TextEditingController();
   final TextEditingController _registerUsernameController = TextEditingController();
   final TextEditingController _registerPasswordController = TextEditingController();
 
   final TextEditingController _loginUsernameController = TextEditingController();
   final TextEditingController _loginPasswordController = TextEditingController();
-
-  void _login() {
-
-
-
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const WelcomeScreen(),
-      ),
-    );
-  }
 
   @override
   void initState() {
@@ -77,36 +69,53 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
         hint: 'Username', 
         iconData: Ionicons.person_outline,
         inputController: _registerUsernameController,
+        keyboardType: TextInputType.text,
+        type: InputType.text,
       ),
       Input(
         hint: 'Email', 
         iconData: Ionicons.mail_outline,
         inputController: _registerEmailController,
+        keyboardType: TextInputType.emailAddress,
+        type: InputType.text,
       ),
       Input(
         hint: 'Password', 
         iconData: Ionicons.lock_closed_outline,
         inputController: _registerPasswordController,
+        keyboardType: TextInputType.visiblePassword,
+        type: InputType.password,
       ),
       Mutation(
         options: MutationOptions(
           document: gql(createUser),
-          onCompleted: (dynamic resultData) {
+          onCompleted: (dynamic resultData) async{
+
+            final localStorage = await SharedPreferences.getInstance();
+            await localStorage.setString('username', resultData['createUser']['user']['username']);
+            
+            if(!mounted) return;
+            
             Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const WelcomeScreen(),
-            ),
-          );
+              MaterialPageRoute(
+                builder: (context) => const WelcomeScreen(),
+              ),
+            );
           },
         ),
         builder: (RunMutation runMutation, QueryResult? result) {
           return Button(
             text: 'Sign Up', 
-            action: () => runMutation({
-              'username': _registerUsernameController.text,
-              'email': _registerEmailController.text,
-              'password': _registerPasswordController.text,
-            }),
+            action: () => {
+
+              if(_registerFormKey.currentState!.validate()){
+                runMutation({
+                  'username': _registerUsernameController.text,
+                  'email': _registerEmailController.text,
+                  'password': _registerPasswordController.text,
+                })
+              }
+            },
             color: kSecondaryColor,  
           );
         },
@@ -120,23 +129,34 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
         hint: 'Username', 
         iconData: Ionicons.person_outline,
         inputController: _loginUsernameController,
+        keyboardType: TextInputType.text,
+        type: InputType.text,
       ),
       Input(
         hint: 'Password', 
         iconData: Ionicons.lock_closed_outline,
         inputController: _loginPasswordController,
+        keyboardType: TextInputType.visiblePassword,
+        type: InputType.password,
       ),
       Mutation(
         options: MutationOptions(
           document: gql(logUser),
-          onCompleted: (dynamic resultData) {
+          onCompleted: (dynamic resultData) async {
 
             if(resultData['logUser'] != null){
+
+              final localStorage = await SharedPreferences.getInstance();
+              await localStorage.setString('username', resultData['logUser']['username']);
+              
+              if(!mounted) return;
+              
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => const WelcomeScreen(),
                 ),
               );
+
             }else{
               showDialog(
                 context: context, 
@@ -156,11 +176,16 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
         builder: (RunMutation runMutation, QueryResult? result) {
           return Button(
             text: 'Log In', 
-            action: () => runMutation({
-              'username': _loginUsernameController.text,
-              'password': _loginPasswordController.text,
-            }),
-            color: kSecondaryColor,  
+            action: () => {
+
+              if(_loginFormKey.currentState!.validate()){
+                runMutation({
+                  'username': _loginUsernameController.text,
+                  'password': _loginPasswordController.text,
+                })
+              }
+            },
+            color: kSecondaryColor, 
           );
         },
       ),
@@ -200,11 +225,6 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
 
-
-    
-
-
-
     return Stack(
       children: [
         const Positioned(
@@ -216,15 +236,21 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
           padding: const EdgeInsets.only(top: 100),
           child: Stack(
             children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: createAccountContent,
+              Form(
+                key: _registerFormKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: createAccountContent,
+                ),
               ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: loginContent,
+              Form(
+                key: _loginFormKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: loginContent,
+                ),
               ),
             ]
           ),
