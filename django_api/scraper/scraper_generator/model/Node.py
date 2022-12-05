@@ -41,6 +41,12 @@ class Node(object):
         if not isinstance(selector, str):
             raise TypeError("Selector must be a string")
         
+        selector = selector.strip()
+        parent = self.get_parent()
+        
+        if parent and selector in [node.get_selector() for node in parent.get_children()]:
+            raise ValueError("Selector must be unique")
+        
         self.selector = selector
     
     def get_children(self):
@@ -53,6 +59,11 @@ class Node(object):
         
         if not isinstance(children, list):
             raise TypeError("Children must be a list")
+        
+        children_set = set(children)
+        
+        if len(children_set) != len(children):
+            children = list(children_set)
         
         self.children = children
     
