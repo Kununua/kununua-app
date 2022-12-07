@@ -2,8 +2,8 @@ class Node(object):
     
     def __init__(self, selector, parent=None, children=None):
         
-        self.set_selector(selector)
         self.set_parent(parent)
+        self.set_selector(selector)
         self.set_children(children)
         
         level = 0
@@ -13,15 +13,15 @@ class Node(object):
         
         self.level = level
         
-    def get_child(self, child):
+    def get_child(self, child_index):
         
-        if not isinstance(child, int):
-            raise TypeError("Child must be a number")
+        if not isinstance(child_index, int):
+            raise TypeError("child_index must be a number")
 
-        if child not in range(len(self.get_children())):
+        if child_index not in range(len(self.get_children())):
             raise IndexError("Child not found")
         
-        return self.get_children()[child]
+        return self.get_children()[child_index]
     
     def get_parent(self):
         return self.parent
@@ -30,6 +30,8 @@ class Node(object):
         
         if parent!=None and not isinstance(parent, Node):
             raise TypeError("Parent must be a Node")
+        if parent!=None:
+            parent.add_child(self)
         
         self.parent = parent
     
@@ -38,13 +40,16 @@ class Node(object):
     
     def set_selector(self, selector):
         
-        if not isinstance(selector, str):
-            raise TypeError("Selector must be a string")
+        if not isinstance(selector, str) and selector is not None:
+            raise TypeError("Selector must be a string or None")
         
-        selector = selector.strip()
+        if selector is None:
+            selector = selector
+        else:
+            selector = selector.strip()
         parent = self.get_parent()
-        
-        if parent and selector in [node.get_selector() for node in parent.get_children()]:
+
+        if parent is not None and selector in [node.get_selector() for node in parent.get_children() if node is not self]:
             raise ValueError("Selector must be unique")
         
         self.selector = selector
@@ -84,25 +89,14 @@ class Node(object):
         
         return True
     
-    def add(self, name):
+    def add_child(self, new_node):
         
-        if name in self.get_children():
+        if new_node in self.get_children():
             raise ValueError("Child already exists")
         
-        new_node = Node(selector=name, parent=self)
         self.get_children().append(new_node)
         
         return new_node
-    
-    def calculate_tree_paths(self):
-        
-        if self.is_leaf():
-            return [self.get_selector()]
-        else:
-            paths = []
-            for child in self.get_children():
-                paths += [self.get_selector() + "; " + path for path in child.calculate_tree_paths()]
-            return paths
     
     def __str__(self):
         
@@ -112,57 +106,3 @@ class Node(object):
             result += child.__str__()
         
         return result
-
-    
-if __name__ == '__main__':
-    
-    tree=Node("root")
-    print("NEW ROOT (LEVEL=" +  str(tree.get_level()) + "):")
-    print(tree)
-    print("\n")
-    
-    tree=tree.add("child1")
-    print("NEW CHILD (LEVEL=" +  str(tree.get_level()) + "):")
-    print(tree)
-    print("\n")
-    
-    tree=tree.add("grandchild1")
-    print("NEW GRANDCHILD (LEVEL=" +  str(tree.get_level()) + "):")
-    print(tree)
-    print("\n")
-    
-    tree=tree.get_parent()
-    print("CHILD 0 (LEVEL=" +  str(tree.get_level()) + "):")
-    print(tree)
-    print("\n")
-    tree=tree.add("grandchild2")
-    print("NEW GRANDCHILD (LEVEL=" +  str(tree.get_level()) + "):")
-    print(tree)
-    print("\n")
-    
-    tree=tree.get_parent()
-    tree=tree.get_parent()
-    print("ROOT (LEVEL=" +  str(tree.get_level()) + ") :")
-    print("\n")
-    tree=tree.add("child2")
-    print("NEW CHILD (LEVEL=" +  str(tree.get_level()) + ") :")
-    print(tree)
-    print("\n")
-    
-    tree=tree.get_parent()
-    print("ROOT (LEVEL=" +  str(tree.get_level()) + ") :")
-    print(tree)
-    print("\n")
-    
-    print("CHILD 0 (LEVEL=" +  str(tree.get_level()) + ") :")
-    print(tree.get_child(0))
-    print("\n")
-    print("CHILD 1 (LEVEL=" +  str(tree.get_level()) + ") :")
-    print(tree.get_child(1))
-    print("\n")
-    
-    print("FINAL RESULT:")
-    print(tree)
-    print("\n")
-    paths = tree.calculate_tree_paths()
-    print(paths)
