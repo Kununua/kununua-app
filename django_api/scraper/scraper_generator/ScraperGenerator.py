@@ -48,6 +48,10 @@ class ScraperGenerator(object):
         extract_data += "\tdriver.get(url)\n"
         extract_data += "\tselenium_utils.navigate_to(path)\n"
         extract_data += "\n"
+        if self.elem_details is not None:
+            extract_data += "\turl_cache = driver.current_url\n"
+        extract_data += "\tproducts_scraped = 0\n"
+        extract_data += "\twhile True:\n"
         
         selenium_utils.navigate_to(tree_paths[0])
         
@@ -61,7 +65,11 @@ class ScraperGenerator(object):
             
         fields_to_be_extracted = self.perform_matching(fields_to_be_extracted)
         
-        extract_data = extractor.update_extraction_function(extract_data, fields_to_be_extracted)
+        if self.elem_details is None:
+            extract_data = extractor.update_standard_extraction_function(extract_data, fields_to_be_extracted)
+        else:
+            extract_data = extractor.update_recursive_extraction_function(extract_data, fields_to_be_extracted)
+            
         self.create_scraper_file(main_scraper, extract_data, get_urls_to_extract)
         
         
@@ -72,12 +80,14 @@ class ScraperGenerator(object):
         
         for field in fields_to_be_extracted:
             
-            field_name = input("The field %i has the following values: %s\nPlease, enter the name of the field (or write x to discard): " % (field_counter, field.get_values()))
+            field_name = input("The field %i has the following values: %s\n\nPlease, enter the name of the field (or write x to discard): " % (field_counter, field.get_values()))
 
             if field_name != 'x':
-                field.set_name(field_name)
+                field.set_name(field_name.lower())
                 result.append(field)
-                print("The name of the field has been set to: %s \n" % (field_name))
+                print("The name of the field has been set to: %s \n" % (field.get_name()))
+            
+            field_counter += 1
         
         return result
     
@@ -87,7 +97,7 @@ class ScraperGenerator(object):
         
         path.mkdir(parents=True, exist_ok=True)
         
-        with open (str(path) + "/generated_scraper_%s.py" % str(time.time()).split(".")[0], "w") as f:
+        with open (str(path) + "/generated_scraper_%s_%s.py" % ("standard" if self.get_elem_details() is None else "recursive", str(time.time()).split(".")[0]), "w") as f:
             
             f.write(self._initial_configuration())
             if get_urls_to_extract is not None:
@@ -178,8 +188,9 @@ class ScraperGenerator(object):
             raise ValueError("if elem_details is not specified, num_pag must be None")
         elif not isinstance(num_pag, int) and num_pag is not None:
             raise TypeError("num_pag must be an integer or None")
-        elif num_pag < 0 and num_pag is not None:
-            raise ValueError("num_pag must be a positive integer or None")
+        elif num_pag is not None:
+            if num_pag <= 0:
+                raise ValueError("num_pag must be a positive integer or None")
         
         self.num_pag = num_pag
         

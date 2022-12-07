@@ -11,7 +11,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from django.conf import settings
 
-from .scrapers.spain import generated_scraper_plantilla_recursivo as scraper
+from .scrapers.spain import generated_scraper_plantilla_recursivo as recursive_scraper
+from .scrapers.spain import generated_scraper_standard_1670450025 as standard_scraper
 class TreeTestCase(TestCase):
     def setUp(self):
         timer = Timer()
@@ -54,7 +55,7 @@ class TreeTestCase(TestCase):
         self.timer.end_timer()
         print("El tiempo de ejecución ha sido de %f milisegundos" % (self.timer.end_time-self.timer.start_time))
         
-class GeneratorElJamonCase(TestCase):
+class GeneratorElJamonRecursiveCase(TestCase):
     def setUp(self):
         options = webdriver.ChromeOptions()
         options.headless = False # Change to True if you want to run the scraper in headless mode
@@ -93,7 +94,51 @@ class GeneratorElJamonCase(TestCase):
 
         return result_tree
     
-class ScrapersTestCase(TestCase):
+class GeneratorElJamonStandardCase(TestCase):
+    def setUp(self):
+        options = webdriver.ChromeOptions()
+        options.headless = False # Change to True if you want to run the scraper in headless mode
+        self.driver = webdriver.Chrome(options=options)
+        
+        tree_el_jamon = self.generate_tree_for_el_jamon()
+        
+        self.generator = ScraperGenerator(url="https://www.supermercadoseljamon.com/inicio", 
+                                          country="Spain",
+                                          tree=tree_el_jamon, 
+                                          C=[".precio", ".texto-porKilo", ".nombre"], 
+                                          driver=self.driver, 
+                                          elem_details=None, 
+                                          num_pag=None)
+    
+    def tearDown(self):           
+        super().tearDown()
+        self.driver.quit()
+    
+    def test_generate_scraper_for_el_jamon(self):
+        self.driver.get(self.generator.get_url())
+        #print(self.driver.find_element(by=By.CSS_SELECTOR, value="#banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(2) > a.link-botcategoria > span").text)
+        #print(WebDriverWait(self.driver, timeout=10).until(lambda d: d.find_element(by=By.CSS_SELECTOR, value="#banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(2) > a.link-botcategoria > span")).text)
+        
+        self.generator.generate()
+        
+    def generate_tree_for_el_jamon(self):
+        
+        result_tree = Tree()
+        
+        root = Node(selector=None, parent=None)
+        result_tree.add(root)
+        for i in range(11):
+            child = Node(selector="#banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(%d) > a.link-botcategoria > span" % (i+1), parent=root)
+            result_tree.add(child)
+
+        return result_tree
+    
+class ScrapersTestCaseRecursive(TestCase):
     
     def test_el_jamon_generated_scraper(self):
-        scraper.scraper()
+        recursive_scraper.scraper()
+        
+class ScrapersTestCaseStandard(TestCase):
+    
+    def test_el_jamon_generated_scraper(self):
+        standard_scraper.scraper()

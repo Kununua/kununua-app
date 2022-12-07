@@ -14,7 +14,26 @@ class Extractors(object):
         self.set_driver_utils(driver_utils)
         
     def standard_extraction(self):
-        pass
+        
+        leaves_selectors = self._get_dom_leaves_selectors(self.get_C())
+        data_dict = {}
+        
+        for leaf in leaves_selectors:
+            
+            matched_leaves = self.get_driver_utils().get_elements_by_css_selector(leaf)
+            
+            for matched_leaf in matched_leaves:
+                if leaf not in data_dict.keys():
+                    data_dict[leaf] = []
+                
+                relative_leaf_values = data_dict[leaf]
+                relative_leaf_values.append(matched_leaf.text)
+                
+        self._prepare_function_to_standard_extraction()
+        
+        fields_to_be_extracted = self._get_fields_to_be_extracted(data_dict)
+        
+        return fields_to_be_extracted
     
     def recursive_extraction(self, elem_details, num_pag):
         
@@ -44,16 +63,43 @@ class Extractors(object):
         
         return fields_to_be_extracted
     
-    def update_extraction_function(self, extract_data_function, fields_to_be_extracted):
+    def update_standard_extraction_function(self, extract_data_function, fields_to_be_extracted):
         
-        extract_data_function = self.get_extract_data() #TODO AQUÍ TENIAS UN +=
+        extract_data_function = self.get_extract_data()
+        data_lists_to_zip = ""
+        
+        for field in fields_to_be_extracted:
+            
+            extract_data_function += "\t\t%ss_elements = soup.select('%s')\n" % (field.get_name(), field.get_selector())
+            extract_data_function += "\t\t%ss = [elem.get_text().strip() for elem in %ss_elements]\n" % (field.get_name(), field.get_name())
+            data_lists_to_zip += "%ss, " % field.get_name()
+        
+        extract_data_function += "\n"
+        extract_data_function += "\t\tdata_extracted = zip(%s)\n" % data_lists_to_zip[:-2]
+        extract_data_function += "\n"
+        extract_data_function += "\t\tfor item in data_extracted:\n"
+        extract_data_function += "\n"
+        extract_data_function += "\t\t\t # Write print or save data function on this line \n"
+        extract_data_function += "\n"
+        extract_data_function += "\t\t\tproducts_scraped += 1\n"
+        extract_data_function += "\n"
+        extract_data_function += "\t\t# Finish pagination configuration in this section\n"
+        extract_data_function += "\n"
+        extract_data_function += "\t\t# -----------------------------------------------\n"
+        extract_data_function += "\n"
+        
+        return extract_data_function
+    
+    def update_recursive_extraction_function(self, extract_data_function, fields_to_be_extracted):
+        
+        extract_data_function = self.get_extract_data()
         
         for field in fields_to_be_extracted:
             
             extract_data_function += "\t\t\t%s = soup.select_one('%s').get_text().strip()\n" % (field.get_name(), field.get_selector())
         
         extract_data_function += "\n"
-        extract_data_function += "\t\t\t# Write print or save data function in this line\n"
+        extract_data_function += "\t\t\t# Write print or save data function on this line\n"
         extract_data_function += "\n"
         extract_data_function += "\t\t\tproducts_scraped += 1\n"
         extract_data_function += "\n"
@@ -63,6 +109,7 @@ class Extractors(object):
         extract_data_function += "\t\t# Finish pagination configuration in this section\n"
         extract_data_function += "\n"
         extract_data_function += "\t\t# -----------------------------------------------\n"
+        extract_data_function += "\n"
         
         return extract_data_function
     
@@ -71,11 +118,13 @@ class Extractors(object):
     
     # ------------------ PRIVATE FUNCTIONS ------------------ #
     
+    def _prepare_function_to_standard_extraction(self):
+
+        self.extract_data += "\t\tpage_source = driver.page_source\n"
+        self.extract_data += "\t\tsoup = BeautifulSoup(page_source, 'lxml')\n"
+    
     def _prepare_function_to_recursive_extraction(self):
-        
-        self.extract_data += "\turl_cache = driver.current_url\n"
-        self.extract_data += "\tproducts_scraped = 0\n"
-        self.extract_data += "\twhile True:\n"
+
         self.extract_data += "\t\turls_to_extract = get_urls_to_extract(selenium_utils)\n"
         self.extract_data += "\t\tfor url_to_extract in urls_to_extract:\n"
         self.extract_data += "\t\t\tdriver.get(url_to_extract)\n"
@@ -104,7 +153,10 @@ class Extractors(object):
     
     def _get_leaves_from_container(self, container, container_selector):
         
-        leaves = [leaf for leaf in container.find_elements(by = By.XPATH, value = ".//*[not(*)]") if leaf.text.strip() != ""]    
+        leaves = [leaf for leaf in container.find_elements(by = By.XPATH, value = ".//*[not(*)]") if leaf.text.strip() != ""]  
+        
+        if len(leaves) == 0:
+            leaves = [container]
         
         result = set()
         
