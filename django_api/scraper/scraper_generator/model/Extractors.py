@@ -27,7 +27,10 @@ class Extractors(object):
                     data_dict[leaf] = []
                 
                 relative_leaf_values = data_dict[leaf]
-                relative_leaf_values.append(matched_leaf.text)
+                if matched_leaf.tag_name == "img":
+                    relative_leaf_values.append(matched_leaf.get_attribute("src"))
+                else:
+                    relative_leaf_values.append(matched_leaf.text)
                 
         self._prepare_function_to_standard_extraction()
         
@@ -55,7 +58,21 @@ class Extractors(object):
                     data_dict[leaf_selector] = []
                 
                 leaf_values = data_dict[leaf_selector]
-                leaf_values.append(self.get_driver_utils().get_element_by_css_selector(leaf_selector).text)
+                leaf_value = None
+                try:
+                    if leaf_selector.endswith("img"):
+                        try:
+                            leaf = self.get_driver_utils().get_element_by_css_selector(leaf_selector)
+                            leaf_value = leaf.get_attribute("src")
+                        except:
+                            leaf_value = None
+                    else:
+                        leaf = self.get_driver_utils().get_element_by_css_selector(leaf_selector)
+                        leaf_value = leaf.text
+                        
+                    leaf_values.append(leaf_value)
+                except:
+                    continue
         
         self._prepare_function_to_recursive_extraction()
         
@@ -71,7 +88,10 @@ class Extractors(object):
         for field in fields_to_be_extracted:
             
             extract_data_function += "\t\t%ss_elements = soup.select('%s')\n" % (field.get_name(), field.get_selector())
-            extract_data_function += "\t\t%ss = [elem.get_text().strip() for elem in %ss_elements]\n" % (field.get_name(), field.get_name())
+            if field.get_selector().endswith("img"):
+                extract_data_function += "\t\t%ss = [elem.get('src').strip() for elem in %ss_elements]\n" % (field.get_name(), field.get_name())
+            else:
+                extract_data_function += "\t\t%ss = [elem.get_text().strip() for elem in %ss_elements]\n" % (field.get_name(), field.get_name())
             data_lists_to_zip += "%ss, " % field.get_name()
         
         extract_data_function += "\n"
@@ -96,7 +116,13 @@ class Extractors(object):
         
         for field in fields_to_be_extracted:
             
-            extract_data_function += "\t\t\t%s = soup.select_one('%s').get_text().strip()\n" % (field.get_name(), field.get_selector())
+            if field.get_selector().endswith("img"):
+                extract_data_function += "\t\t\ttry:\n"
+                extract_data_function += "\t\t\t\t%s = soup.select_one('%s').get('src').strip()\n" % (field.get_name(), field.get_selector())
+                extract_data_function += "\t\t\texcept:\n"
+                extract_data_function += "\t\t\t\t%s = None\n" % (field.get_name())
+            else:
+                extract_data_function += "\t\t\t%s = soup.select_one('%s').get_text().strip()\n" % (field.get_name(), field.get_selector())
         
         extract_data_function += "\n"
         extract_data_function += "\t\t\t# Write print or save data function on this line\n"
@@ -154,6 +180,7 @@ class Extractors(object):
     def _get_leaves_from_container(self, container, container_selector):
         
         leaves = [leaf for leaf in container.find_elements(by = By.XPATH, value = ".//*[not(*)]") if leaf.text.strip() != ""]  
+        leaves += [img for img in container.find_elements(by = By.TAG_NAME, value = "img") if img.get_attribute("src") != ""]
         
         if len(leaves) == 0:
             leaves = [container]

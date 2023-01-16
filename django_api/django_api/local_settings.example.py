@@ -65,12 +65,12 @@ WSGI_APPLICATION = 'django_api.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': '<db_name>',
         'USER': '<db_user>',
         'PASSWORD': '<complex_password>',
         'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'PORT': '5432',
     }
 }
 
