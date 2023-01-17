@@ -11,8 +11,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from django.conf import settings
 
-from .scrapers.spain import generated_scraper_recursive_1673973783 as recursive_scraper
-from .scrapers.spain import generated_scraper_standard_1673970177 as standard_scraper
+from .scrapers.spain import generated_scraper_plantilla_recursivo as recursive_scraper
+from .scrapers.spain import generated_scraper_plantilla_standard as standard_scraper
 class TreeTestCase(TestCase):
     def setUp(self):
         timer = Timer()
