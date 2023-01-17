@@ -19,6 +19,7 @@ livereload==2.6.3
 lxml==4.9.1
 mysqlclient==2.1.1
 outcome==1.2.0
+Pillow==9.4.0
 promise==2.3
 psycopg2==2.9.5
 PySocks==1.7.1

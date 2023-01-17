@@ -1,5 +1,5 @@
 import graphene
-from django_api_app.models import User
+from django_api_app.models import KununuaUser
 from .types import *
 
 class CreateUserMutation(graphene.Mutation):
@@ -13,18 +13,17 @@ class CreateUserMutation(graphene.Mutation):
     email = graphene.String()
     phone_number = graphene.String()
 
-  user = graphene.Field(UserType)
+  user = graphene.Field(KununuaUserType)
 
   @staticmethod
   def mutate(root, info, **kwargs):
     username = kwargs.get('username', '').strip()
     password = kwargs.get("password", '').strip()
-    name = kwargs.get("name", "").strip()
-    surname = kwargs.get("surname", "").strip()
-    direction = kwargs.get("direction", "").strip()
+    first_name = kwargs.get("name", "").strip()
+    last_name = kwargs.get("surname", "").strip()
     email = kwargs.get("email", "").strip()
     phone_number = kwargs.get("phone_number", "").strip()
-    obj = User.objects.create(username=username, password=password, name=name, surname=surname, direction=direction, email=email, phone_number=phone_number)
+    obj = KununuaUser.objects.create_user(username=username, password=password, first_name=first_name, last_name=last_name, email=email, phone_number=phone_number)
     return CreateUserMutation(user=obj)
 
 class DeleteUserMutation(graphene.Mutation):
@@ -32,13 +31,13 @@ class DeleteUserMutation(graphene.Mutation):
   class Input:
     username = graphene.String(required=True)
 
-  user = graphene.Field(UserType)
+  user = graphene.Field(KununuaUserType)
 
   @staticmethod
   def mutate(root, info, **kwargs):
     username = kwargs.get('username', '').strip()
     
-    selected_user = User.objects.get(username=username)
+    selected_user = KununuaUser.objects.get(username=username)
 
     selected_user.delete()
     

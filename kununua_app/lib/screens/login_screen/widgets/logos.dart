@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 
-class Logos extends StatelessWidget {
+class Logos extends StatefulWidget {
   const Logos({super.key});
 
+  @override
+  State<Logos> createState() => _LogosState();
+}
+
+class _LogosState extends State<Logos> {
   @override
   Widget build(BuildContext context) {
     return Padding(

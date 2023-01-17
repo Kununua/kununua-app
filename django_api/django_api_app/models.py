@@ -1,13 +1,9 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
-class User(models.Model):
-    username = models.CharField(max_length=16, unique=True)
-    password = models.CharField(max_length=255)
-    name = models.CharField(max_length=40, blank=True)
-    surname = models.CharField(max_length=60, blank=True)
-    direction = models.CharField(max_length=255, blank=True)
-    email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=13, blank=True)
-
+class KununuaUser(AbstractUser):
+    phone_number = models.CharField(max_length=20, null=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures', blank=True, null=True)
+    
     def __str__(self):
-        return self.username
+        return f"User[username: {self.username}, first_name: {self.first_name}, last_name: {self.last_name}, email: {self.email}]"

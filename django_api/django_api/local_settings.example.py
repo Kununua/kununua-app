@@ -18,6 +18,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django_api_app',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -25,8 +26,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'graphene_django',
-    'django_api_app.apps.DjangoApiAppConfig',
-    'graphene_schema.apps.GrapheneSchemaAppConfig',
+    'graphene_schema',
+    'scraper',
 ]
 
 MIDDLEWARE = [
@@ -93,6 +94,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'django_api_app.KununuaUser'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
