@@ -82,14 +82,29 @@ class ScraperGenerator(object):
             
             field_name = input("The field %i has the following values: %s\n\nPlease, enter the name of the field (or write x to discard): " % (field_counter, field.get_values()))
 
-            if field_name != 'x':
+            if field_name != 'x' and field_name != 'X' and field_name.strip() != '':
                 field.set_name(field_name.lower())
                 result.append(field)
-                print("The name of the field has been set to: %s \n" % (field.get_name()))
+                if "," in field_name:
+                    if "(" in field_name and "[" in field_name and "]" in field_name and ")" in field_name:
+                        if self.default_field_is_contained(field_name):
+                            print("Multiple names have been asigned to the values of this field\n")
+                        else:
+                            raise RuntimeError("The default value given has not been declared on names section.\n")
+                    else:
+                        raise RuntimeError("It seems that you are trying to assign multiple names to the values of this field. Please, remember to use the following format: name1, name2... ({value_separator}) [{default_field_name}]\n")
+                else:
+                    print("The name of the field has been set to: %s \n" % (field.get_name()))
             
             field_counter += 1
         
         return result
+    
+    def default_field_is_contained(self, field_name):
+        
+        values = field_name.split("(")[0]
+        
+        return field_name.split("[")[1].split("]")[0] in [value.strip() for value in values.split(",")]
     
     def create_scraper_file(self, main_scraper, extract_data, get_urls_to_extract=None):
         

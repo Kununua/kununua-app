@@ -3,48 +3,43 @@ from ...python_utils.SeleniumUtils import SeleniumUtils
 from selenium import webdriver
 import time
 
-def get_urls_to_extract(selenium_utils):
-
-	located_elements = selenium_utils.get_elements_by_css_selector('p.nombre > a')
-
-	return [elem.get_attribute('href') for elem in located_elements]
-
 def extract_data(url, path, driver, selenium_utils):
 	driver.get(url)
 	selenium_utils.navigate_to(path)
 
-	url_cache = driver.current_url
 	products_scraped = 0
 	while True:
-		urls_to_extract = get_urls_to_extract(selenium_utils)
-		for url_to_extract in urls_to_extract:
-			driver.get(url_to_extract)
-			page_source = driver.page_source
-			soup = BeautifulSoup(page_source, 'lxml')
-			name = soup.select_one('#_DetalleProductoFoodPortlet_WAR_comerzziaportletsfood_frmDatos > h1').get_text().strip()
-			price = soup.select_one('#_DetalleProductoFoodPortlet_WAR_comerzziaportletsfood_frmDatos > div > div > span').get_text().strip()
-			brand = soup.select_one('#_DetalleProductoFoodPortlet_WAR_comerzziaportletsfood_frmDatos > span').get_text().strip()
+		page_source = driver.page_source
+		soup = BeautifulSoup(page_source, 'lxml')
+		prices_elements = soup.select('.articulo > div > div > div > p > span')
+		prices = [elem.get_text().strip() for elem in prices_elements]
+		nombres_elements = soup.select('.articulo > div > p > a')
+		nombres = [elem.get_text().strip() for elem in nombres_elements]
+		foto_productos_elements = soup.select('.articulo > a > div > div > div > img')
+		foto_productos = [elem.get('src').strip() for elem in foto_productos_elements]
+		denominacions_elements = soup.select('.articulo > ul > li > img')
+		denominacions = [elem.get('src').strip() for elem in denominacions_elements]
 
-			print("[name:%s, brand:%s, price:%s]" % (name, brand, price))
+		data_extracted = zip(prices, nombres, foto_productos, denominacions)
+
+		for item in data_extracted:
+
+			print("Item[name: %s, price: %s, imagen: %s, denominacion: %s]" % (item[1], item[0], item[2], item[3]))
 
 			products_scraped += 1
-
-		driver.get(url_cache)
-		selenium_utils.navigate_to(path)
 
 		# Finish pagination configuration in this section
 		try:
 			next_page_button = [elem for elem in selenium_utils.get_elements_by_css_selector(".activo") if elem.get_attribute("title") == "Siguiente"][0]
 			next_page_button.click()
-			url_cache = driver.current_url
 		except:
 			print("Se han scrapeado: " + str(products_scraped) + " productos.")
 			break
 		# -----------------------------------------------
-  
+
 def scraper():
 	driver_options = webdriver.ChromeOptions()
-	driver_options.headless = True
+	driver_options.headless = False
 	driver = webdriver.Chrome(options=driver_options)
 	selenium_utils = SeleniumUtils(timeout=10, driver=driver)
 	

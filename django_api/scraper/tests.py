@@ -12,7 +12,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from django.conf import settings
 
 from .scrapers.spain import generated_scraper_plantilla_recursivo as recursive_scraper
-from .scrapers.spain import generated_scraper_standard_1670450025 as standard_scraper
+from .scrapers.spain import generated_scraper_plantilla_standard as standard_scraper
 class TreeTestCase(TestCase):
     def setUp(self):
         timer = Timer()
@@ -77,9 +77,6 @@ class GeneratorElJamonRecursiveCase(TestCase):
     
     def test_generate_scraper_for_el_jamon(self):
         self.driver.get(self.generator.get_url())
-        #print(self.driver.find_element(by=By.CSS_SELECTOR, value="#banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(2) > a.link-botcategoria > span").text)
-        #print(WebDriverWait(self.driver, timeout=10).until(lambda d: d.find_element(by=By.CSS_SELECTOR, value="#banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(2) > a.link-botcategoria > span")).text)
-        
         self.generator.generate()
         
     def generate_tree_for_el_jamon(self):
@@ -105,7 +102,7 @@ class GeneratorElJamonStandardCase(TestCase):
         self.generator = ScraperGenerator(url="https://www.supermercadoseljamon.com/inicio", 
                                           country="Spain",
                                           tree=tree_el_jamon, 
-                                          C=[".precio", ".texto-porKilo", ".nombre"], 
+                                          C=[".articulo"], 
                                           driver=self.driver, 
                                           elem_details=None, 
                                           num_pag=None)
@@ -116,9 +113,6 @@ class GeneratorElJamonStandardCase(TestCase):
     
     def test_generate_scraper_for_el_jamon(self):
         self.driver.get(self.generator.get_url())
-        #print(self.driver.find_element(by=By.CSS_SELECTOR, value="#banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(2) > a.link-botcategoria > span").text)
-        #print(WebDriverWait(self.driver, timeout=10).until(lambda d: d.find_element(by=By.CSS_SELECTOR, value="#banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(2) > a.link-botcategoria > span")).text)
-        
         self.generator.generate()
         
     def generate_tree_for_el_jamon(self):

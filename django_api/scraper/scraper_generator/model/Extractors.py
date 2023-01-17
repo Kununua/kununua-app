@@ -27,7 +27,10 @@ class Extractors(object):
                     data_dict[leaf] = []
                 
                 relative_leaf_values = data_dict[leaf]
-                relative_leaf_values.append(matched_leaf.text)
+                if matched_leaf.tag_name == "img":
+                    relative_leaf_values.append(matched_leaf.get_attribute("src"))
+                else:
+                    relative_leaf_values.append(matched_leaf.text)
                 
         self._prepare_function_to_standard_extraction()
         
@@ -55,7 +58,21 @@ class Extractors(object):
                     data_dict[leaf_selector] = []
                 
                 leaf_values = data_dict[leaf_selector]
-                leaf_values.append(self.get_driver_utils().get_element_by_css_selector(leaf_selector).text)
+                leaf_value = None
+                try:
+                    if leaf_selector.endswith("img"):
+                        try:
+                            leaf = self.get_driver_utils().get_element_by_css_selector(leaf_selector)
+                            leaf_value = leaf.get_attribute("src")
+                        except:
+                            leaf_value = None
+                    else:
+                        leaf = self.get_driver_utils().get_element_by_css_selector(leaf_selector)
+                        leaf_value = leaf.text
+                        
+                    leaf_values.append(leaf_value)
+                except:
+                    continue
         
         self._prepare_function_to_recursive_extraction()
         
@@ -67,12 +84,43 @@ class Extractors(object):
         
         extract_data_function = self.get_extract_data()
         data_lists_to_zip = ""
+        multifield_counter = 1
         
         for field in fields_to_be_extracted:
             
-            extract_data_function += "\t\t%ss_elements = soup.select('%s')\n" % (field.get_name(), field.get_selector())
-            extract_data_function += "\t\t%ss = [elem.get_text().strip() for elem in %ss_elements]\n" % (field.get_name(), field.get_name())
-            data_lists_to_zip += "%ss, " % field.get_name()
+            if "," in field.get_name():
+                extract_data_function += "\t\tmultifield_%s_elements = soup.select('%s')\n" % (str(multifield_counter), field.get_selector())
+                value_separator = field.get_name().split("(")[1].split(")")[0]
+                field_names = [name.strip() for name in field.get_name().split("(")[0].split(",")]
+                main_value = field.get_name().split("[")[1].split("]")[0]
+                default_tuple = "("
+                parsing_row = "\t\t"
+                
+                for name in field_names:
+                    parsing_row += "%ss, " % name
+                    data_lists_to_zip += "%ss, " % name
+                    if name == main_value:
+                        default_tuple += "elem.get_text().strip(), "
+                    else:
+                        default_tuple += "None, "
+                
+                default_tuple = default_tuple[:-2]
+                default_tuple += ")"
+                        
+                parsing_row = parsing_row[:-2]
+                extract_data_function += "\t\tmultifield_%s_values = [tuple(elem.get_text().strip().split('%s')) if len(elem.get_text().strip().split('%s')) == %s else %s for elem in multifield_%s_elements]\n" % (str(multifield_counter), value_separator, value_separator, str(len(field_names)), default_tuple, str(multifield_counter))
+                extract_data_function += parsing_row
+                extract_data_function += " = tuple([list(t) for t in zip(*multifield_%s_values)])\n" % str(multifield_counter)
+                
+                multifield_counter += 1
+                
+            else:
+                extract_data_function += "\t\t%ss_elements = soup.select('%s')\n" % (field.get_name(), field.get_selector())
+                if field.get_selector().endswith("img"):
+                    extract_data_function += "\t\t%ss = [elem.get('src').strip() for elem in %ss_elements]\n" % (field.get_name(), field.get_name())
+                else:
+                    extract_data_function += "\t\t%ss = [elem.get_text().strip() for elem in %ss_elements]\n" % (field.get_name(), field.get_name())
+                data_lists_to_zip += "%ss, " % field.get_name()
         
         extract_data_function += "\n"
         extract_data_function += "\t\tdata_extracted = zip(%s)\n" % data_lists_to_zip[:-2]
@@ -93,10 +141,41 @@ class Extractors(object):
     def update_recursive_extraction_function(self, extract_data_function, fields_to_be_extracted):
         
         extract_data_function = self.get_extract_data()
+        multifield_counter = 1
         
         for field in fields_to_be_extracted:
             
-            extract_data_function += "\t\t\t%s = soup.select_one('%s').get_text().strip()\n" % (field.get_name(), field.get_selector())
+            if "," in field.get_name():
+                value_separator = field.get_name().split("(")[1].split(")")[0]
+                field_names = [name.strip() for name in field.get_name().split("(")[0].split(",")]
+                main_value = field.get_name().split("[")[1].split("]")[0]
+                
+                extract_data_function += "\t\t\tmultifield_%s_data = tuple(soup.select_one('%s').get_text().strip().split('%s'))\n" % (str(multifield_counter), field.get_selector(), value_separator)
+                extract_data_function += "\t\t\t"
+                default_tuple = "("
+                
+                for name in field_names:
+                    extract_data_function += "%s, " % name
+                    if name == main_value:
+                        default_tuple += "soup.select_one('%s').get_text().strip(), " % field.get_selector()
+                    else:
+                        default_tuple += "None, "
+                        
+                default_tuple = default_tuple[:-2]
+                default_tuple += ")"
+                extract_data_function = extract_data_function[:-2]
+                extract_data_function += " = multifield_%s_data if len(multifield_%s_data) == %s else %s\n" % (str(multifield_counter), str(multifield_counter), str(len(field_names)), default_tuple)
+                
+                multifield_counter += 1
+                
+            else:
+                if field.get_selector().endswith("img"):
+                    extract_data_function += "\t\t\ttry:\n"
+                    extract_data_function += "\t\t\t\t%s = soup.select_one('%s').get('src').strip()\n" % (field.get_name(), field.get_selector())
+                    extract_data_function += "\t\t\texcept:\n"
+                    extract_data_function += "\t\t\t\t%s = None\n" % (field.get_name())
+                else:
+                    extract_data_function += "\t\t\t%s = soup.select_one('%s').get_text().strip()\n" % (field.get_name(), field.get_selector())
         
         extract_data_function += "\n"
         extract_data_function += "\t\t\t# Write print or save data function on this line\n"
@@ -154,6 +233,7 @@ class Extractors(object):
     def _get_leaves_from_container(self, container, container_selector):
         
         leaves = [leaf for leaf in container.find_elements(by = By.XPATH, value = ".//*[not(*)]") if leaf.text.strip() != ""]  
+        leaves += [img for img in container.find_elements(by = By.TAG_NAME, value = "img") if img.get_attribute("src") != ""]
         
         if len(leaves) == 0:
             leaves = [container]
