@@ -22,7 +22,7 @@ class LoginScreen extends StatelessWidget {
 
     debugPrint('Name: ${data.name}, Password: ${data.password}');
 
-    final MutationOptions options = MutationOptions(
+    final MutationOptions loggingOptions = MutationOptions(
       document: gql(logUser),
       variables: <String, dynamic>{
         'username': data.name,
@@ -30,11 +30,29 @@ class LoginScreen extends StatelessWidget {
       },
     );
 
-    final result = await globals.client.value.mutate(options);
+    final MutationOptions jwtOptions = MutationOptions(
+      document: gql(tokenAuth),
+      variables: <String, dynamic>{
+        'username': data.name,
+        'password': data.password,
+      },
+    );
 
-    if (result.data?['logUser'] == null) {
-      return 'Invalid credentials';
+    final loggingResult = await globals.client.value.mutate(loggingOptions);
+
+    if (loggingResult.data?['logUser'] == null) {
+      return 'Credenciales inválidas. Por favor, inténtalo de nuevo.';
     }
+
+    final jwtToken = await globals.client.value.mutate(jwtOptions);
+
+    if (jwtToken.data?['tokenAuth'] == null) {
+      return 'Ha ocurrido un error. Inténtelo más tarde.';
+    }
+
+    globals.jwtToken = jwtToken.data?['tokenAuth']['token'];
+    globals.currentUser = data.name;
+
     return null;
   }
 

@@ -1,4 +1,5 @@
 import graphene
+import graphql_jwt
 from django_api_app.models import KununuaUser
 from .types import *
 
@@ -58,5 +59,8 @@ class DeleteUserMutation(graphene.Mutation):
 
 
 class Mutation(graphene.ObjectType):
+  token_auth = graphql_jwt.ObtainJSONWebToken.Field()
+  verify_token = graphql_jwt.Verify.Field()
+  refresh_token = graphql_jwt.Refresh.Field()
   create_user = CreateUserMutation.Field()
   delete_user = DeleteUserMutation.Field()
