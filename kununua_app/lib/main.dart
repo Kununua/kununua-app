@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:kununua_app/screens/login_screen/login_sceen.dart';
+import 'package:kununua_app/screens/new_login_screen/login_screen.dart';
 import 'package:kununua_app/utils/constants.dart';
 
 void main() {
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      systemNavigationBarColor:
+          SystemUiOverlayStyle.dark.systemNavigationBarColor,
+    ),
+  );
   runApp(const MyApp());
 }
 
@@ -29,7 +36,7 @@ class MyApp extends StatelessWidget {
               fontFamily: 'Montserrat'
             ),
           ), 
-          home: const LoginScreen(),             
+          home: const LoginScreen()         
       ));
   }
 }

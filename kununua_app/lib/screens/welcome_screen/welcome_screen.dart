@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kununua_app/screens/login_screen/login_sceen.dart';
+import 'package:kununua_app/screens/new_login_screen/login_screen.dart';
 import 'package:kununua_app/utils/widgets/button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
