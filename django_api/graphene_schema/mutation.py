@@ -7,11 +7,9 @@ class CreateUserMutation(graphene.Mutation):
   class Input:
     username = graphene.String(required=True)
     password = graphene.String(required=True)
-    name = graphene.String()
-    surname = graphene.String()
-    direction = graphene.String()
-    email = graphene.String()
-    phone_number = graphene.String()
+    name = graphene.String(required=True)
+    surname = graphene.String(required=True)
+    email = graphene.String(required=True)
 
   user = graphene.Field(KununuaUserType)
 
@@ -22,8 +20,23 @@ class CreateUserMutation(graphene.Mutation):
     first_name = kwargs.get("name", "").strip()
     last_name = kwargs.get("surname", "").strip()
     email = kwargs.get("email", "").strip()
-    phone_number = kwargs.get("phone_number", "").strip()
-    obj = KununuaUser.objects.create_user(username=username, password=password, first_name=first_name, last_name=last_name, email=email, phone_number=phone_number)
+    
+    if len(username) < 6 or username > 25 or username == "" or username == None:
+      return None
+    
+    if len(password) < 6 or password == "" or password == None:
+      return None
+    
+    if len(first_name) < 3 or first_name >= 50 or first_name == "" or first_name == None:
+      return None
+    
+    if len(last_name) < 3 or last_name >= 50 or last_name == "" or last_name == None:
+      return None
+    
+    if email == "" or email == None or (not "@" in email) or (not "." in email):
+      return None
+    
+    obj = KununuaUser.objects.create_user(username=username, password=password, first_name=first_name, last_name=last_name, email=email, phone_number=None, profile_picture="/assets/user-images/default.png")
     return CreateUserMutation(user=obj)
 
 class DeleteUserMutation(graphene.Mutation):

@@ -19,8 +19,10 @@ class Query(object):
     return KununuaUser.objects.all()
 
   def resolve_log_user(self, info, username, password):
-
+    
+    
+    
     try:
-      return KununuaUser.objects.get(username=username, password=password)
+      return KununuaUser.objects.get(username=username)#, password=password)
     except:
       return None

@@ -6,28 +6,36 @@ import 'package:kununua_app/screens/welcome_screen/welcome_screen.dart';
 import 'package:kununua_app/screens/new_login_screen/components/center_widget/center_widget.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/screens/new_login_screen/utils/validators.dart';
-
-const users = {
-  'dribbble@gmail.com': '12345',
-  'hunter@gmail.com': 'hunter',
-};
+import 'package:kununua_app/screens/new_login_screen/utils/requests.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:kununua_app/screens/new_login_screen/utils/globals.dart' as globals;
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
 
-  Duration get loginTime => const Duration(milliseconds: 2250);
+  const LoginScreen({
+    super.key,
+  });
 
-  Future<String?> _authUser(LoginData data) {
+  Duration get loginTime => const Duration(milliseconds: 0);
+
+  Future<String?> _authUser(LoginData data) async {
+
     debugPrint('Name: ${data.name}, Password: ${data.password}');
-    return Future.delayed(loginTime).then((_) {
-      if (!users.containsKey(data.name)) {
-        return 'User not exists';
-      }
-      if (users[data.name] != data.password) {
-        return 'Credenciales inválidas';
-      }
-      return null;
-    });
+
+    final MutationOptions options = MutationOptions(
+      document: gql(logUser),
+      variables: <String, dynamic>{
+        'username': data.name,
+        'password': data.password,
+      },
+    );
+
+    final result = await globals.client.value.mutate(options);
+
+    if (result.data?['logUser'] == null) {
+      return 'Invalid credentials';
+    }
+    return null;
   }
 
   Future<String?> _signupUser(SignupData data) {
@@ -41,9 +49,9 @@ class LoginScreen extends StatelessWidget {
     //TODO: implement recovery password
     debugPrint('Name: $name');
     return Future.delayed(loginTime).then((_) {
-      if (!users.containsKey(name)) {
-        return 'User not exists';
-      }
+      // if (!users.containsKey(name)) {
+      //   return 'User not exists';
+      // }
       return null;
     });
   }
@@ -89,7 +97,6 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final screenSize = MediaQuery.of(context).size;
 
     return Stack(
@@ -205,8 +212,8 @@ class LoginScreen extends StatelessWidget {
 
             if (valueLength == 0){
               return "ESte campo es obligatorio";
-            }else if (valueLength < 6) {
-              return "El usuario debe tener al menos 6 caracteres";
+            }else if (valueLength < 6 && valueLength > 25) {
+              return "El usuario debe tener entre 6 y 24 caracteres";
             }
             return null;
           },
