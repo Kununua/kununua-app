@@ -2,6 +2,27 @@ import graphene
 import graphql_jwt
 from django_api_app.models import KununuaUser
 from .types import *
+from django.contrib.auth import authenticate
+
+class LogUserMutation(graphene.Mutation):
+  
+  class Input:
+    username = graphene.String(required=True)
+    password = graphene.String(required=True)
+    
+  user = graphene.Field(KununuaUserType)
+  
+  @staticmethod
+  def mutate(root, info, **kwargs):
+    username = kwargs.get('username', '').strip()
+    password = kwargs.get('password', '').strip()
+    
+    user = authenticate(username=username, password=password)
+    
+    if user == None:
+      return None
+    
+    return LogUserMutation(user=user)
 
 class CreateUserMutation(graphene.Mutation):
 
@@ -57,10 +78,17 @@ class DeleteUserMutation(graphene.Mutation):
     
     return DeleteUserMutation(user=selected_user)
 
+class ObtainJSONWebToken(graphql_jwt.JSONWebTokenMutation):
+    user = graphene.Field(KununuaUserType)
+
+    @classmethod
+    def resolve(cls, root, info, **kwargs):
+        return cls(user=info.context.user)
 
 class Mutation(graphene.ObjectType):
-  token_auth = graphql_jwt.ObtainJSONWebToken.Field()
+  token_auth = ObtainJSONWebToken.Field()
   verify_token = graphql_jwt.Verify.Field()
   refresh_token = graphql_jwt.Refresh.Field()
+  log_user = LogUserMutation.Field()
   create_user = CreateUserMutation.Field()
   delete_user = DeleteUserMutation.Field()

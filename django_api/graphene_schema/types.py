@@ -1,8 +1,7 @@
 import graphene
+import jwt
 from graphene_django.types import DjangoObjectType
 from django_api_app.models import KununuaUser
-from django.contrib.auth import authenticate
-
 class KununuaUserType(DjangoObjectType):
   class Meta:
     model = KununuaUser
@@ -18,13 +17,3 @@ class Query(object):
 
   def resolve_all_users(self, info):
     return KununuaUser.objects.all()
-
-  def resolve_log_user(self, info, username, password):
-    
-    try:
-      user = authenticate(username=username, password=password)
-      if user == None:
-        return None
-      return user
-    except:
-      return None
