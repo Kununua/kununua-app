@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:kununua_app/screens/login_screen/login_sceen.dart';
+import 'package:kununua_app/screens/main_screen/main_screen.dart';
 import 'package:kununua_app/utils/constants.dart';
 
 void main() {
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
               fontFamily: 'Montserrat'
             ),
           ), 
-          home: const LoginScreen(),             
+          home: const MainScreen(),             
       ));
   }
 }

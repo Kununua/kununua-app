@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kununua_app/screens/login_screen/login_sceen.dart';
-import 'package:kununua_app/utils/widgets/button.dart';
+import 'package:kununua_app/widgets/button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WelcomeScreen extends StatefulWidget {

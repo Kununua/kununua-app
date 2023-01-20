@@ -10,8 +10,8 @@ import 'package:kununua_app/screens/login_screen/widgets/or_divider.dart';
 import 'package:kununua_app/screens/welcome_screen/welcome_screen.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/utils/helper_functions.dart';
-import 'package:kununua_app/utils/widgets/button.dart';
-import 'package:kununua_app/utils/widgets/input.dart';
+import 'package:kununua_app/widgets/button.dart';
+import 'package:kununua_app/widgets/input.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum Screens{
