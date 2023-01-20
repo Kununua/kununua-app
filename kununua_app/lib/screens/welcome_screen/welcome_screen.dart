@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kununua_app/screens/new_login_screen/login_screen.dart';
 import 'package:kununua_app/utils/widgets/button.dart';
-import 'package:kununua_app/screens/new_login_screen/utils/globals.dart' as globals;
+import 'package:kununua_app/utils/globals.dart' as globals;
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -25,7 +25,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   void initState() {
 
-    name = globals.currentUser;
+    name = globals.currentUser['username'];
 
     super.initState();
   }

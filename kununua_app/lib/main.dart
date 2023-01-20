@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:kununua_app/screens/new_login_screen/login_screen.dart';
 import 'package:kununua_app/utils/constants.dart';
-import 'package:kununua_app/screens/new_login_screen/utils/globals.dart' as globals;
+import 'package:kununua_app/utils/globals.dart' as globals;
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(

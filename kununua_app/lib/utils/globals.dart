@@ -6,4 +6,4 @@ final HttpLink mainGraphqlLink = HttpLink("http://127.0.0.1:8000/graphql/");
 
 ValueNotifier<GraphQLClient> client = ValueNotifier(GraphQLClient(cache: GraphQLCache(), link: mainGraphqlLink));
 String jwtToken = '';
-String currentUser = '';
+Map<String, dynamic> currentUser = <String, dynamic>{};

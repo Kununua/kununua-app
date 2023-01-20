@@ -6,9 +6,9 @@ import 'package:kununua_app/screens/welcome_screen/welcome_screen.dart';
 import 'package:kununua_app/screens/new_login_screen/components/center_widget/center_widget.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/screens/new_login_screen/utils/validators.dart';
-import 'package:kununua_app/screens/new_login_screen/utils/requests.dart';
+import 'package:kununua_app/utils/requests.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:kununua_app/screens/new_login_screen/utils/globals.dart' as globals;
+import 'package:kununua_app/utils/globals.dart' as globals;
 
 class LoginScreen extends StatelessWidget {
 
@@ -20,8 +20,6 @@ class LoginScreen extends StatelessWidget {
 
   Future<String?> _authUser(LoginData data) async {
 
-    debugPrint('Name: ${data.name}, Password: ${data.password}');
-
     final MutationOptions loggingOptions = MutationOptions(
       document: gql(logUser),
       variables: <String, dynamic>{
@@ -30,28 +28,14 @@ class LoginScreen extends StatelessWidget {
       },
     );
 
-    final MutationOptions jwtOptions = MutationOptions(
-      document: gql(tokenAuth),
-      variables: <String, dynamic>{
-        'username': data.name,
-        'password': data.password,
-      },
-    );
-
     final loggingResult = await globals.client.value.mutate(loggingOptions);
 
-    if (loggingResult.data?['logUser'] == null) {
+    if (loggingResult.data?['tokenAuth'] == null) {
       return 'Credenciales inválidas. Por favor, inténtalo de nuevo.';
     }
 
-    final jwtToken = await globals.client.value.mutate(jwtOptions);
-
-    if (jwtToken.data?['tokenAuth'] == null) {
-      return 'Ha ocurrido un error. Inténtelo más tarde.';
-    }
-
-    globals.jwtToken = jwtToken.data?['tokenAuth']['token'];
-    globals.currentUser = data.name;
+    globals.jwtToken = loggingResult.data?['tokenAuth']['token'];
+    globals.currentUser = Map<String, dynamic>.from(loggingResult.data?['tokenAuth']['user']);
 
     return null;
   }
