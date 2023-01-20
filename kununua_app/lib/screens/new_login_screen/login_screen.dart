@@ -20,7 +20,7 @@ class LoginScreen extends StatelessWidget {
 
   Future<String?> _authUser(LoginData data) async {
 
-    final MutationOptions loggingOptions = MutationOptions(
+    final MutationOptions loginOptions = MutationOptions(
       document: gql(logUser),
       variables: <String, dynamic>{
         'username': data.name,
@@ -28,24 +28,41 @@ class LoginScreen extends StatelessWidget {
       },
     );
 
-    final loggingResult = await globals.client.value.mutate(loggingOptions);
+    final loginResult = await globals.client.value.mutate(loginOptions);
 
-    if (loggingResult.data?['tokenAuth'] == null) {
+    if (loginResult.data?['tokenAuth'] == null) {
       return 'Credenciales inválidas. Por favor, inténtalo de nuevo.';
     }
 
-    globals.jwtToken = loggingResult.data?['tokenAuth']['token'];
-    globals.currentUser = Map<String, dynamic>.from(loggingResult.data?['tokenAuth']['user']);
+    globals.jwtToken = loginResult.data?['tokenAuth']['token'];
+    globals.currentUser = Map<String, dynamic>.from(loginResult.data?['tokenAuth']['user']);
 
     return null;
   }
 
   Future<String?> _signupUser(SignupData data) async {
-    debugPrint('Signup Name: ${data.name}, Password: ${data.password}');
-    
-    return Future.delayed(loginTime).then((_) {
-      return null;
-    });
+    final MutationOptions createUserOptions = MutationOptions(
+      document: gql(createUser),
+      variables: <String, dynamic>{
+        'username': data.name,
+        'password': data.password,
+        'firstName': data.additionalSignupData?['Nombre'],
+        'lastName': data.additionalSignupData?['Apellidos'],
+        'email': data.additionalSignupData?['Email'],
+      },
+    );
+
+    final createUserResult = await globals.client.value.mutate(createUserOptions);
+    final exceptions = createUserResult.exception?.graphqlErrors;
+
+    if (exceptions != null) {
+      return exceptions[0].message;
+    }
+
+    globals.jwtToken = createUserResult.data?['tokenAuth']['token'];
+    globals.currentUser = Map<String, dynamic>.from(createUserResult.data?['tokenAuth']['user']);
+
+    return null;
   }
 
   Future<String?> _recoverPassword(String name) {
@@ -214,8 +231,8 @@ class LoginScreen extends StatelessWidget {
             int valueLength = value != null ? value.length : 0;
 
             if (valueLength == 0){
-              return "ESte campo es obligatorio";
-            }else if (valueLength < 6 && valueLength > 25) {
+              return "Este campo es obligatorio";
+            }else if (valueLength < 6 || valueLength > 25) {
               return "El usuario debe tener entre 6 y 24 caracteres";
             }
             return null;
