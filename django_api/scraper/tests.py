@@ -16,7 +16,7 @@ from .scrapers.spain import generated_scraper_plantilla_standard as standard_scr
 class TreeTestCase(TestCase):
     def setUp(self):
         timer = Timer()
-        timer.start_timer()
+        timer.start()
         self.tree = Tree()
     
         root = Node(selector="root")
@@ -40,8 +40,8 @@ class TreeTestCase(TestCase):
         print("\n")
         paths = self.tree.calculate_tree_paths()
         print(paths)
-        self.timer.end_timer()
-        print("El tiempo de ejecución ha sido de %f milisegundos" % (self.timer.end_time-self.timer.start_time))
+        self.timer.stop()
+        print("El tiempo de ejecución ha sido de %f milisegundos" % (self.timer.get_time()))
         
     def test_calculate_tree_paths_with_null_root_selector(self):
         
@@ -52,8 +52,8 @@ class TreeTestCase(TestCase):
         print("\n")
         paths = self.tree.calculate_tree_paths()
         print(paths)
-        self.timer.end_timer()
-        print("El tiempo de ejecución ha sido de %f milisegundos" % (self.timer.end_time-self.timer.start_time))
+        self.timer.stop()
+        print("El tiempo de ejecución ha sido de %f milisegundos" % (self.timer.get_time()))
         
 class GeneratorElJamonRecursiveCase(TestCase):
     def setUp(self):

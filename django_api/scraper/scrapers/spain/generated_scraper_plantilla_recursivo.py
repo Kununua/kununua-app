@@ -25,7 +25,7 @@ def extract_data(url, path, driver, selenium_utils):
 			marca = soup.select_one('#_DetalleProductoFoodPortlet_WAR_comerzziaportletsfood_frmDatos > span').get_text().strip()
 			try:
 				denominacion = soup.select_one('#_DetalleProductoFoodPortlet_WAR_comerzziaportletsfood_frmDatos > div > ul > li > img').get('src').strip()
-			except:
+			except Exception:
 				denominacion = None
     
 			precio = soup.select_one('#_DetalleProductoFoodPortlet_WAR_comerzziaportletsfood_frmDatos > div > div > span').get_text().strip()
@@ -42,7 +42,7 @@ def extract_data(url, path, driver, selenium_utils):
 			next_page_button = [elem for elem in selenium_utils.get_elements_by_css_selector(".activo") if elem.get_attribute("title") == "Siguiente"][0]
 			next_page_button.click()
 			url_cache = driver.current_url
-		except:
+		except Exception:
 			print("Se han scrapeado: " + str(products_scraped) + " productos.")
 			break
 		# -----------------------------------------------
