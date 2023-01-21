@@ -11,58 +11,71 @@ enum Screens{
   profile
 }
 
-class KununuaNavBar extends StatelessWidget {
+class KununuaNavBar extends StatefulWidget {
   
   final Screens screen;
+  final Function currentScreenCallback;
   
   const KununuaNavBar({
     super.key,
-    required this.screen
+    required this.screen,
+    required this.currentScreenCallback
   });
 
+  @override
+  State<KununuaNavBar> createState() => _KununuaNavBarState();
+}
+
+class _KununuaNavBarState extends State<KununuaNavBar> {
   @override
   Widget build(BuildContext context) {
 
     final screenSize = MediaQuery.of(context).size;
 
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      child: Container(
-        width: screenSize.width,
-        height: 0.1 * screenSize.height,
-        color: kPrimaryColor,
-        child: Flex(
-          direction: Axis.horizontal,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            NavBarIcon(
-              onPressed: () => {debugPrint("Pressed home")},
-              icon: NavBarIcons.home,
-              screen: screen,
-            ),
-            NavBarIcon(
-              onPressed: () => {debugPrint("Pressed stats")},
-              icon: NavBarIcons.stats,
-              screen: screen,
-            ),
-            NavBarIcon(
-              onPressed: () => {debugPrint("Pressed search")},
-              icon: NavBarIcons.search,
-              screen: screen,
-            ),
-            NavBarIcon(
-              onPressed: () => {debugPrint("Pressed cart")},
-              icon: NavBarIcons.cart,
-              screen: screen,
-            ),
-            NavBarIcon(
-              onPressed: () => {debugPrint("Pressed profile")},
-              icon: NavBarIcons.profile,
-              screen: screen,
-            ),
-          ],
-        ),
+    return Container(
+      width: screenSize.width,
+      height: 0.1 * screenSize.height,
+      color: kPrimaryColor,
+      child: Flex(
+        direction: Axis.horizontal,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          NavBarIcon(
+            onPressed: () => {
+              widget.currentScreenCallback(Screens.home)
+            },
+            icon: NavBarIcons.home,
+            screen: widget.screen,
+          ),
+          NavBarIcon(
+            onPressed: () => {
+              widget.currentScreenCallback(Screens.stats)
+            },
+            icon: NavBarIcons.stats,
+            screen: widget.screen,
+          ),
+          NavBarIcon(
+            onPressed: () => {
+              widget.currentScreenCallback(Screens.search)
+            },
+            icon: NavBarIcons.search,
+            screen: widget.screen,
+          ),
+          NavBarIcon(
+            onPressed: () => {
+              widget.currentScreenCallback(Screens.cart)
+            },
+            icon: NavBarIcons.cart,
+            screen: widget.screen,
+          ),
+          NavBarIcon(
+            onPressed: () => {
+              widget.currentScreenCallback(Screens.profile)
+            },
+            icon: NavBarIcons.profile,
+            screen: widget.screen,
+          ),
+        ],
       ),
     );
   }
