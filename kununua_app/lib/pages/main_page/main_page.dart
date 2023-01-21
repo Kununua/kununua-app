@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kununua_app/screens/main_screen/components/main_page_category_row/main_page_category_row.dart';
-import 'package:kununua_app/screens/main_screen/components/carousel.dart';
-import 'package:kununua_app/screens/main_screen/components/main_page_row/main_page_row.dart';
+import 'package:kununua_app/pages/main_page/components/main_page_category_row/main_page_category_row.dart';
+import 'package:kununua_app/pages/main_page/components/carousel.dart';
+import 'package:kununua_app/pages/main_page/components/main_page_row/main_page_row.dart';
 import 'package:kununua_app/utils/constants.dart';
 
 

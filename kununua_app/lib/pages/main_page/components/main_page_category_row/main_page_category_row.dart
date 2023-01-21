@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kununua_app/screens/main_screen/components/main_page_category_row/main_page_category_cell.dart';
-import 'package:kununua_app/screens/main_screen/components/row_title.dart';
+import 'package:kununua_app/pages/main_page/components/main_page_category_row/main_page_category_cell.dart';
+import 'package:kununua_app/pages/main_page/components/row_title.dart';
 
 class MainPageCategoryRow extends StatelessWidget {
   const MainPageCategoryRow({super.key});

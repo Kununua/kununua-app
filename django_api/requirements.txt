@@ -6,6 +6,8 @@ backports.zoneinfo==0.2.1
 beautifulsoup4==4.11.1
 certifi==2022.9.24
 Django==4.1.2
+django-extensions==3.2.1
+django-graphql-jwt==0.3.4
 django-livereload-server==0.4
 djangorestframework==3.14.0
 exceptiongroup==1.0.4
@@ -19,8 +21,10 @@ livereload==2.6.3
 lxml==4.9.1
 mysqlclient==2.1.1
 outcome==1.2.0
+Pillow==9.4.0
 promise==2.3
 psycopg2==2.9.5
+PyJWT==2.6.0
 PySocks==1.7.1
 pytz==2022.5
 selenium==4.7.2

@@ -3,14 +3,14 @@ import 'package:kununua_app/screens/login_screen/login_sceen.dart';
 import 'package:kununua_app/widgets/button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({super.key});
+class WelcomePage extends StatefulWidget {
+  const WelcomePage({super.key});
 
   @override
-  State<WelcomeScreen> createState() => _WelcomeScreenState();
+  State<WelcomePage> createState() => _WelcomePageState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> {
+class _WelcomePageState extends State<WelcomePage> {
 
   String name = '';
 
