@@ -1,6 +1,6 @@
 import graphene, graphql_jwt, json
 from httplib2 import Http
-from django_api_app.models import KununuaUser
+from authentication.models import KununuaUser
 from .types import KununuaUserType
 from django.utils.translation import gettext_lazy as _
 

@@ -14,12 +14,15 @@ SECRET_KEY = 'django-insecure--#=wj@k3l)dt)##^pxbijw-4!_2e6t8be&022pu4t_wg69ph!t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1']
+ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost']
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django_api_app',
+    'authentication',
+    'location',
+    'products',
+    'stats',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -27,7 +30,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'graphene_django',
-    'graphene_schema',
     'scraper',
     'corsheaders',
 ]
@@ -43,7 +45,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-ROOT_URLCONF = 'django_api.urls'
+ROOT_URLCONF = 'kununua_backend.urls'
 
 TEMPLATES = [
     {
@@ -61,8 +63,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'django_api.wsgi.application'
-
+WSGI_APPLICATION = 'kununua_backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -70,14 +71,13 @@ WSGI_APPLICATION = 'django_api.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': '<db_name>',
-        'USER': '<db_user>',
-        'PASSWORD': '<complex_password>',
+        'NAME': 'kununua_db',
+        'USER': 'kununua_user',
+        'PASSWORD': 'kununua_password',
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -97,7 +97,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'django_api_app.KununuaUser'
+AUTH_USER_MODEL = 'authentication.KununuaUser'
 
 AUTHENTICATION_BACKENDS = [
     "graphql_jwt.backends.JSONWebTokenBackend",
@@ -132,7 +132,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 GRAPHENE = {
-    'SCHEMA': 'graphene_schema.schema.schema',
+    'SCHEMA': 'kununua_backend.schema.schema',
     "MIDDLEWARE": [
         "graphql_jwt.middleware.JSONWebTokenMiddleware",
     ],
