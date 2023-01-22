@@ -1,50 +1,13 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ValidationError
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-class Currency(models.Model):
-    name = models.CharField(_("name"), max_length=64, unique=True)
-    icon = models.CharField(_("icon"), max_length=3, unique=True)
+from authentication.models import KununuaUser
+from location.models import Country
 
-    def __str__(self):
-        return f"Currency[name: {self.name}, icon: {self.icon}]"
-
-class Country(models.Model):
-    name = models.CharField(_("name"), max_length=64, unique=True)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
-    
-    def __str__(self):
-        return f"Country[name: {self.name}, currency: {self.currency}]"
-    
-class KununuaUser(AbstractUser):
-    email = models.EmailField(_("email address"), unique=True)
-    phone_number = models.CharField(_("phone_number"), max_length=20, null=True)
-    profile_picture = models.ImageField(_("profile_picture"), upload_to='profile_pictures', blank=True, null=True)
-    country = models.ForeignKey(Country, on_delete=models.CASCADE, null=True)
-    
-    def __str__(self):
-        return f"User[username: {self.username}, first_name: {self.first_name}, last_name: {self.last_name}, email: {self.email}]"
-    
-class Address(models.Model):
-    name = models.CharField(_("name"), max_length=64)
-    value = models.CharField(_("value"), max_length=256)
-    zipcode = models.CharField(_("zipcode"), max_length=10)
-    is_default = models.BooleanField(_("is_default"), default=False)
-    user = models.ForeignKey(KununuaUser, on_delete=models.CASCADE)
-    
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["user", "value"], name='Unique user-value constraint'),
-            models.UniqueConstraint(fields=["user", "name"], name='unique user-name constraint')
-        ]
-    
-    def __str__(self):
-        return f"Address[name: {self.name}, value: {self.value}, zipcode: {self.zipcode}, is_default: {self.is_default}, user: {self.user}]"
-    
 class Supermarket(models.Model):
     name = models.CharField(_("name"), max_length=64)
     zipcode = models.CharField(_("zipcode"), max_length=10)
@@ -79,7 +42,7 @@ class Product(models.Model):
     
     @property
     def weight_unit(self):
-        return get_weight_unit(self)
+        return _get_weight_unit(self)
     
     def get_average_rating(self):
         return Rating.objects.filter(product=self).aggregate(models.Avg('rating'))['rating__avg']
@@ -98,20 +61,6 @@ class Rating(models.Model):
     def _str_(self):
         return f"Rating[product: {self.product}, user: {self.user}, rating: {self.rating}]"
     
-    
-class PriceHistory(models.Model):
-    price = models.DecimalField(_("price"), max_digits=10, decimal_places=2)
-    unit_price = models.CharField(_("unit_price"), max_length=16)
-    date = models.DateTimeField(_("date"), auto_now=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    
-    @property
-    def weight_unit(self):
-        return get_weight_unit(self)
-    
-    def _str_(self):
-        return f"PriceHistory[price: {self.price}, unit_price: {self.unit_price}, last_modified: {self.last_modified}, product: {self.product}]"
-
 class List(models.Model):
     user = models.ForeignKey(KununuaUser, on_delete=models.CASCADE)
     date = models.DateTimeField(_("date"), auto_now_add=True)
@@ -135,10 +84,6 @@ class ProductEntry(models.Model):
     def __str__(self):
         return f"ProductEntry[quantity: {self.quantity}, product: {self.product}, list: {self.list}, cart: {self.cart}, is_list_product: {self.is_list_product}]"
 
-# Auxiliary functions
-def get_weight_unit(object):
-    return "NotImplemented"
-
 # Signals
 @receiver(pre_save, sender=ProductEntry)
 def make_field_null(sender, instance, **kwargs):
@@ -151,3 +96,8 @@ def make_field_null(sender, instance, **kwargs):
         raise ValidationError(_("The product must be either in a cart or a list."))
 
 pre_save.connect(make_field_null, sender=ProductEntry)
+    
+# ----------------- PRIVATE FUNCTIONS -----------------
+
+def _get_weight_unit(object):
+    return "NotImplemented"

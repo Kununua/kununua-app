@@ -1,7 +1,7 @@
 import graphene
 import jwt
 from graphene_django.types import DjangoObjectType
-from django_api_app.models import KununuaUser
+from authentication.models import KununuaUser
 class KununuaUserType(DjangoObjectType):
   class Meta:
     model = KununuaUser

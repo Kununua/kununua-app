@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import KununuaUser
+from .models import KununuaUser, Address
 
 class KununuaUserAdmin(UserAdmin):
     model = KununuaUser
@@ -49,3 +49,4 @@ class KununuaUserAdmin(UserAdmin):
     )
     
 admin.site.register(KununuaUser, KununuaUserAdmin)
+admin.site.register(Address)

@@ -14,12 +14,15 @@ SECRET_KEY = 'django-insecure--#=wj@k3l)dt)##^pxbijw-4!_2e6t8be&022pu4t_wg69ph!t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1']
+ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost']
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django_api_app',
+    'authentication',
+    'location',
+    'products',
+    'stats',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,7 +46,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-ROOT_URLCONF = 'django_api.urls'
+ROOT_URLCONF = 'kununua_backend.urls'
 
 TEMPLATES = [
     {
@@ -61,7 +64,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'django_api.wsgi.application'
+WSGI_APPLICATION = 'kununua_backend.wsgi.application'
 
 
 # Database
@@ -97,7 +100,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'django_api_app.KununuaUser'
+AUTH_USER_MODEL = 'authentication.KununuaUser'
 
 AUTHENTICATION_BACKENDS = [
     "graphql_jwt.backends.JSONWebTokenBackend",
