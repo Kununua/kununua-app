@@ -41,6 +41,15 @@ String createUser = """
     }
     """;
 
+String createGoogleUser = """
+
+      mutation createGoogleUser(\$accessToken: String!){
+        createGoogleUser(accessToken: \$accessToken){
+          created
+        }
+      }
+      """;
+
 String verifyToken = """
     mutation verifyToken(\$token: String!){
       verifyToken(token: \$token){
