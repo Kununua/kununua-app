@@ -1,0 +1,130 @@
+@startuml "Kununua Data Model" as KununuaDataModel
+
+' --------------- CONFIG ----------------
+
+title Kununua Data Model
+'!theme minty
+'!theme materia
+skinparam defaultFontName Serif
+
+' --------------- CLASSES ----------------
+
+class AbstractUser{}
+
+class KununuaUser{
+    +profile_picture: Image
+    +phone_number: String
+}
+
+class Country{
+    +name: String
+}
+
+class Currency{
+    +name: String
+    +icon: String
+}
+
+class Address{
+    +name: String
+    +value: String
+    +zipcode: String
+    +default: bool
+}
+
+class Product{
+    +name: String
+    +price: float
+    +unit_price: float
+    +product_url: url {Unique}
+    +offer_price: float {Nullable}
+    +unit_offer_price: float {Nullable}
+    +is_vegetarian: bool {Nullable}
+    +is_gluten_free: bool {Nullable}
+    +is_freezed: bool {Nullable}
+    ..
+    + / weight_unit: String
+    ..
+    +is_from_country(KununuaUser: user): bool
+    +get_average_rating(): float {Transient}
+}
+
+class Category{
+    +name: String {Unique}
+}
+
+class Supermarket{
+    +name: String {Unique}
+    +zipcode: String
+    +main_url: url
+}
+
+class Rating{
+    +value: int {min: 1, max: 5}
+}
+
+class PriceHistory{
+    +price: float
+    +unit_price: float
+    +date: datetime
+}
+
+class List{
+    +date: datetime
+}
+
+class Cart{}
+
+class ProductEntry{
+    +quantity: int
+    +is_list_product: bool
+}
+
+' --------------- NOTES ----------------
+note left of Address 
+An user can only have 
+one Address set as default
+end note
+
+note bottom of Address 
+Unique (user,value)
+Unique (user,name)
+end note
+
+note top of Product
+is_from_country method returns wheter the
+product is from the user's country or not
+end note
+
+note top of Supermarket
+Unique (name,country,zipcode)
+end note
+
+note right of Rating
+Unique (user,product)
+end note
+
+note right of ProductEntry
+if is_list_product == true --> class related to List. Cart relation is null
+else --> class related to Cart. List relation is null
+end note
+
+' --------------- RELATIONS ----------------
+
+AbstractUser <|-- KununuaUser
+KununuaUser *-- Address
+KununuaUser "*" --> "1" Country: lives in
+KununuaUser "1" --> "0..*" Rating: gives
+KununuaUser "1" --> "0..*" List: writes
+KununuaUser "1" --> "1" Cart: has
+Country "*" --> "1" Currency: has
+Product "*" --> "0..1" Category: has
+Product "*" --> "1" Supermarket: is in
+Product "1" --> "0..*" PriceHistory: has
+Supermarket "*" --> "1" Country: is in
+Rating "*" --> "1" Product: rates
+List *-- ProductEntry
+Cart *-- ProductEntry
+ProductEntry "*" --> "1" Product: appears in
+
+@enduml
