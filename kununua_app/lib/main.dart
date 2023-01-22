@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:kununua_app/screens/login_screen/login_sceen.dart';
+import 'package:kununua_app/screens/new_login_screen/login_screen.dart';
 import 'package:kununua_app/utils/constants.dart';
+import 'package:kununua_app/utils/globals.dart' as globals;
 
 void main() {
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      systemNavigationBarColor:
+          SystemUiOverlayStyle.dark.systemNavigationBarColor,
+    ),
+  );
   runApp(const MyApp());
 }
 
@@ -13,12 +21,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final HttpLink link = HttpLink("http://127.0.0.1:8000/graphql/");
-
-    ValueNotifier<GraphQLClient> client = ValueNotifier(GraphQLClient(cache: GraphQLCache(), link: link));
-
     return GraphQLProvider(
-        client: client,
+        client: globals.client,
         child: MaterialApp(  
           debugShowCheckedModeBanner: false,        
           title: 'Kununua App',
@@ -29,7 +33,7 @@ class MyApp extends StatelessWidget {
               fontFamily: 'Montserrat'
             ),
           ), 
-          home: const LoginScreen(),             
+          home: LoginScreen()         
       ));
   }
 }

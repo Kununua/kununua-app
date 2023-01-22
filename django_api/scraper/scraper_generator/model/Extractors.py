@@ -64,14 +64,14 @@ class Extractors(object):
                         try:
                             leaf = self.get_driver_utils().get_element_by_css_selector(leaf_selector)
                             leaf_value = leaf.get_attribute("src")
-                        except:
+                        except Exception:
                             leaf_value = None
                     else:
                         leaf = self.get_driver_utils().get_element_by_css_selector(leaf_selector)
                         leaf_value = leaf.text
                         
                     leaf_values.append(leaf_value)
-                except:
+                except Exception:
                     continue
         
         self._prepare_function_to_recursive_extraction()
@@ -80,7 +80,7 @@ class Extractors(object):
         
         return fields_to_be_extracted
     
-    def update_standard_extraction_function(self, extract_data_function, fields_to_be_extracted):
+    def update_standard_extraction_function(self, fields_to_be_extracted):
         
         extract_data_function = self.get_extract_data()
         data_lists_to_zip = ""
@@ -138,7 +138,7 @@ class Extractors(object):
         
         return extract_data_function
     
-    def update_recursive_extraction_function(self, extract_data_function, fields_to_be_extracted):
+    def update_recursive_extraction_function(self, fields_to_be_extracted):
         
         extract_data_function = self.get_extract_data()
         multifield_counter = 1
@@ -172,7 +172,7 @@ class Extractors(object):
                 if field.get_selector().endswith("img"):
                     extract_data_function += "\t\t\ttry:\n"
                     extract_data_function += "\t\t\t\t%s = soup.select_one('%s').get('src').strip()\n" % (field.get_name(), field.get_selector())
-                    extract_data_function += "\t\t\texcept:\n"
+                    extract_data_function += "\t\t\texcept Exception:\n"
                     extract_data_function += "\t\t\t\t%s = None\n" % (field.get_name())
                 else:
                     extract_data_function += "\t\t\t%s = soup.select_one('%s').get_text().strip()\n" % (field.get_name(), field.get_selector())

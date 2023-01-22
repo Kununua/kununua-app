@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .models import User
+from .models import KununuaUser
 
 # Create your views here.
 def index(request):
-    return render(request, "index.html", context={'users': User.objects.all()})
+    return render(request, "index.html", context={'users': KununuaUser.objects.all()})

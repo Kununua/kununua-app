@@ -66,9 +66,9 @@ class ScraperGenerator(object):
         fields_to_be_extracted = self.perform_matching(fields_to_be_extracted)
         
         if self.elem_details is None:
-            extract_data = extractor.update_standard_extraction_function(extract_data, fields_to_be_extracted)
+            extract_data = extractor.update_standard_extraction_function(fields_to_be_extracted)
         else:
-            extract_data = extractor.update_recursive_extraction_function(extract_data, fields_to_be_extracted)
+            extract_data = extractor.update_recursive_extraction_function(fields_to_be_extracted)
             
         self.create_scraper_file(main_scraper, extract_data, get_urls_to_extract)
         

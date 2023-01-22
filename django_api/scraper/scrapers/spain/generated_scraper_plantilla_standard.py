@@ -32,7 +32,7 @@ def extract_data(url, path, driver, selenium_utils):
 		try:
 			next_page_button = [elem for elem in selenium_utils.get_elements_by_css_selector(".activo") if elem.get_attribute("title") == "Siguiente"][0]
 			next_page_button.click()
-		except:
+		except Exception:
 			print("Se han scrapeado: " + str(products_scraped) + " productos.")
 			break
 		# -----------------------------------------------

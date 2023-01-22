@@ -42,6 +42,8 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
   final TextEditingController _loginUsernameController = TextEditingController();
   final TextEditingController _loginPasswordController = TextEditingController();
 
+  bool _keyboard_toggling = true;
+
   @override
   void initState() {
 
@@ -62,7 +64,6 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
           }
         }
     """;
-
 
     createAccountContent = [
       Input(
@@ -120,8 +121,14 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
           );
         },
       ),
-      const OrDivider(),
-      const Logos(),
+      Visibility(
+        visible: _keyboard_toggling,
+        child: const OrDivider()
+      ),
+      Visibility(
+        visible: _keyboard_toggling,
+        child: const Logos()
+      ),
     ];
 
     loginContent = [
@@ -227,32 +234,44 @@ class _LoginContentState extends State<LoginContent> with TickerProviderStateMix
 
     return Stack(
       children: [
-        const Positioned(
-          top: 136,
-          left: 24,
-          child: TopText()
+        Visibility(
+          visible: _keyboard_toggling,
+          child: const Positioned(
+            top: 136,
+            left: 24,
+            child: TopText()
+          ),
         ),
         Padding(
           padding: const EdgeInsets.only(top: 100),
-          child: Stack(
-            children: [
-              Form(
-                key: _registerFormKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: createAccountContent,
-                ),
+          child: FocusScope(
+            child: Focus(
+              onFocusChange: (hasFocus) {
+                setState(() {
+                  _keyboard_toggling = !hasFocus;
+                });
+              },
+              child: Stack(
+                children: [
+                  Form(
+                    key: _registerFormKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: createAccountContent,
+                    ),
+                  ),
+                  Form(
+                    key: _loginFormKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: loginContent,
+                    ),
+                  ),
+                ]
               ),
-              Form(
-                key: _loginFormKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: loginContent,
-                ),
-              ),
-            ]
+            ),
           ),
         ),
         const Align(
