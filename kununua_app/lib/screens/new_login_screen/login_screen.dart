@@ -29,6 +29,9 @@ class LoginScreen extends StatelessWidget {
 
     final loginResult = await globals.client.value.mutate(loginOptions);
 
+    debugPrint(loginResult.data.toString());
+    debugPrint(loginResult.toString());
+
     if (loginResult.data?['tokenAuth'] == null) {
       return 'Credenciales inválidas. Por favor, inténtalo de nuevo.';
     }
@@ -74,20 +77,40 @@ class LoginScreen extends StatelessWidget {
       ],
     );
     GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-    debugPrint(googleUser?.toString());
+
     if (googleUser == null) {
       return 'Ha ocurrido un error';
     }
-    debugPrint(googleUser.toString());
+
     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    print(googleAuth.idToken);
-    globals.currentUser = {
-      'username': googleAuth.idToken,
-      'email': googleUser.email,
-      'firstName': googleUser.displayName,
-      'lastName': googleUser.displayName,
-    };
-    return null;
+
+    final MutationOptions googleLoginOptions = MutationOptions(
+      document: gql(createGoogleUser),
+      variables: <String, dynamic>{
+        'accessToken': googleAuth.accessToken ?? '',
+      },
+    );
+
+    final createGoogleUserResult = await globals.client.value.mutate(googleLoginOptions);
+
+    try{
+
+      if (!createGoogleUserResult.data?['createGoogleUser']['created']) {
+        return 'Ha ocurrido un error. Inténtelo de nuevo más tarde';
+      }
+
+      globals.currentUser = {
+        'username': googleUser.displayName,
+        'email': googleUser.email,
+        'firstName': googleUser.displayName,
+        'lastName': googleUser.displayName,
+      };
+
+      return null;
+
+    } catch (e) {
+      return 'Ha ocurrido un error. Inténtelo de nuevo más tarde';
+    }
   }
 
   Future<String?> _recoverPassword(String name) {

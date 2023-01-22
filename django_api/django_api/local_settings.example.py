@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure--#=wj@k3l)dt)##^pxbijw-4!_2e6t8be&022pu4t_wg69ph!t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1']
 
 # Application definition
 
@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'graphene_django',
     'graphene_schema',
     'scraper',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -39,6 +40,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'django_api.urls'
