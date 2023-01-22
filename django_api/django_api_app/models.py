@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
-from django.db.models import Q
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ValidationError
 from django.db.models.signals import pre_save
@@ -38,9 +37,9 @@ class Address(models.Model):
     user = models.ForeignKey(KununuaUser, on_delete=models.CASCADE)
     
     class Meta:
-        unique_together = ('user', 'value'), ('user', 'name')
         constraints = [
-            models.UniqueConstraint(fields=('user',), condition=Q(is_default=True), name=_('one_default_per_user'))
+            models.UniqueConstraint(fields=["user", "value"], name='Unique user-value constraint'),
+            models.UniqueConstraint(fields=["user", "name"], name='unique user-name constraint')
         ]
     
     def __str__(self):
@@ -103,7 +102,7 @@ class Rating(models.Model):
 class PriceHistory(models.Model):
     price = models.DecimalField(_("price"), max_digits=10, decimal_places=2)
     unit_price = models.CharField(_("unit_price"), max_length=16)
-    last_modified = models.DateTimeField(_("last_modified"), auto_now=True)
+    date = models.DateTimeField(_("date"), auto_now=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     
     @property
