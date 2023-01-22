@@ -30,7 +30,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'graphene_django',
-    'graphene_schema',
     'scraper',
     'corsheaders',
 ]
@@ -135,7 +134,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 GRAPHENE = {
-    'SCHEMA': 'graphene_schema.schema.schema',
+    'SCHEMA': 'kununua_backend.schema.schema',
     "MIDDLEWARE": [
         "graphql_jwt.middleware.JSONWebTokenMiddleware",
     ],
