@@ -4,7 +4,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:kununua_app/screens/new_login_screen/login_screen.dart';
 import 'package:kununua_app/screens/main_screen.dart';
 import 'package:kununua_app/utils/constants.dart';
-import 'package:kununua_app/screens/product_details_screen.dart';
+import 'package:kununua_app/screens/product_details_screen/product_details_screen.dart';
 import 'package:kununua_app/utils/globals.dart' as globals;
 
 void main() {
@@ -37,8 +37,7 @@ class MyApp extends StatelessWidget {
           ), 
           // home: MainScreen(),
           home: const ProductDetails(
-            productImage: AssetImage('assets/images/products/pechuga.png'),
-            productName: "Pechuga de pavo"
+            productId: 1
           ),             
       ));
   }
