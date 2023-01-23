@@ -29,9 +29,6 @@ class LoginScreen extends StatelessWidget {
 
     final loginResult = await globals.client.value.mutate(loginOptions);
 
-    debugPrint(loginResult.data.toString());
-    debugPrint(loginResult.toString());
-
     if (loginResult.data?['tokenAuth'] == null) {
       return 'Credenciales inválidas. Por favor, inténtalo de nuevo.';
     }

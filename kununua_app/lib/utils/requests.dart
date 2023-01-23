@@ -57,3 +57,14 @@ String verifyToken = """
       }
     }
     """;
+
+/* ------------------------------- PRODUCT RETRIEVAL ------------------------------- */
+
+String getProductById = """
+    query getProductById(\$id: Int!){
+      getProductById(id: \$id){
+        name
+        image
+      }
+    }
+    """;

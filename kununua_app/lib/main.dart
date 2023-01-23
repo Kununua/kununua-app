@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'screens/new_login_screen/login_screen.dart';
-import 'screens/main_screen.dart';
-import 'utils/constants.dart';
-import 'screens/product_details_screen.dart';
-import 'utils/globals.dart' as globals;
+import 'package:kununua_app/screens/new_login_screen/login_screen.dart';
+import 'package:kununua_app/screens/main_screen.dart';
+import 'package:kununua_app/utils/constants.dart';
+import 'package:kununua_app/screens/product_details_screen.dart';
+import 'package:kununua_app/utils/globals.dart' as globals;
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
@@ -35,11 +35,11 @@ class MyApp extends StatelessWidget {
               fontFamily: 'Montserrat'
             ),
           ), 
-          home: MainScreen(),
-          // home: const ProductDetails(
-          //   productImage: AssetImage('assets/images/products/pechuga.png'),
-          //   productName: "Pechuga de pavo"
-          // ),             
+          // home: MainScreen(),
+          home: const ProductDetails(
+            productImage: AssetImage('assets/images/products/pechuga.png'),
+            productName: "Pechuga de pavo"
+          ),             
       ));
   }
 }

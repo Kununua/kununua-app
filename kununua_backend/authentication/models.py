@@ -7,7 +7,7 @@ from location.models import Country
 class KununuaUser(AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
     phone_number = models.CharField(_("phone_number"), max_length=20, null=True)
-    profile_picture = models.ImageField(_("profile_picture"), upload_to='profile_pictures', blank=True, null=True)
+    profile_picture = models.ImageField(_("profile_picture"), upload_to='users/images/', blank=True, null=True)
     country = models.ForeignKey(Country, on_delete=models.CASCADE, null=True)
     
     def __str__(self):

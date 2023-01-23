@@ -1,4 +1,4 @@
-@startuml "Kununua Data Model" as KununuaDataModel
+@startuml KununuaDataModel
 
 ' --------------- CONFIG ----------------
 
@@ -35,7 +35,8 @@ class Address{
 class Product{
     +name: String
     +price: float
-    +unit_price: float
+    +unit_price: String
+    +product_image: Image
     +product_url: url {Unique}
     +offer_price: float {Nullable}
     +unit_offer_price: float {Nullable}

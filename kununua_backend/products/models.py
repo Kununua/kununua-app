@@ -30,6 +30,7 @@ class Product(models.Model):
     name = models.CharField(_("name"), max_length=256)
     price = models.DecimalField(_("price"), max_digits=10, decimal_places=2)
     unit_price = models.CharField(_("unit_price"), max_length=16)
+    image = models.ImageField(_("image"), upload_to="products/images/", null=True)
     url = models.URLField(_("url"), unique=True)
     is_vegetarian = models.BooleanField(_("is_vegetarian"), default=False, null=True)
     is_gluten_free = models.BooleanField(_("is_gluten_free"), default=False, null=True)
