@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         client: globals.client,
         child: MaterialApp(  
           debugShowCheckedModeBanner: false,        
-          title: 'Kununua App',
+          title: 'Kununua',
           theme: ThemeData(           
             scaffoldBackgroundColor: kBackgroundColor,
             textTheme: Theme.of(context).textTheme.apply(
