@@ -15,7 +15,7 @@ class ProductQuery(object):
       
     product = Product.objects.get(pk=id)
     
-    with open("kununua_backend" + product.image.url, "rb") as img:
+    with open(product.image.url[1:], "rb") as img:
       
         encoded_image = base64.b64encode(bytes(img.read()))
       

@@ -105,8 +105,15 @@ class ProductDetails extends StatelessWidget {
             );
           }
         }else{
-          return const Center(
-            child: CircularProgressIndicator(),
+          return Scaffold(
+            body: Container(
+              height: double.infinity,
+              width: double.infinity,
+              color: Colors.white,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
           );
         }
       }

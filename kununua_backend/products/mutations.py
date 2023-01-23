@@ -16,9 +16,9 @@ class AddImageToProductMutation(graphene.Mutation):
     
     selected_product = Product.objects.get(pk=id)
 
-    with open("products/pechuga.png", "rb") as img:
+    with open("products/pechua-de-pavo-carrefour.png", "rb") as img:
 
-        selected_product.image.save("pechua-de-pavo-carrefour.png", img, save=True)
+        selected_product.image.save("pechuga-de-pavo-carrefour.png", img, save=True)
     
     return AddImageToProductMutation(product=selected_product)
 
