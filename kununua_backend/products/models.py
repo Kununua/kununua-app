@@ -35,7 +35,6 @@ class Product(models.Model):
     is_vegetarian = models.BooleanField(_("is_vegetarian"), default=False, null=True)
     is_gluten_free = models.BooleanField(_("is_gluten_free"), default=False, null=True)
     is_freezed = models.BooleanField(_("is_freezed"), default=False, null=True)
-    is_from_country = models.BooleanField(_("is_from_country"), default=False, null=True)
     offer_price = models.DecimalField(_("offer_price"), max_digits=10, decimal_places=2, null=True)
     unit_offer_price = models.CharField(_("unit_offer_price"), max_length=16, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
@@ -43,7 +42,11 @@ class Product(models.Model):
     
     @property
     def weight_unit(self):
-        return _get_weight_unit(self)
+        return "NotImplemented"
+    
+    @property
+    def is_from_country(self):
+        return True
     
     def get_average_rating(self):
         return Rating.objects.filter(product=self).aggregate(models.Avg('rating'))['rating__avg']
@@ -85,7 +88,8 @@ class ProductEntry(models.Model):
     def __str__(self):
         return f"ProductEntry[quantity: {self.quantity}, product: {self.product}, list: {self.list}, cart: {self.cart}, is_list_product: {self.is_list_product}]"
 
-# Signals
+# ------------------------------ SIGNALS ------------------------------ #
+
 @receiver(pre_save, sender=ProductEntry)
 def make_field_null(sender, instance, **kwargs):
     if instance.is_list_product:
@@ -98,7 +102,3 @@ def make_field_null(sender, instance, **kwargs):
 
 pre_save.connect(make_field_null, sender=ProductEntry)
     
-# ----------------- PRIVATE FUNCTIONS -----------------
-
-def _get_weight_unit(object):
-    return "NotImplemented"

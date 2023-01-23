@@ -2,7 +2,7 @@ from .Field import Field
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from ...python_utils.SeleniumUtils import SeleniumUtils
+from ...utils.SeleniumUtils import SeleniumUtils
 
 class Extractors(object):
     

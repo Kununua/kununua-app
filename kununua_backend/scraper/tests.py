@@ -3,7 +3,7 @@ from django.test import TestCase
 from .scraper_generator.model.Node import Node
 from .scraper_generator.model.Tree import Tree
 from .scraper_generator.ScraperGenerator import ScraperGenerator
-from .python_utils.Timer import Timer
+from .utils.Timer import Timer
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By

@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from ...python_utils.SeleniumUtils import SeleniumUtils
+from ...utils.SeleniumUtils import SeleniumUtils
 from selenium import webdriver
 import time
 

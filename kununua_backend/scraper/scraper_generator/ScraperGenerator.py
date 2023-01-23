@@ -1,6 +1,6 @@
 from .model.Tree import Tree
 from .model.Extractors import Extractors
-from ..python_utils.SeleniumUtils import SeleniumUtils
+from ..utils.SeleniumUtils import SeleniumUtils
 from selenium import webdriver
 import time
 from pathlib import Path
