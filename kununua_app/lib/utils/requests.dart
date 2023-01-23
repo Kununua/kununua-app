@@ -64,7 +64,27 @@ String getProductById = """
     query getProductById(\$id: Int!){
       getProductById(id: \$id){
         name
+        price
+        unitPrice
+        url
+        isVegetarian
+        isGlutenFree
+        isFreezed
+        isFromCountry
+        offerPrice
+        unitOfferPrice
         image
+        supermarket{
+          name
+          mainUrl
+          country{
+            name
+            currency{
+              name
+              icon
+            }
+          }
+        }
       }
     }
     """;
