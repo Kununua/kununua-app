@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:kununua_app/utils/constants.dart';
 
-class OrDivider extends StatelessWidget {
+class OrDivider extends StatefulWidget {
   const OrDivider({super.key});
 
+  @override
+  State<OrDivider> createState() => _OrDividerState();
+}
+
+class _OrDividerState extends State<OrDivider> {
   @override
   Widget build(BuildContext context) {
     return Padding(

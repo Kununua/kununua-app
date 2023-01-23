@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kununua_app/screens/login_screen/login_sceen.dart';
-import 'package:kununua_app/widgets/button.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:kununua_app/screens/new_login_screen/login_screen.dart';
+import '../widgets/button.dart';
+import 'package:kununua_app/utils/globals.dart' as globals;
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -17,24 +17,15 @@ class _WelcomePageState extends State<WelcomePage> {
   void _return(){;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
+        builder: (context) => LoginScreen(),
       ),
     );
   }
 
-  Future<String> _getNameFromLocalStorage() async{
-    final localStorage = await SharedPreferences.getInstance();
-    return localStorage.getString('username') ?? '';
-  }
-
   @override
-  void initState() { 
+  void initState() {
 
-    _getNameFromLocalStorage().then((value) => {
-      setState(() {
-        name = value;
-      })
-    });
+    name = globals.currentUser['username'];
 
     super.initState();
   }
@@ -49,7 +40,7 @@ class _WelcomePageState extends State<WelcomePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Center(child: Text('Welcome $name')),
-            Button(text: 'Volver', action: _return, color: Color.fromARGB(255, 255, 0, 0))
+            Button(text: 'Volver', action: _return, color: const Color.fromARGB(255, 255, 0, 0))
           ],
         ),
       ),

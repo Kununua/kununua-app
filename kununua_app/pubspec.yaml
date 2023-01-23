@@ -43,6 +43,9 @@ dependencies:
   blurrycontainer: ^1.0.2
   swipe: ^0.0.1
   draggable_home: ^1.0.4
+  flutter_login: ^4.1.1
+  flutter_hooks: ^0.18.5+1
+  google_sign_in: ^5.4.3
 
 dev_dependencies:
   flutter_test:
