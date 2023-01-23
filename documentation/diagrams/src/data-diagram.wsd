@@ -44,9 +44,9 @@ class Product{
     +is_gluten_free: bool {Nullable}
     +is_freezed: bool {Nullable}
     ..
+    + / is_from_country: bool
     + / weight_unit: String
     ..
-    +is_from_country(KununuaUser: user): bool
     +get_average_rating(): float {Transient}
 }
 
@@ -61,7 +61,7 @@ class Supermarket{
 }
 
 class Rating{
-    +value: int {min: 1, max: 5}
+    +rating: int {min: 1, max: 5}
 }
 
 class PriceHistory{

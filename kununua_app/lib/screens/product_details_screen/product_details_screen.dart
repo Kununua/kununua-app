@@ -50,9 +50,8 @@ class ProductDetails extends StatelessWidget {
           Map<String, dynamic> product = productResult.data!;
 
           if (product['exception'] != null) {
-            return const ErrorMessage(message: "Ha ocurrido un error. Por favor, inténtelo de nuevo.");
+            return ErrorMessage(message: product['exception']);
           }else{
-
             return DetailsWidget(product: product);
           }
         }else{

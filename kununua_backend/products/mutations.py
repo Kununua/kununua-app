@@ -22,5 +22,5 @@ class AddImageToProductMutation(graphene.Mutation):
     
     return AddImageToProductMutation(product=selected_product)
 
-class Mutation(graphene.ObjectType):
+class ProductsMutation(graphene.ObjectType):
   add_image_to_product = AddImageToProductMutation.Field()

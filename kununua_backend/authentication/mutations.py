@@ -103,7 +103,7 @@ class ObtainJSONWebToken(graphql_jwt.JSONWebTokenMutation):
     def resolve(cls, root, info, **kwargs):
         return cls(user=info.context.user)
 
-class Mutation(graphene.ObjectType):
+class AuthenticationMutation(graphene.ObjectType):
   token_auth = ObtainJSONWebToken.Field()
   verify_token = graphql_jwt.Verify.Field()
   refresh_token = graphql_jwt.Refresh.Field()

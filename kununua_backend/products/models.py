@@ -30,23 +30,17 @@ class Product(models.Model):
     name = models.CharField(_("name"), max_length=256)
     price = models.DecimalField(_("price"), max_digits=10, decimal_places=2)
     unit_price = models.CharField(_("unit_price"), max_length=16)
+    weight_unit = models.CharField(_("weight_unit"), max_length=8, default="Kg")
     image = models.ImageField(_("image"), upload_to="products/images/", null=True)
     url = models.URLField(_("url"), unique=True)
     is_vegetarian = models.BooleanField(_("is_vegetarian"), default=False, null=True)
     is_gluten_free = models.BooleanField(_("is_gluten_free"), default=False, null=True)
     is_freezed = models.BooleanField(_("is_freezed"), default=False, null=True)
+    is_from_country = models.BooleanField(_("is_from_country"), default=False, null=True)
     offer_price = models.DecimalField(_("offer_price"), max_digits=10, decimal_places=2, null=True)
     unit_offer_price = models.CharField(_("unit_offer_price"), max_length=16, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
     supermarket = models.ForeignKey(Supermarket, on_delete=models.CASCADE)
-    
-    @property
-    def weight_unit(self):
-        return "NotImplemented"
-    
-    @property
-    def is_from_country(self):
-        return True
     
     def get_average_rating(self):
         return Rating.objects.filter(product=self).aggregate(models.Avg('rating'))['rating__avg']
