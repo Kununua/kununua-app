@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:kununua_app/screens/welcome_screen/welcome_screen.dart';
+import '../../pages/welcome_page.dart';
 import 'package:kununua_app/screens/new_login_screen/components/center_widget/center_widget.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/screens/new_login_screen/utils/validators.dart';
@@ -232,7 +232,7 @@ class LoginScreen extends StatelessWidget {
         onSubmitAnimationCompleted: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => const WelcomeScreen(),
+              builder: (context) => const WelcomePage(),
             ),
           );
         },
