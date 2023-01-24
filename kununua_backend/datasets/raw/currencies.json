@@ -1,0 +1,144 @@
+{
+    "data": {
+      "currencies": {
+        "results": [
+          {
+            "code": "GBP",
+            "symbol": "£"
+          },
+          {
+            "code": "CZK",
+            "symbol": "Kč"
+          },
+          {
+            "code": "LVL",
+            "symbol": "Ls"
+          },
+          {
+            "code": "CHF",
+            "symbol": "CHF"
+          },
+          {
+            "code": "HRK",
+            "symbol": "kn"
+          },
+          {
+            "code": "DKK",
+            "symbol": "kr"
+          },
+          {
+            "code": "KRW",
+            "symbol": "₩"
+          },
+          {
+            "code": "SEK",
+            "symbol": "kr"
+          },
+          {
+            "code": "TRY",
+            "symbol": "₤"
+          },
+          {
+            "code": "HUF",
+            "symbol": "Ft"
+          },
+          {
+            "code": "BRL",
+            "symbol": "R$"
+          },
+          {
+            "code": "LTL",
+            "symbol": "Lt"
+          },
+          {
+            "code": "BGN",
+            "symbol": "лB"
+          },
+          {
+            "code": "PLN",
+            "symbol": "zł"
+          },
+          {
+            "code": "USD",
+            "symbol": "$"
+          },
+          {
+            "code": "RUB",
+            "symbol": "руб"
+          },
+          {
+            "code": "JPY",
+            "symbol": "¥"
+          },
+          {
+            "code": "RON",
+            "symbol": "lei"
+          },
+          {
+            "code": "NOK",
+            "symbol": "kr"
+          },
+          {
+            "code": "AUD",
+            "symbol": "$"
+          },
+          {
+            "code": "ILS",
+            "symbol": "₪"
+          },
+          {
+            "code": "NZD",
+            "symbol": "$"
+          },
+          {
+            "code": "IDR",
+            "symbol": "Rp"
+          },
+          {
+            "code": "PHP",
+            "symbol": "₱"
+          },
+          {
+            "code": "EUR",
+            "symbol": "€"
+          },
+          {
+            "code": "CAD",
+            "symbol": "$"
+          },
+          {
+            "code": "CNY",
+            "symbol": "¥"
+          },
+          {
+            "code": "HKD",
+            "symbol": "$"
+          },
+          {
+            "code": "INR",
+            "symbol": "₨"
+          },
+          {
+            "code": "MXN",
+            "symbol": "$"
+          },
+          {
+            "code": "MYR",
+            "symbol": "RM"
+          },
+          {
+            "code": "ZAR",
+            "symbol": "R"
+          },
+          {
+            "code": "THB",
+            "symbol": "฿"
+          },
+          {
+            "code": "SGD",
+            "symbol": "$"
+          }
+        ]
+      }
+    }
+  }

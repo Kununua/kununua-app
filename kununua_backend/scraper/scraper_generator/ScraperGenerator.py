@@ -129,7 +129,7 @@ class ScraperGenerator(object):
     def _initial_configuration(self):
         
         result = "from bs4 import BeautifulSoup\n"
-        result += "from ...python_utils.SeleniumUtils import SeleniumUtils\n"
+        result += "from ...utils.SeleniumUtils import SeleniumUtils\n"
         result += "from selenium import webdriver\n"
         result += "import time\n"
         result += "\n"
