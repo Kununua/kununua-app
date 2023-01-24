@@ -14,7 +14,7 @@ def extract_data():
     
     table = soup.find('tbody')
     
-    with open('../../datasets/raw/countries.csv', 'w') as f:
+    with open('../../data/datasets/raw/countries-currency.csv', 'w') as f:
         
         f.write("country;currency_name;currency_code\n")
     

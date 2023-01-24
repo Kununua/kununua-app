@@ -6,11 +6,11 @@ def create_cleaned_dataset():
     
     print("Merging datasets...")
   
-    countries_currency = pd.read_csv('../datasets/raw/countries-currency.csv', sep=';')
-    countries_iso = pd.read_csv('../datasets/raw/countries-iso.csv', sep=',')
+    countries_currency = pd.read_csv('../data/datasets/raw/countries-currency.csv', sep=';')
+    countries_iso = pd.read_csv('../data/datasets/raw/countries-iso.csv', sep=',')
     currencies = dict()
     
-    with open("../datasets/raw/currencies.json", "r") as json_file:
+    with open("../data/datasets/raw/currencies.json", "r") as json_file:
         currencies = json.load(json_file)
         
     try:
@@ -20,13 +20,13 @@ def create_cleaned_dataset():
     
     if len(currencies) == 0: raise RuntimeError("The currencies dataset is empty")
     
-    if not os.path.exists('../datasets/clean/cleaned-countries.csv'):
+    if not os.path.exists('../data/datasets/clean/cleaned-countries.csv'):
         
         merge_datasets(countries_currency, countries_iso, currencies)
                     
-        print("The dataset has been filtered and cleaned. You can find it in the folder: `datasets/clean/`")
+        print("The dataset has been filtered and cleaned. You can find it in the folder: `data/datasets/clean/`")
     else:
-        print("There is alredy a cleaned dataset in the folder: `datasets/clean/`. If you want to merge DS again, delete the existing file and rerun the script.")
+        print("There is alredy a cleaned dataset in the folder: `data/datasets/clean/`. If you want to merge DS again, delete the existing file and rerun the script.")
 
 def merge_datasets(countries_currency, countries_iso, currencies):
     

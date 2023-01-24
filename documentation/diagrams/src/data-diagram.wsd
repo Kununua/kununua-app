@@ -17,12 +17,16 @@ class KununuaUser{
 }
 
 class Country{
-    +name: String
+    +spanish_name: String {Unique}
+    +english_name: String {Unique}
+    +code: String {Unique}
+    +phone_code: String {Unique}
 }
 
 class Currency{
-    +name: String
-    +icon: String
+    +name: String {Unique}
+    +code: String {Unique}
+    +symbol: String {Nullable}
 }
 
 class Address{
@@ -34,6 +38,7 @@ class Address{
 
 class Product{
     +name: String
+    +brand: String
     +price: float
     +unit_price: String
     +product_image: Image
@@ -43,6 +48,9 @@ class Product{
     +is_vegetarian: bool {Nullable}
     +is_gluten_free: bool {Nullable}
     +is_freezed: bool {Nullable}
+    +is_eco: bool {Nullable}
+    +is_without_sugar: bool {Nullable}
+    +is_without_lactose: bool {Nullable}
     ..
     + / is_from_country: bool
     + / weight_unit: String

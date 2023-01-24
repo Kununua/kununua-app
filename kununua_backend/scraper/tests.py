@@ -11,8 +11,9 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from django.conf import settings
 
-from .scrapers.spain import generated_scraper_plantilla_recursivo as recursive_scraper
-from .scrapers.spain import generated_scraper_plantilla_standard as standard_scraper
+from .scrapers import generated_scraper_recursive_template as recursive_scraper
+from .scrapers import generated_scraper_standard_template as standard_scraper
+from .scrapers.spain import scraper_el_jamon
 class TreeTestCase(TestCase):
     def setUp(self):
         timer = Timer()
@@ -102,10 +103,11 @@ class GeneratorElJamonStandardCase(TestCase):
         self.generator = ScraperGenerator(url="https://www.supermercadoseljamon.com/inicio", 
                                           country="Spain",
                                           tree=tree_el_jamon, 
-                                          C=[".articulo"], 
+                                          C=[".marca", ".nombre", ".precio", ".texto-porKilo", ".imgwrap > img", ".tachado"], 
                                           driver=self.driver, 
                                           elem_details=None, 
-                                          num_pag=None)
+                                          num_pag=None,
+                                          common_parent_selector=".articulo")
     
     def tearDown(self):           
         super().tearDown()
@@ -136,3 +138,8 @@ class ScrapersTestCaseStandard(TestCase):
     
     def test_el_jamon_generated_scraper(self):
         standard_scraper.scraper()
+        
+class ScraperElJamonTest(TestCase):
+    
+    def test_scraper_el_jamon(self):
+        scraper_el_jamon.scraper()

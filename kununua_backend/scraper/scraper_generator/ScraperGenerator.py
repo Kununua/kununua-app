@@ -11,7 +11,7 @@ from django.conf import settings
 class ScraperGenerator(object):
     
     # TODO se ha añadido el pais como parametro para poder hacer el scraping de cualquier pais
-    def __init__(self, url, country, tree, C, driver, elem_details=None, num_pag=None):
+    def __init__(self, url, country, tree, C, driver, elem_details=None, num_pag=None, common_parent_selector=None):
         
         self.set_url(url)
         self.set_country(country)
@@ -20,6 +20,7 @@ class ScraperGenerator(object):
         self.set_elem_details(elem_details)
         self.set_num_pag(num_pag)
         self.set_driver(driver)
+        self.set_common_parent_selector(common_parent_selector)
         
     def generate(self):
         
@@ -44,18 +45,19 @@ class ScraperGenerator(object):
         main_scraper += "\n"
         main_scraper += "\tfor path in tree_paths: \n"
         main_scraper += "\t\textract_data('%s', path, driver, selenium_utils) \n" % (self.get_url())
+        main_scraper += "\n"
+        main_scraper += "\tdriver.quit()"
         
         extract_data += "\tdriver.get(url)\n"
         extract_data += "\tselenium_utils.navigate_to(path)\n"
         extract_data += "\n"
         if self.elem_details is not None:
             extract_data += "\turl_cache = driver.current_url\n"
-        extract_data += "\tproducts_scraped = 0\n"
         extract_data += "\twhile True:\n"
         
         selenium_utils.navigate_to(tree_paths[0])
         
-        extractor = Extractors(C=self.C, extract_data=extract_data, driver=self.driver, driver_utils=selenium_utils)
+        extractor = Extractors(C=self.C, extract_data=extract_data, driver=self.driver, driver_utils=selenium_utils, common_parent_selector=self.common_parent_selector)
         get_urls_to_extract = None
         if self.elem_details is None:
             fields_to_be_extracted = extractor.standard_extraction()
@@ -131,7 +133,8 @@ class ScraperGenerator(object):
         result = "from bs4 import BeautifulSoup\n"
         result += "from ...utils.SeleniumUtils import SeleniumUtils\n"
         result += "from selenium import webdriver\n"
-        result += "import time\n"
+        result += "from ...configuration_tools import ConfigurationTools\n"
+        result += "import itertools\n"
         result += "\n"
         
         return result
@@ -218,6 +221,16 @@ class ScraperGenerator(object):
             raise TypeError("driver must be a chrome selenium driver")
         
         self.driver = driver
+        
+    def get_set_common_parent_selector(self):
+        return self.set_common_parent_selector
+    
+    def set_common_parent_selector(self, common_parent_selector):
+        
+        if not isinstance(common_parent_selector, str):
+            raise TypeError("common_parent_selector must be a string")
+        
+        self.common_parent_selector = common_parent_selector
         
     # ------------------ PRIVATE METHODS ------------------ #
     

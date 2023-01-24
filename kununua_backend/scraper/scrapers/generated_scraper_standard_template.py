@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
-from ...utils.SeleniumUtils import SeleniumUtils
+from ..utils.SeleniumUtils import SeleniumUtils
 from selenium import webdriver
+import itertools
 import time
 
 def extract_data(url, path, driver, selenium_utils):
