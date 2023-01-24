@@ -45,13 +45,14 @@ class ScraperGenerator(object):
         main_scraper += "\n"
         main_scraper += "\tfor path in tree_paths: \n"
         main_scraper += "\t\textract_data('%s', path, driver, selenium_utils) \n" % (self.get_url())
+        main_scraper += "\n"
+        main_scraper += "\tdriver.quit()"
         
         extract_data += "\tdriver.get(url)\n"
         extract_data += "\tselenium_utils.navigate_to(path)\n"
         extract_data += "\n"
         if self.elem_details is not None:
             extract_data += "\turl_cache = driver.current_url\n"
-        extract_data += "\tproducts_scraped = 0\n"
         extract_data += "\twhile True:\n"
         
         selenium_utils.navigate_to(tree_paths[0])

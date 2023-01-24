@@ -106,11 +106,7 @@ class Extractors(object):
             extract_data_function += "\n"
             extract_data_function += "\t\t\t# Write print or save data function on this line \n"
             extract_data_function += "\n"
-            extract_data_function += "\t\t\tproducts_scraped += 1\n"
-            extract_data_function += "\n"
         else:
-            extract_data_function += "\n"
-            extract_data_function += "\t\t\tproducts_scraped += 1"
             extract_data_function += "\n"
             extract_data_function += "\t\t\t# Write print or save data function on this line\n"
             extract_data_function += "\n"

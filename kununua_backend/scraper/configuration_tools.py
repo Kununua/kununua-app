@@ -9,7 +9,7 @@ class ConfigurationTools():
         selenium_utils.get_element_by_css_selector("#change-cp").click()
         selenium_utils.get_element_by_css_selector("#seleccionarCp").send_keys("41009")
         selenium_utils.get_element_by_css_selector("#aceptarPorCp").click()
-        time.sleep(10)
+        time.sleep(5)
         
     @staticmethod
     def run_pagination_eljamon(selenium_utils):
