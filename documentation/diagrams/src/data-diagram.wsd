@@ -34,6 +34,7 @@ class Address{
 
 class Product{
     +name: String
+    +brand: String
     +price: float
     +unit_price: String
     +product_image: Image

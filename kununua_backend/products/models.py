@@ -28,6 +28,7 @@ class Category(models.Model):
 
 class Product(models.Model):
     name = models.CharField(_("name"), max_length=256)
+    brand = models.CharField(_("brand"), max_length=64, default=_("Marca blanca"))
     price = models.DecimalField(_("price"), max_digits=10, decimal_places=2)
     unit_price = models.CharField(_("unit_price"), max_length=16)
     weight_unit = models.CharField(_("weight_unit"), max_length=8, default="Kg")
