@@ -1,9 +1,10 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:kununua_app/app_bars/main_page_app_bar.dart';
+import 'package:ionicons/ionicons.dart';
+import 'package:kununua_app/screens/product_details_screen/components/details_header.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/screens/product_details_screen/components/draggable_home.dart';
+import 'package:kununua_app/screens/product_details_screen/components/details_library.dart';
 
 class DetailsWidget extends StatelessWidget {
   
@@ -16,63 +17,38 @@ class DetailsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return DraggableHome(
               leading: Platform.isIOS ? const Icon(Icons.arrow_back_ios) : const Icon(Icons.arrow_back),
               title: Container(),
               appBarColor: kPrimaryColor,
               alwaysShowTitle: false,
-              backgroundColor: Color.fromARGB(255, 231, 231, 231),
+              backgroundColor: const Color.fromARGB(255, 231, 231, 231),
               shadowBorder: true,
               curvedBodyRadius: 40,
               // fullyStretchable: true,
               alwaysShowLeadingAndAction: true,
-              headerWidget: Container(
-                width: double.infinity,
-                color: Colors.white,
-                child: Stack(
-                  children: [
-                    Container(
-                      height: double.infinity,
-                      color: Colors.white,
-                    ),
-                    Center(
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.3,
-                        child: AspectRatio(
-                          aspectRatio: 16/9,
-                          child: Image(
-                            image: product['image'],
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ]
-                ),
-              ),
+              headerWidget: DetailsHeader(productImage: product['image'],),
               // expandedBody: const CameraPreview(),
               body: [
                 Padding(
                   padding: const EdgeInsets.only(left: 20, right: 20),
-                  child: Flex(
-                    direction: Axis.horizontal,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
                     children: [
-                      Text(
-                        product['name'],
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      ProductNameRow(productName: product['name']),
+                      PriceRow(
+                        supermarket: product['supermarket']['name'], 
+                        price: "${product['price']} ${product['supermarket']['country']['currency']['symbol']}",
+                        offerPrice: product['offerPrice'] != null ? "${product['offerPrice']} ${product['supermarket']['country']['currency']['symbol']}" : null,
                       ),
-                      const Text(
-                        "10.00",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      FlagsRow(
+                        isVegetarian: product['isVegetarian'],
+                        isGlutenFree: product['isGlutenFree'],
+                        isEco: product['isEco'],
+                        isFreezed: product['isFreezed'],
+                        isFromCountry: product['isFromCountry'],
+                        isWithoutLactose: product['isWithoutLactose'],
+                        isWithoutSugar: product['isWithoutSugar'],
                       ),
                     ]
                   ),

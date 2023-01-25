@@ -71,6 +71,9 @@ String getProductById = """
         isGlutenFree
         isFreezed
         isFromCountry
+    		isEco
+    		isWithoutSugar
+    		isWithoutLactose
         offerPrice
         unitOfferPrice
         image
@@ -78,10 +81,14 @@ String getProductById = """
           name
           mainUrl
           country{
-            name
+            spanishName
+            englishName
+            code
+            phoneCode
             currency{
               name
-              icon
+              code
+              symbol
             }
           }
         }
