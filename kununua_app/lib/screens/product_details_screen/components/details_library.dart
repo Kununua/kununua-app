@@ -121,45 +121,54 @@ class FlagsRow extends StatelessWidget {
     required this.isWithoutLactose,
   });
 
+  List<Image> getFlags() {
+    final flagDirs = [
+      "assets/icons/vegan-icon.png",
+      "assets/icons/gluten-free-icon.png",
+      "assets/icons/freezed-icon.png",
+      "assets/icons/country-icon.png",
+      "assets/icons/eco-friendly-icon.png",
+      "assets/icons/without-sugar-icon.png",
+      "assets/icons/without-lactose-icon.png",
+    ];
+
+    final flagValues = [
+      isVegetarian,
+      isGlutenFree,
+      isFreezed,
+      isFromCountry,
+      isEco,
+      isWithoutSugar,
+      isWithoutLactose,
+    ];
+
+    final flags = <Image>[];
+
+    for (var i = 0; i < flagDirs.length; i++) {
+      if (flagValues[i]) {
+        flags.add(Image(
+          image: AssetImage(flagDirs[i]),
+          width: 50,
+          height: 50,
+        ));
+      }
+    }
+
+    return flags;
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Container(
               margin: const EdgeInsets.only(top: 20, bottom: 20),
               height: 120,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: const [
-                  Image(
-                    image: AssetImage("assets/icons/without-lactose-icon.png"),
-                    height: 50,
-                    width: 50,  
-                  ),
-                  Image(
-                    image: AssetImage("assets/icons/eco-friendly-icon.png"),
-                    height: 50,
-                    width: 50,  
-                  ),
-                  Image(
-                    image: AssetImage("assets/icons/gluten-free-icon.png"),
-                    height: 50,
-                    width: 50,  
-                  ),
-                  Image(
-                    image: AssetImage("assets/icons/vegan-icon.png"),
-                    height: 50,
-                    width: 50,  
-                  ),
-                  Image(
-                    image: AssetImage("assets/icons/without-sugar-icon.png"),
-                    height: 50,
-                    width: 50,  
-                  ),
-                  Image(
-                    image: AssetImage("assets/icons/country-icon.png"),
-                    height: 50,
-                    width: 50,  
-                  ),
-                ],
+              child: GridView.count(
+                crossAxisCount: 4,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 20,
+                childAspectRatio: 1/1,
+                children: getFlags(),
               ),
             );
   }

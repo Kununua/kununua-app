@@ -34,14 +34,15 @@ class Command(BaseCommand):
         
             if "products" not in product.image.url:
         
-                url = product.image
-                file_name = normalize(product.name.replace(' ', '_').replace(",", "_").replace("/", "")) + '_' + normalize(product.supermarket.name) + '.jpg'
+                try:
+                    url = product.image
+                    file_name = normalize(product.name.replace(' ', '_').replace(",", "_").replace("/", "")) + '_' + normalize(product.supermarket.name) + '.jpg'
 
-                res = requests.get(url, stream = True)
+                    res = requests.get(url, stream = True)
 
-                if res.status_code == 200:
-                    
-                    product.image.save(file_name, res.raw, save=True)
-                    
-                else:
-                    print('Image Couldn\'t be retrieved')
+                    if res.status_code == 200:
+                        
+                        product.image.save(file_name, res.raw, save=True)
+                        
+                except requests.exceptions.MissingSchema:
+                    print("The product " + product.name + " doesn't have a valid image url.")
