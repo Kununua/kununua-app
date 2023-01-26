@@ -63,6 +63,7 @@ String verifyToken = """
 String getProductById = """
     query getProductById(\$id: Int!){
       getProductById(id: \$id){
+        id
         name
         price
         unitPrice

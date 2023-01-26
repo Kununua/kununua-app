@@ -36,24 +36,30 @@ class DetailsWidget extends StatelessWidget {
                   child: Column(
                     children: [
                       ProductNameRow(productName: product['name']),
+                      const RatingRow(
+                        rating: 4.5
+                      ),
                       PriceRow(
                         supermarket: product['supermarket']['name'], 
                         price: "${product['price']} ${product['supermarket']['country']['currency']['symbol']}",
                         offerPrice: product['offerPrice'] != null ? "${product['offerPrice']} ${product['supermarket']['country']['currency']['symbol']}" : null,
                       ),
                       FlagsRow(
-                        isVegetarian: true,//product['isVegetarian'],
-                        isGlutenFree: true,//product['isGlutenFree'],
-                        isEco: true,//product['isEco'],
-                        isFreezed: true,//product['isFreezed'],
-                        isFromCountry: true,//product['isFromCountry'],
-                        isWithoutLactose: true,//product['isWithoutLactose'],
-                        isWithoutSugar: true,//product['isWithoutSugar'],
+                        isVegetarian: product['isVegetarian'],
+                        isGlutenFree: product['isGlutenFree'],
+                        isEco: product['isEco'],
+                        isFreezed: product['isFreezed'],
+                        isFromCountry: product['isFromCountry'],
+                        isWithoutLactose: product['isWithoutLactose'],
+                        isWithoutSugar: product['isWithoutSugar'],
                       ),
                     ]
                   ),
                 ),
-              ]
+              ],
+              bottomNavigationBar: AddToCart(
+                  productId: int.parse(product['id']),
+                ),
             );
   }
 }

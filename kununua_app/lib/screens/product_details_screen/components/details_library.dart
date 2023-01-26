@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/utils/extensions/string_extension.dart';
+import 'package:kununua_app/widgets/button.dart';
+import 'package:kununua_app/widgets/kununua_grid.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class ProductNameRow extends StatelessWidget {
   
@@ -15,7 +18,7 @@ class ProductNameRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-            margin: const EdgeInsets.only(bottom: 20),
+            margin: const EdgeInsets.only(bottom: 10),
             child: Text(
               productName.capitalizeFirstOfEach(),
               style: const TextStyle(
@@ -121,7 +124,7 @@ class FlagsRow extends StatelessWidget {
     required this.isWithoutLactose,
   });
 
-  List<Image> getFlags() {
+  List<Image> _getFlags() {
     final flagDirs = [
       "assets/icons/vegan-icon.png",
       "assets/icons/gluten-free-icon.png",
@@ -144,7 +147,7 @@ class FlagsRow extends StatelessWidget {
 
     final flags = <Image>[];
 
-    for (var i = 0; i < flagDirs.length; i++) {
+    for (var i = 0; i < flagValues.length; i++) {
       if (flagValues[i]) {
         flags.add(Image(
           image: AssetImage(flagDirs[i]),
@@ -159,17 +162,87 @@ class FlagsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return KununuaGrid(
+            crossAxisCount: 4,
+            gridMargin: const EdgeInsets.only(top: 20, bottom: 20),
+            children: _getFlags(),
+          );
+  }
+}
+
+class RatingRow extends StatelessWidget {
+
+  final double rating;
+
+  const RatingRow({
+    super.key,
+    required this.rating,  
+  });
+
+  @override
+  Widget build(BuildContext context) {
+
+    if (rating < 0 || rating > 5) {
+      throw Exception("Rating must be between 0 and 5");
+    }
 
     return Container(
-              margin: const EdgeInsets.only(top: 20, bottom: 20),
-              height: 120,
-              child: GridView.count(
-                crossAxisCount: 4,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 20,
-                childAspectRatio: 1/1,
-                children: getFlags(),
-              ),
+            margin: const EdgeInsets.only(bottom: 10),
+            child: RatingBar.builder(
+                    initialRating: rating,
+                    minRating: 1,
+                    direction: Axis.horizontal,
+                    allowHalfRating: true,
+                    ignoreGestures: true,
+                    itemCount: 5,
+                    itemSize: 30,
+                    itemPadding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    itemBuilder: (context, _) => const Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    ),
+                    onRatingUpdate: (rating) {},
+                  ),
             );
+  }
+}
+
+class AddToCart extends StatelessWidget {
+
+  final int productId;
+
+  const AddToCart({
+    super.key,
+    required this.productId,  
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width - 40,
+        height: 60,
+        child: ElevatedButton(
+          onPressed: (){debugPrint("Pressed");}, 
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(kPrimaryColor),
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18.0),
+              ),
+            ),
+          ),
+          child: const Text(
+            "AÑADIR AL CARRITO",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

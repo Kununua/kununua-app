@@ -271,7 +271,7 @@ class _DraggableHomeState extends State<DraggableHome> {
             );
           },
         ),
-        sliverList(context, appBarHeight + topPadding),
+        sliverList(context, appBarHeight + topPadding + 20),
       ],
     );
   }
