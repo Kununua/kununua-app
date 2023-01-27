@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:kununua_app/utils/constants.dart';
 
 class DraggableHome extends StatefulWidget {
   @override
@@ -74,6 +75,8 @@ class DraggableHome extends StatefulWidget {
   /// bottomNavigationBar: Snack bars slide from underneath the bottom navigation bar while bottom sheets are stacked on top.
   final Widget? bottomNavigationBar;
 
+  final double? bottomNavigationBarContainerHeight;
+
   /// floatingActionButtonLocation: An object that defines a position for the FloatingActionButton based on the Scaffold's ScaffoldPrelayoutGeometry.
   final FloatingActionButtonLocation? floatingActionButtonLocation;
 
@@ -107,6 +110,7 @@ class DraggableHome extends StatefulWidget {
       this.bottomSheet,
       this.bottomNavigationBarHeight = kBottomNavigationBarHeight,
       this.bottomNavigationBar,
+      this.bottomNavigationBarContainerHeight = kAddToCartButtonHeight,
       this.floatingActionButton,
       this.floatingActionButtonLocation,
       this.floatingActionButtonAnimator,
@@ -185,6 +189,7 @@ class _DraggableHomeState extends State<DraggableHome> {
     double expandedHeight,
     double topPadding,
   ) {
+
     return CustomScrollView(
       physics: widget.physics ?? const BouncingScrollPhysics(),
       slivers: [
@@ -271,7 +276,7 @@ class _DraggableHomeState extends State<DraggableHome> {
             );
           },
         ),
-        sliverList(context, appBarHeight + topPadding + 20),
+        sliverList(context, appBarHeight + topPadding + kAddToCartButtonHeight-40),
       ],
     );
   }

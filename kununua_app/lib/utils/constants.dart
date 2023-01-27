@@ -12,3 +12,7 @@ const kStatsText = 'Estadísticas';
 const kSearchText = 'Buscar';
 const kCartText = 'Carrito';
 const kProfileText = 'Perfil';
+
+// Add to cart button
+
+const kAddToCartButtonHeight = 70.0;

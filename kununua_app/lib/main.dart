@@ -34,8 +34,9 @@ class MyApp extends StatelessWidget {
               bodyColor: kPrimaryColor,
               fontFamily: 'Montserrat'
             ),
-          ), 
-          home: MainScreen(),         
+          ),
+          //home: const MainScreen(), 
+          home: ProductDetails(productId: 1,),       
       ));
   }
 }

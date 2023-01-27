@@ -18,6 +18,8 @@ class DetailsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
+    final addToCart = GlobalKey();
+
     return DraggableHome(
               leading: Platform.isIOS ? const Icon(Icons.arrow_back_ios) : const Icon(Icons.arrow_back),
               title: Container(),
@@ -35,7 +37,9 @@ class DetailsWidget extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 20, right: 20),
                   child: Column(
                     children: [
-                      ProductNameRow(productName: product['name']),
+                      ProductNameRow(
+                        productName: product['name']
+                      ),
                       const RatingRow(
                         rating: 4.5
                       ),
@@ -58,6 +62,7 @@ class DetailsWidget extends StatelessWidget {
                 ),
               ],
               bottomNavigationBar: AddToCart(
+                  key: addToCart,
                   productId: int.parse(product['id']),
                 ),
             );

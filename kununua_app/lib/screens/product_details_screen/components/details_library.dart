@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/utils/extensions/string_extension.dart';
-import 'package:kununua_app/widgets/button.dart';
 import 'package:kununua_app/widgets/kununua_grid.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
@@ -213,7 +212,7 @@ class AddToCart extends StatelessWidget {
 
   const AddToCart({
     super.key,
-    required this.productId,  
+    required this.productId,
   });
 
   @override
@@ -222,9 +221,11 @@ class AddToCart extends StatelessWidget {
       margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
       child: SizedBox(
         width: MediaQuery.of(context).size.width - 40,
-        height: 60,
+        height: kAddToCartButtonHeight,
         child: ElevatedButton(
-          onPressed: (){debugPrint("Pressed");}, 
+          onPressed: (){
+            debugPrint("Pressed");
+          }, 
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(kPrimaryColor),
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -233,16 +234,91 @@ class AddToCart extends StatelessWidget {
               ),
             ),
           ),
-          child: const Text(
-            "AÑADIR AL CARRITO",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+          child: SizedBox(
+            width: double.infinity,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                Flexible(
+                  flex: 2,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      "AÑADIR AL CARRITO",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                AmountSelector()
+              ]
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+class AmountSelector extends StatefulWidget {
+  const AmountSelector({super.key});
+
+  @override
+  State<AmountSelector> createState() => _AmountSelectorState();
+}
+
+class _AmountSelectorState extends State<AmountSelector> {
+  
+  int amount = 1;
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Container(
+            alignment: Alignment.centerRight,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  onPressed: (){
+                    setState(() {
+                      if (amount > 1) {
+                        amount--;
+                      }
+                    });
+                  }, 
+                  icon: const Icon(
+                    Ionicons.remove,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+                Text(
+                  "$amount",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  onPressed: (){
+                    setState(() {
+                      amount++;
+                    });
+                  }, 
+                  icon: const Icon(
+                    Ionicons.add,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ],
+            ),
+          );
   }
 }

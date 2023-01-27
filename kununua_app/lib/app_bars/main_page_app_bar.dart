@@ -20,6 +20,7 @@ class MainPageAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _MainPageAppBarState extends State<MainPageAppBar> {
   @override
   Widget build(BuildContext context) {
+
     return AppBar(
         title: Text(widget.text.toUpperCase()),
         titleTextStyle: const TextStyle(
