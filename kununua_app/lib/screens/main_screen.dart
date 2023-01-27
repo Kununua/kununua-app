@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kununua_app/app_bars/main_page_app_bar.dart';
 import 'package:kununua_app/pages/main_page/main_page.dart';
+import 'package:kununua_app/pages/not_implemented_page.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/widgets/kununua_nav_bar/kununua_nav_bar.dart';
 import 'package:kununua_app/pages/welcome_page.dart';
@@ -21,28 +22,38 @@ class _MainScreenState extends State<MainScreen> {
       case Screens.home:
         return const MainPage();
       case Screens.stats:
-        return const WelcomePage();
+        return const NotImplementedPage();
       case Screens.search:
-        return const MainPage();
+        return const NotImplementedPage();
       case Screens.cart:
-        return const MainPage();
+        return const NotImplementedPage();
       case Screens.profile:
-        return const MainPage();
+        return const NotImplementedPage();
     }
   }
 
   PreferredSizeWidget? _loadAppBar(Screens screen){
     switch(screen){
       case Screens.home:
-        return const MainPageAppBar();
+        return const MainPageAppBar(
+          text: kHomeText
+        );
       case Screens.stats:
-        return const MainPageAppBar();
+        return const MainPageAppBar(
+          text: kStatsText
+        );
       case Screens.search:
-        return const MainPageAppBar();
+        return const MainPageAppBar(
+          text: kSearchText
+        );
       case Screens.cart:
-        return const MainPageAppBar();
+        return const MainPageAppBar(
+          text: kCartText
+        );
       case Screens.profile:
-        return const MainPageAppBar();
+        return const MainPageAppBar(
+          text: kProfileText
+        );
     }
   }
 

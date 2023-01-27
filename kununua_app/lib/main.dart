@@ -35,10 +35,7 @@ class MyApp extends StatelessWidget {
               fontFamily: 'Montserrat'
             ),
           ), 
-          // home: MainScreen(),
-          home: const ProductDetails(
-            productId: 1
-          ),             
+          home: MainScreen(),         
       ));
   }
 }

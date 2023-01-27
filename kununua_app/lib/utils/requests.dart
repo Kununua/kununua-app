@@ -58,6 +58,16 @@ String verifyToken = """
     }
     """;
 
+/* ------------------------------- CATEGORIES RETRIEVAL ------------------------------- */
+
+String getCategories = """
+    query getAllCategories{
+      getAllCategories{
+        name
+      }
+    }
+    """;
+
 /* ------------------------------- PRODUCT RETRIEVAL ------------------------------- */
 
 String getProductById = """

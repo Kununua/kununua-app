@@ -3,6 +3,10 @@ import 'package:kununua_app/pages/main_page/components/main_page_category_row/ma
 import 'package:kununua_app/pages/main_page/components/carousel.dart';
 import 'package:kununua_app/pages/main_page/components/main_page_row/main_page_row.dart';
 import 'package:kununua_app/utils/constants.dart';
+import 'package:kununua_app/utils/globals.dart' as globals;
+import 'package:kununua_app/utils/helper_functions.dart';
+import 'package:kununua_app/utils/requests.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 
 class MainPage extends StatelessWidget {

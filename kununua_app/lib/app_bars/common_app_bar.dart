@@ -1,27 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:kununua_app/utils/constants.dart';
 
-class MainPageAppBar extends StatefulWidget implements PreferredSizeWidget {
-
+class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
+  
   final String text;
-
-  const MainPageAppBar({
+  
+  const CommonAppBar({
     super.key,
     required this.text,
   });
 
   @override
-  State<MainPageAppBar> createState() => _MainPageAppBarState();
-  
-  @override
-  Size get preferredSize => const Size.fromHeight(50);
-}
-
-class _MainPageAppBarState extends State<MainPageAppBar> {
-  @override
   Widget build(BuildContext context) {
     return AppBar(
-        title: Text(widget.text.toUpperCase()),
+        title: Text(text.toUpperCase()),
         titleTextStyle: const TextStyle(
           color: Colors.white,
           fontSize: 20,
@@ -30,4 +22,7 @@ class _MainPageAppBarState extends State<MainPageAppBar> {
         backgroundColor: kPrimaryColor,
       );
   }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(50);
 }

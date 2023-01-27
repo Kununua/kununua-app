@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kununua_app/app_bars/main_page_app_bar.dart';
+import 'package:kununua_app/app_bars/common_app_bar.dart';
 
 class ErrorMessage extends StatelessWidget {
 
@@ -13,7 +13,9 @@ class ErrorMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-              appBar: const MainPageAppBar(),
+              appBar: const CommonAppBar(
+                text: 'Error',
+              ),
               body: Container(
                 height: double.infinity,
                 width: double.infinity,
