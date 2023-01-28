@@ -109,7 +109,9 @@ AUTHENTICATION_BACKENDS = [
 
 GRAPHQL_JWT = {
     "JWT_VERIFY_EXPIRATION": True,
-    "JWT_EXPIRATION_DELTA": timedelta(minutes=10),
+    "JWT_EXPIRATION_DELTA": timedelta(days=7),
+    "JWT_ALGORITHM": "HS256",
+    "JWT_SECRET_KEY": "my_secret"
 }
 
 # Internationalization

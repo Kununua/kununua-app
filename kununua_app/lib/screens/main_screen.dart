@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:kununua_app/app_bars/main_page_app_bar.dart';
 import 'package:kununua_app/pages/main_page/main_page.dart';
 import 'package:kununua_app/pages/not_implemented_page.dart';
+import 'package:kununua_app/pages/profile_page/profile_page.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/widgets/kununua_nav_bar/kununua_nav_bar.dart';
-import 'package:kununua_app/pages/welcome_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -28,7 +28,7 @@ class _MainScreenState extends State<MainScreen> {
       case Screens.cart:
         return const NotImplementedPage();
       case Screens.profile:
-        return const NotImplementedPage();
+        return const ProfilePage();
     }
   }
 

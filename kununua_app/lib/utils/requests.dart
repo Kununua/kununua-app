@@ -50,13 +50,13 @@ String createGoogleUser = """
       }
       """;
 
-String verifyToken = """
-    mutation verifyToken(\$token: String!){
-      verifyToken(token: \$token){
-        payload
-      }
+String refreshToken = """
+  mutation refreshToken(\$token: String!){
+    refreshToken(token: \$token){
+      token
     }
-    """;
+  }
+  """;
 
 /* ------------------------------- CATEGORIES RETRIEVAL ------------------------------- */
 

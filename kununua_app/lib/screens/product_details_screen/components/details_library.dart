@@ -206,7 +206,7 @@ class RatingRow extends StatelessWidget {
   }
 }
 
-class AddToCart extends StatelessWidget {
+class AddToCart extends StatefulWidget {
 
   final int productId;
 
@@ -214,6 +214,14 @@ class AddToCart extends StatelessWidget {
     super.key,
     required this.productId,
   });
+
+  @override
+  State<AddToCart> createState() => _AddToCartState();
+}
+
+class _AddToCartState extends State<AddToCart> {
+
+  int amount = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +232,7 @@ class AddToCart extends StatelessWidget {
         height: kAddToCartButtonHeight,
         child: ElevatedButton(
           onPressed: (){
-            debugPrint("Pressed");
+            debugPrint("Amount: $amount");
           }, 
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(kPrimaryColor),
@@ -238,8 +246,8 @@ class AddToCart extends StatelessWidget {
             width: double.infinity,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Flexible(
+              children: [
+                const Flexible(
                   flex: 2,
                   child: SizedBox(
                     width: double.infinity,
@@ -254,71 +262,53 @@ class AddToCart extends StatelessWidget {
                     ),
                   ),
                 ),
-                AmountSelector()
+                Container(
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        onPressed: (){
+                          setState(() {
+                            if (amount > 1) {
+                              amount--;
+                            }
+                          });
+                        }, 
+                        icon: const Icon(
+                          Ionicons.remove,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                      ),
+                      Text(
+                        "$amount",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: (){
+                          setState(() {
+                            amount++;
+                          });
+                        }, 
+                        icon: const Icon(
+                          Ionicons.add,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ]
             ),
           ),
         ),
       ),
     );
-  }
-}
-
-class AmountSelector extends StatefulWidget {
-  const AmountSelector({super.key});
-
-  @override
-  State<AmountSelector> createState() => _AmountSelectorState();
-}
-
-class _AmountSelectorState extends State<AmountSelector> {
-  
-  int amount = 1;
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Container(
-            alignment: Alignment.centerRight,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  onPressed: (){
-                    setState(() {
-                      if (amount > 1) {
-                        amount--;
-                      }
-                    });
-                  }, 
-                  icon: const Icon(
-                    Ionicons.remove,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-                ),
-                Text(
-                  "$amount",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                IconButton(
-                  onPressed: (){
-                    setState(() {
-                      amount++;
-                    });
-                  }, 
-                  icon: const Icon(
-                    Ionicons.add,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-                ),
-              ],
-            ),
-          );
   }
 }

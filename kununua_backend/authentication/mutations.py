@@ -2,6 +2,7 @@ import graphene, graphql_jwt, json
 from httplib2 import Http
 from authentication.models import KununuaUser
 from .types import KununuaUserType
+from products.models import Cart
 from django.utils.translation import gettext_lazy as _
 
 class CreateUserMutation(graphene.Mutation):
@@ -46,6 +47,8 @@ class CreateUserMutation(graphene.Mutation):
 
     obj = KununuaUser.objects.create_user(username=username, password=password, first_name=first_name, last_name=last_name, email=email, phone_number=None, profile_picture="/assets/user-images/default.png")
     
+    Cart.objects.create(user=obj)
+        
     return CreateUserMutation(user=obj)
   
 class CreateGoogleUser(graphene.Mutation):

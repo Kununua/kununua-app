@@ -25,7 +25,7 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   void initState() {
 
-    name = globals.currentUser['username'];
+    name = globals.prefs!.getString('username') as String;
 
     super.initState();
   }
