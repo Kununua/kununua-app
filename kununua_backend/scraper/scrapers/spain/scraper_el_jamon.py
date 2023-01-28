@@ -25,8 +25,16 @@ def extract_data(url, path, driver, selenium_utils):
 			multifield_1 = item.select('.nombre > a')[0]
 			name, _ = tuple(multifield_1.get_text().strip().split(',') if len(multifield_1.get_text().strip().split(',')) == 2 else (multifield_1.get_text().strip(), None))
 			name_link = multifield_1.get('href').strip()
-			price = float(item.select('.precio > span')[0].get_text().replace("€","").replace(",",".").strip())
-			unit_price = item.select('.texto-porKilo')[0].get_text().strip()
+			if item.select('.precio > span.tachado'):
+				offer_price = float(item.select('.precio > span:nth-child(2)')[0].get_text().replace("€","").replace(",",".").strip())
+				unit_price = item.select('.texto-porKilo')[0].get_text().strip()
+				unit_offer_price = unit_price
+				price = float(item.select('.precio > span.tachado')[0].get_text().replace("€","").replace(",",".").strip())
+			else:
+				offer_price = None
+				unit_offer_price = None
+				price = float(item.select('.precio > span')[0].get_text().replace("€","").replace(",",".").strip())
+				unit_price = item.select('.texto-porKilo')[0].get_text().strip()
 			product_image = item.select('.imgwrap > img')[0].get('src').strip()
 			is_from_country = True if item.find('img', alt='Andaluz') else None
 			is_gluten_free = True if item.find('img', alt='Sin Gluten') else False
@@ -36,7 +44,7 @@ def extract_data(url, path, driver, selenium_utils):
 			is_without_sugar = True if item.find('img', alt='Sin Azucar') else False
 			is_without_lactose = True if item.find('img', alt='Sin Lactosa') else False
 
-			products.append(Product(name=name, brand=brand, weight_unit=None, price=price, unit_price=unit_price, image=product_image, is_from_country=is_from_country, is_gluten_free=is_gluten_free, is_freezed=is_freezed, is_vegetarian=is_vegan, is_eco=is_eco, is_without_sugar=is_without_sugar, is_without_lactose=is_without_lactose, url=name_link))
+			products.append(Product(name=name, brand=brand, weight_unit=None, price=price, unit_price=unit_price, offer_price=offer_price, unit_offer_price=unit_offer_price, image=product_image, is_from_country=is_from_country, is_gluten_free=is_gluten_free, is_freezed=is_freezed, is_vegetarian=is_vegan, is_eco=is_eco, is_without_sugar=is_without_sugar, is_without_lactose=is_without_lactose, url=name_link))
 			categories.append(Category(name=category))
    
 		# Finish pagination configuration in this section

@@ -1,7 +1,5 @@
 from django.core.management.base import BaseCommand
-from location.models import Country, Currency
 from scraper.utils.ProductShelf import ProductShelf
-import pandas as pd
 
 
 class Command(BaseCommand):
@@ -14,5 +12,4 @@ class Command(BaseCommand):
         shelve = ProductShelf(path="data/shelves/products")
         
         shelve.read_shelf()
-        
         
