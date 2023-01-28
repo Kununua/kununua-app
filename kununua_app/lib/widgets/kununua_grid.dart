@@ -8,6 +8,7 @@ class KununuaGrid extends StatelessWidget {
   final double mainAxisSpacing;
   final double crossAxisSpacing;
   final EdgeInsets gridMargin;
+  final bool scrollable;
 
   const KununuaGrid({
     super.key,
@@ -17,6 +18,7 @@ class KununuaGrid extends StatelessWidget {
     this.mainAxisSpacing = 5,
     this.crossAxisSpacing = 0,
     this.gridMargin = const EdgeInsets.all(0),
+    this.scrollable = false,
   });
 
   @override
@@ -48,11 +50,23 @@ class KununuaGrid extends StatelessWidget {
       }
     }
 
-    return Container(
+    if(!scrollable){
+      return Container(
               margin: gridMargin,
               child: Column(
-                      children: rows,
-                    ),
+                children: rows,
+              ),
+            );
+    }
+
+    return Container(
+              margin: gridMargin,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                        children: rows,
+                      ),
+              ),
             );
   }
 }

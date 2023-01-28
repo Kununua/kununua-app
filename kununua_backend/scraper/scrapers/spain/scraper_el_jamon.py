@@ -43,8 +43,9 @@ def extract_data(url, path, driver, selenium_utils):
 			is_eco = True if item.find('img', alt='Eco') else False
 			is_without_sugar = True if item.find('img', alt='Sin Azucar') else False
 			is_without_lactose = True if item.find('img', alt='Sin Lactosa') else False
-
+			
 			products.append(Product(name=name, brand=brand, weight_unit=None, price=price, unit_price=unit_price, offer_price=offer_price, unit_offer_price=unit_offer_price, image=product_image, is_from_country=is_from_country, is_gluten_free=is_gluten_free, is_freezed=is_freezed, is_vegetarian=is_vegan, is_eco=is_eco, is_without_sugar=is_without_sugar, is_without_lactose=is_without_lactose, url=name_link))
+			
 			categories.append(Category(name=category))
    
 		# Finish pagination configuration in this section
