@@ -1,7 +1,9 @@
-import graphene
-from .types import ProductType, CategoryType
+import graphene, jwt
+from django.utils.translation import gettext_lazy as _
+from .types import ProductType, CategoryType, ProductEntryType
+from authentication.models import KununuaUser
 from location.types import CountryType
-from .models import Product, Category
+from .models import Product, Category, Cart, ProductEntry
 from .utils.image_coder import encode_image
 
 
@@ -13,20 +15,14 @@ class ProductsQuery(object):
   def resolve_get_product_by_id(self, info, id):
       
     product = Product.objects.get(pk=id)
-    product.image = encode_image(product.image.url)
   
     return product
   
   def resolve_get_products_by_category(self, info, category):
     
-    products = Product.objects.filter(category__name=category)
+    products = Product.objects.filter(category__name=category)[:20]
     
-    # Order products
-    
-    products = products[:50]
-    
-    for product in products:
-        product.image = encode_image(product.image.url)
+    # TODO: Añadir paginación, retraso por codificacion de imagenes, orden, etc.
     
     return products
   
@@ -36,3 +32,20 @@ class CategoriesQuery(object):
   
   def resolve_get_all_categories(self, info):
     return Category.objects.all().order_by('name')
+  
+class CartQuery(object):
+  
+  get_cart = graphene.List(ProductEntryType, user_token=graphene.String())
+  
+  def resolve_get_cart(self, info, user_token):
+    
+    try:
+      user = jwt.decode(user_token, 'my_secret', algorithms=['HS256'])
+    except jwt.InvalidSignatureError:
+      raise ValueError(_("Invalid token"))
+    
+    user = KununuaUser.objects.get(username=user['username'])
+    
+    cart = Cart.objects.get(user=user)
+    
+    return ProductEntry.objects.filter(cart=cart)

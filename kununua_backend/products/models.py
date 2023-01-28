@@ -71,7 +71,7 @@ class List(models.Model):
         return f"List[date: {self.date}, user: {self.user}]"
 
 class Cart(models.Model):
-    user = models.ForeignKey(KununuaUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(KununuaUser, on_delete=models.CASCADE)
     
     def __str__(self):
         return f"Cart[user: {self.user}]"
