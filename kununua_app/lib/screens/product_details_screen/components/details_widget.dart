@@ -30,7 +30,7 @@ class DetailsWidget extends StatelessWidget {
               curvedBodyRadius: 40,
               // fullyStretchable: true,
               alwaysShowLeadingAndAction: true,
-              headerWidget: DetailsHeader(productImage: product['image'],),
+              headerWidget: DetailsHeader(productImage: product['imageEncoded'],),
               // expandedBody: const CameraPreview(),
               body: [
                 Padding(

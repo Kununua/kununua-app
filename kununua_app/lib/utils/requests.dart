@@ -87,7 +87,7 @@ String getProductById = """
     		isWithoutLactose
         offerPrice
         unitOfferPrice
-        image
+        imageEncoded
         supermarket{
           name
           mainUrl
@@ -106,3 +106,25 @@ String getProductById = """
       }
     }
     """;
+
+/* ------------------------------- CART RETRIEVAL ------------------------------- */
+
+String getProductsInCart = """
+
+    query getCart(\$userToken: String!){
+      getCart(userToken: \$userToken){
+        quantity
+        product{
+          name
+          supermarket{
+            name
+          }
+          price
+          offerPrice
+          unitPrice
+          imageEncoded
+        }
+      }
+    }
+
+""";

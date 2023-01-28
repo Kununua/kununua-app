@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kununua_app/app_bars/main_page_app_bar.dart';
+import 'package:kununua_app/pages/cart_page/cart_page.dart';
 import 'package:kununua_app/pages/main_page/main_page.dart';
 import 'package:kununua_app/pages/not_implemented_page.dart';
 import 'package:kununua_app/pages/profile_page/profile_page.dart';
@@ -26,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
       case Screens.search:
         return const NotImplementedPage();
       case Screens.cart:
-        return const NotImplementedPage();
+        return const CartPage();
       case Screens.profile:
         return const ProfilePage();
     }

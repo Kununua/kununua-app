@@ -2,9 +2,22 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-const  List<String> imageKeys = ['image', 'profilePicture'];
+const  List<String> imageKeys = ['imageEncoded', 'profilePicture'];
 
 class HelperFunctions{
+
+  static List<Map<String, dynamic>> deserializeListData(QueryResult<Object?> queryResult){
+
+    String operationName = queryResult.data!.keys.elementAt(1);
+    final data = queryResult.data![operationName];
+    List<Map<String, dynamic>> result = [];
+
+    for (final dataEntry in data) {
+      result.add(_recursiveDeserialization(dataEntry as Map<String, dynamic>));
+    }
+    
+    return result;
+  }
 
   static Map<String, dynamic> deserializeData(QueryResult<Object?> queryResult){
 
@@ -17,13 +30,14 @@ class HelperFunctions{
   }
 
   static Map<String, dynamic> _recursiveDeserialization(Map<String, dynamic> data){
+
     Map<String, dynamic> serializedData = {};
     for (String key in data.keys) {
       if(imageKeys.contains(key)){
         serializedData[key] = HelperFunctions._getImage(data[key]);
       }else if(key != '__typename'){
         var value = data[key];
-        if(value.runtimeType == Map<String, dynamic>){
+        if(value is Map<String, dynamic>){
           serializedData[key] = _recursiveDeserialization(value);
         }else{
           serializedData[key] = value;
