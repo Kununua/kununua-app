@@ -5,6 +5,7 @@ class KununuaGrid extends StatelessWidget {
   final List<Widget> children;
   final int crossAxisCount;
   final MainAxisAlignment mainAxisAlignment;
+  final CrossAxisAlignment crossAxisAlignment;
   final double mainAxisSpacing;
   final double crossAxisSpacing;
   final EdgeInsets gridMargin;
@@ -14,6 +15,7 @@ class KununuaGrid extends StatelessWidget {
     super.key,
     required this.children,
     this.crossAxisCount = 4,
+    this.crossAxisAlignment = CrossAxisAlignment.start,
     this.mainAxisAlignment = MainAxisAlignment.spaceEvenly,
     this.mainAxisSpacing = 5,
     this.crossAxisSpacing = 0,
@@ -53,7 +55,8 @@ class KununuaGrid extends StatelessWidget {
     if(!scrollable){
       return Container(
               margin: gridMargin,
-              child: Column(
+        child: Column(
+          crossAxisAlignment: crossAxisAlignment,
                 children: rows,
               ),
             );
@@ -63,9 +66,10 @@ class KununuaGrid extends StatelessWidget {
               margin: gridMargin,
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
-                child: Column(
-                        children: rows,
-                      ),
+        child: Column(
+          crossAxisAlignment: crossAxisAlignment,
+          children: rows,
+        ),
               ),
             );
   }

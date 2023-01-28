@@ -106,3 +106,25 @@ String getProductById = """
       }
     }
     """;
+
+String getProductsByCategory = """
+query getProductsByCategory(\$categoryName: String!){
+      getProductsByCategory(category: \$categoryName){
+        id
+        name
+        price
+        unitPrice
+        offerPrice
+        unitOfferPrice
+        image
+        supermarket{
+          country{
+            currency{
+              code
+              symbol
+            }
+          }
+        }
+      }
+    }
+    """;
