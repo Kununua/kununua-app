@@ -129,6 +129,43 @@ String getProductsByCategory = """
     }
 """;
 
+String getOfferProducts = """
+  query getProductsWithOffer{
+  getProductsWithOffer{
+    id
+    name
+    price
+    unitPrice
+    url
+    isVegetarian
+    isGlutenFree
+    isFreezed
+    isFromCountry
+    isEco
+    isWithoutSugar
+    isWithoutLactose
+    offerPrice
+    unitOfferPrice
+    imageEncoded
+    supermarket{
+      name
+      mainUrl
+      country{
+        spanishName
+        englishName
+        code
+        phoneCode
+        currency{
+          name
+          code
+          symbol
+        }
+      }
+    }
+  }
+}
+""";
+
 /* ------------------------------- CART ------------------------------- */
 
 String getProductsInCart = """

@@ -4,50 +4,40 @@ import 'package:kununua_app/pages/main_page/components/row_title.dart';
 
 class MainPageRow extends StatelessWidget {
   
+  final List<Widget> cells;
   final String rowName;
+  final bool loading;
   
   const MainPageRow({
     super.key,
-    required this.rowName
+    required this.rowName,
+    this.cells = const [],
+    this.loading = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-            children: [
-              RowTitle(title: rowName),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(10, 0, 10, 20),
-                  child: Row(
-                    children: const [
-                      MainPageCell(
-                        bgImage: AssetImage('assets/images/frescos.png'),
-                      ),
-                      MainPageCell(
-                        bgImage: AssetImage('assets/images/frescos.png'),
-                      ),
-                      MainPageCell(
-                        bgImage: AssetImage('assets/images/frescos.png'),
-                      ),
-                      MainPageCell(
-                        bgImage: AssetImage('assets/images/frescos.png'),
-                      ),
-                      MainPageCell(
-                        bgImage: AssetImage('assets/images/frescos.png'),
-                      ),
-                      MainPageCell(
-                        bgImage: AssetImage('assets/images/frescos.png'),
-                      ),
-                      MainPageCell(
-                        bgImage: AssetImage('assets/images/frescos.png'),
-                      ),
-                    ],
+    return Visibility(
+      visible: cells.isNotEmpty,
+      child: Column(
+              children: [
+                RowTitle(title: rowName),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(10, 0, 10, 20),
+                    child: loading ? 
+                    const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                    :
+                    Row(
+                      children: cells,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          );
+              ],
+            ),
+    );
   }
 }

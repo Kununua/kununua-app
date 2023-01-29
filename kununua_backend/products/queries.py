@@ -11,6 +11,7 @@ class ProductsQuery(object):
   
   get_product_by_id = graphene.Field(ProductType, id=graphene.Int())
   get_products_by_category = graphene.List(ProductType, category=graphene.String())
+  get_products_with_offer = graphene.List(ProductType)
 
   def resolve_get_product_by_id(self, info, id):
       
@@ -23,6 +24,12 @@ class ProductsQuery(object):
     products = Product.objects.filter(category__name=category)[:20]
     
     # TODO: Añadir paginación, retraso por codificacion de imagenes, orden, etc.
+    
+    return products
+  
+  def resolve_get_products_with_offer(self, info):
+    
+    products = Product.objects.filter(offer_price__isnull=False)[:20]
     
     return products
   

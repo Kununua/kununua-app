@@ -10,10 +10,12 @@ import 'package:kununua_app/utils/helper_functions.dart';
 class ProductDetails extends StatelessWidget {
   
   final int productId;
+  final Map<String, dynamic> product;
   
   const ProductDetails({
     super.key,
-    required this.productId,
+    this.productId = 0,
+    this.product = const {},
   });
 
   Future<Map<String, dynamic>> _getProduct() async{
@@ -41,23 +43,27 @@ class ProductDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return FutureBuilder(
-      future: _getProduct(),
-      builder: (context, productResult) {
+    if(product.isNotEmpty){
+      return DetailsWidget(product: product);
+    }else{
+      return FutureBuilder(
+        future: _getProduct(),
+        builder: (context, productResult) {
 
-        if(productResult.hasData){
+          if(productResult.hasData){
 
-          Map<String, dynamic> product = productResult.data!;
+            Map<String, dynamic> product = productResult.data!;
 
-          if (product['exception'] != null) {
-            return ErrorMessage(message: product['exception']);
+            if (product['exception'] != null) {
+              return ErrorMessage(message: product['exception']);
+            }else{
+              return DetailsWidget(product: product);
+            }
           }else{
-            return DetailsWidget(product: product);
+            return const LoadingWidget();
           }
-        }else{
-          return const LoadingWidget();
         }
-      }
-    );
+      );
+    }
   }
 }
