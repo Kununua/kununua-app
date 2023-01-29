@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:kununua_app/pages/welcome_page.dart';
 import 'package:kununua_app/screens/new_login_screen/login_screen.dart';
+import 'package:kununua_app/screens/main_screen.dart';
 import 'package:kununua_app/utils/constants.dart';
+import 'package:kununua_app/screens/product_details_screen/product_details_screen.dart';
 import 'package:kununua_app/utils/globals.dart' as globals;
+import 'package:kununua_app/utils/requests.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
@@ -18,22 +23,63 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  Future<bool> checkToken() async {
+
+    bool validToken = false;
+
+    var prefs = await SharedPreferences.getInstance();
+
+    globals.prefs = prefs;
+
+    final MutationOptions refreshTokenOptions = MutationOptions(
+      document: gql(refreshToken),
+      variables: <String, dynamic>{
+        'token': globals.prefs!.getString('jwtToken') ?? '',
+      },
+    );
+
+    final tokenResult = await globals.client.value.mutate(refreshTokenOptions);
+
+    if (!tokenResult.hasException) {
+      validToken = true;
+      globals.prefs!.setString('jwtToken', tokenResult.data!['refreshToken']['token']);
+    }
+
+    return validToken;
+  }
+
   @override
   Widget build(BuildContext context) {
 
     return GraphQLProvider(
         client: globals.client,
-        child: MaterialApp(  
+        child: MaterialApp( 
           debugShowCheckedModeBanner: false,        
-          title: 'Kununua App',
+          title: 'Kununua',
           theme: ThemeData(           
             scaffoldBackgroundColor: kBackgroundColor,
             textTheme: Theme.of(context).textTheme.apply(
               bodyColor: kPrimaryColor,
               fontFamily: 'Montserrat'
             ),
-          ), 
-          home: LoginScreen()         
+          ),
+          home: FutureBuilder(
+            future: checkToken(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+
+                if (snapshot.data!) {
+                  return const MainScreen();
+                } else {
+                  return const LoginScreen();
+                }
+              } else {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            },
+          ),   
       ));
   }
 }

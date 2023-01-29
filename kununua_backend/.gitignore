@@ -130,3 +130,7 @@ dmypy.json
 
 # Migrations files
 **/migrations/**
+
+# Media files
+
+media/**

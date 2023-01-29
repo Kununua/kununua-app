@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:kununua_app/screens/welcome_screen/welcome_screen.dart';
+import 'package:kununua_app/screens/main_screen.dart';
 import 'package:kununua_app/screens/new_login_screen/components/center_widget/center_widget.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/screens/new_login_screen/utils/validators.dart';
@@ -29,16 +29,15 @@ class LoginScreen extends StatelessWidget {
 
     final loginResult = await globals.client.value.mutate(loginOptions);
 
-    debugPrint(loginResult.data.toString());
-    debugPrint(loginResult.toString());
-
     if (loginResult.data?['tokenAuth'] == null) {
       return 'Credenciales inválidas. Por favor, inténtalo de nuevo.';
     }
 
-    globals.jwtToken = loginResult.data?['tokenAuth']['token'];
-    globals.currentUser =
-        Map<String, dynamic>.from(loginResult.data?['tokenAuth']['user']);
+    globals.prefs!.setString('jwtToken', loginResult.data?['tokenAuth']['token']);
+    globals.prefs!.setString('username', loginResult.data?['tokenAuth']['user']['username']);
+    globals.prefs!.setString('email', loginResult.data?['tokenAuth']['user']['email']);
+    globals.prefs!.setString('firstName', loginResult.data?['tokenAuth']['user']['firstName']!);
+    globals.prefs!.setString('lastName', loginResult.data?['tokenAuth']['user']['lastName']!);
 
     return null;
   }
@@ -63,9 +62,11 @@ class LoginScreen extends StatelessWidget {
       return exceptions[0].message;
     }
 
-    globals.jwtToken = createUserResult.data?['tokenAuth']['token'];
-    globals.currentUser =
-        Map<String, dynamic>.from(createUserResult.data?['tokenAuth']['user']);
+    globals.prefs!.setString('jwtToken', createUserResult.data?['tokenAuth']['token']);
+    globals.prefs!.setString('username', createUserResult.data?['tokenAuth']['user']['username']);
+    globals.prefs!.setString('email', createUserResult.data?['tokenAuth']['user']['email']);
+    globals.prefs!.setString('firstName', createUserResult.data?['tokenAuth']['user']['firstName']!);
+    globals.prefs!.setString('lastName', createUserResult.data?['tokenAuth']['user']['lastName']!);
 
     return null;
   }
@@ -99,12 +100,10 @@ class LoginScreen extends StatelessWidget {
         return 'Ha ocurrido un error. Inténtelo de nuevo más tarde';
       }
 
-      globals.currentUser = {
-        'username': googleUser.displayName,
-        'email': googleUser.email,
-        'firstName': googleUser.displayName,
-        'lastName': googleUser.displayName,
-      };
+      globals.prefs!.setString('username', googleUser.displayName!);
+      globals.prefs!.setString('email', googleUser.email);
+      globals.prefs!.setString('firstName', googleUser.displayName!);
+      globals.prefs!.setString('lastName', googleUser.displayName!);
 
       return null;
 
@@ -230,10 +229,11 @@ class LoginScreen extends StatelessWidget {
           ),
         ],
         onSubmitAnimationCompleted: () {
-          Navigator.of(context).push(
+          Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-              builder: (context) => const WelcomeScreen(),
+              builder: (context) => const MainScreen(),
             ),
+            (route) => false,
           );
         },
         onRecoverPassword: _recoverPassword,

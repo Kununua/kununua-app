@@ -1,11 +1,13 @@
 import graphene
-from authentication.types import AuthenticationQuery as SchemeAuthenticationQuery
-from authentication.mutation import Mutation as SchemeMutation
+from authentication.queries import AuthenticationQuery as SchemeAuthenticationQuery
+from authentication.mutations import AuthenticationMutation as SchemeAuthenticationMutation
+from products.queries import ProductsQuery as SchemeProductsQuery, CategoriesQuery as SchemeCategoriesQuery, CartQuery as SchemeCartQuery
+from products.mutations import ProductsMutation as SchemeProductsMutation
 
-class KununuaQuery(SchemeAuthenticationQuery, graphene.ObjectType):
+class KununuaQuery(SchemeAuthenticationQuery, SchemeProductsQuery, SchemeCategoriesQuery, SchemeCartQuery, graphene.ObjectType):
   pass
 
-class KununuaMutation(SchemeMutation, graphene.ObjectType):
+class KununuaMutation(SchemeAuthenticationMutation, SchemeProductsMutation, graphene.ObjectType):
   pass
 
 schema = graphene.Schema(query=KununuaQuery, mutation=KununuaMutation)

@@ -2,16 +2,19 @@ from .Field import Field
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from ...python_utils.SeleniumUtils import SeleniumUtils
+from ...utils.SeleniumUtils import SeleniumUtils
 
 class Extractors(object):
     
-    def __init__(self, C=None, extract_data=None, driver=None, driver_utils=None):
+    def __init__(self, C=None, extract_data=None, driver=None, driver_utils=None, common_parent_selector=None):
         
         self.set_C(C)
         self.set_extract_data(extract_data)
         self.set_driver(driver)
         self.set_driver_utils(driver_utils)
+        self.set_common_parent_selector(common_parent_selector)
+        self.data_lists_to_zip = ""
+        self.multifield_counter = 1
         
     def standard_extraction(self):
         
@@ -83,54 +86,31 @@ class Extractors(object):
     def update_standard_extraction_function(self, fields_to_be_extracted):
         
         extract_data_function = self.get_extract_data()
-        data_lists_to_zip = ""
-        multifield_counter = 1
         
         for field in fields_to_be_extracted:
             
-            if "," in field.get_name():
-                extract_data_function += "\t\tmultifield_%s_elements = soup.select('%s')\n" % (str(multifield_counter), field.get_selector())
-                value_separator = field.get_name().split("(")[1].split(")")[0]
-                field_names = [name.strip() for name in field.get_name().split("(")[0].split(",")]
-                main_value = field.get_name().split("[")[1].split("]")[0]
-                default_tuple = "("
-                parsing_row = "\t\t"
-                
-                for name in field_names:
-                    parsing_row += "%ss, " % name
-                    data_lists_to_zip += "%ss, " % name
-                    if name == main_value:
-                        default_tuple += "elem.get_text().strip(), "
-                    else:
-                        default_tuple += "None, "
-                
-                default_tuple = default_tuple[:-2]
-                default_tuple += ")"
-                        
-                parsing_row = parsing_row[:-2]
-                extract_data_function += "\t\tmultifield_%s_values = [tuple(elem.get_text().strip().split('%s')) if len(elem.get_text().strip().split('%s')) == %s else %s for elem in multifield_%s_elements]\n" % (str(multifield_counter), value_separator, value_separator, str(len(field_names)), default_tuple, str(multifield_counter))
-                extract_data_function += parsing_row
-                extract_data_function += " = tuple([list(t) for t in zip(*multifield_%s_values)])\n" % str(multifield_counter)
-                
-                multifield_counter += 1
+            if not self.common_parent_selector:
+                field_extraction = self.standard_field_extraction_with_no_common_parent(field)
+                extract_data_function += field_extraction
                 
             else:
-                extract_data_function += "\t\t%ss_elements = soup.select('%s')\n" % (field.get_name(), field.get_selector())
-                if field.get_selector().endswith("img"):
-                    extract_data_function += "\t\t%ss = [elem.get('src').strip() for elem in %ss_elements]\n" % (field.get_name(), field.get_name())
-                else:
-                    extract_data_function += "\t\t%ss = [elem.get_text().strip() for elem in %ss_elements]\n" % (field.get_name(), field.get_name())
-                data_lists_to_zip += "%ss, " % field.get_name()
-        
-        extract_data_function += "\n"
-        extract_data_function += "\t\tdata_extracted = zip(%s)\n" % data_lists_to_zip[:-2]
-        extract_data_function += "\n"
-        extract_data_function += "\t\tfor item in data_extracted:\n"
-        extract_data_function += "\n"
-        extract_data_function += "\t\t\t # Write print or save data function on this line \n"
-        extract_data_function += "\n"
-        extract_data_function += "\t\t\tproducts_scraped += 1\n"
-        extract_data_function += "\n"
+                
+                field_extraction = self.standard_field_extraction_with_common_parent(field)
+                extract_data_function += field_extraction
+                
+        if not self.common_parent_selector:
+            extract_data_function += "\n"
+            extract_data_function += "\t\tdata_extracted = itertools.zip_longest(%s)\n" % self.data_lists_to_zip[:-2]
+            extract_data_function += "\n"
+            extract_data_function += "\t\tfor item in data_extracted:\n"
+            extract_data_function += "\n"
+            extract_data_function += "\t\t\t# Write print or save data function on this line \n"
+            extract_data_function += "\n"
+        else:
+            extract_data_function += "\n"
+            extract_data_function += "\t\t\t# Write print or save data function on this line\n"
+            extract_data_function += "\n"
+            
         extract_data_function += "\t\t# Finish pagination configuration in this section\n"
         extract_data_function += "\n"
         extract_data_function += "\t\t# -----------------------------------------------\n"
@@ -201,6 +181,9 @@ class Extractors(object):
 
         self.extract_data += "\t\tpage_source = driver.page_source\n"
         self.extract_data += "\t\tsoup = BeautifulSoup(page_source, 'lxml')\n"
+        if self.common_parent_selector is not None:
+            self.extract_data += "\t\tcommon_parent = soup.select('%s')\n" % self.common_parent_selector
+            self.extract_data += "\t\tfor item in common_parent:\n"
     
     def _prepare_function_to_recursive_extraction(self):
 
@@ -275,6 +258,92 @@ class Extractors(object):
         
         return result
     
+    def standard_field_extraction_with_no_common_parent(self, field):
+        
+        result = ""
+        
+        if "," in field.get_name():
+            result += "\t\tmultifield_%s_elements = soup.select('%s')\n" % (str(self.multifield_counter), field.get_selector())
+            value_separator = field.get_name().split("(")[1].split(")")[0]
+            field_names = [name.strip() for name in field.get_name().split("(")[0].split(",")]
+            main_value = field.get_name().split("[")[1].split("]")[0]
+            default_tuple = "("
+            parsing_row = "\t\t"
+            
+            for name in field_names:
+                parsing_row += "%ss, " % name
+                self.set_data_lists_to_zip(self.data_lists_to_zip + "%ss, " % name)
+                if name == main_value:
+                    default_tuple += "elem.get_text().strip(), "
+                else:
+                    default_tuple += "None, "
+            
+            default_tuple = default_tuple[:-2]
+            default_tuple += ")"
+                    
+            parsing_row = parsing_row[:-2]
+            result +=  "\t\tmultifield_%s_values = [tuple(elem.get_text().strip().split('%s')) if len(elem.get_text().strip().split('%s')) == %s else %s for elem in multifield_%s_elements]\n" % (str(self.multifield_counter), value_separator, value_separator, str(len(field_names)), default_tuple, str(self.multifield_counter))
+            result += parsing_row
+            result += " = tuple([list(t) for t in zip(*multifield_%s_values)])\n" % str(self.multifield_counter)
+            
+            if field.get_selector().endswith("> a"):
+                result +=  "\t\t%ss_links = [elem.get('href').strip() for elem in multifield_%s_elements]\n" % (main_value, str(self.multifield_counter))
+            
+            self.set_multifield_counter(self.multifield_counter+1)
+                
+        else:
+            result +=  "\t\t%ss_elements = soup.select('%s')\n" % (field.get_name(), field.get_selector())
+            if field.get_selector().endswith("img"):
+                result +=  "\t\t%ss = [elem.get('src').strip() for elem in %ss_elements]\n" % (field.get_name(), field.get_name())
+            elif field.get_selector().endswith("> a"):
+                result +=  "\t\t%ss_links = [elem.get('href').strip() for elem in %ss_elements]\n" % (field.get_name(), field.get_name())
+            else:
+                result +=  "\t\t%ss = [elem.get_text().strip() for elem in %ss_elements]\n" % (field.get_name(), field.get_name())
+            self.set_data_lists_to_zip(self.data_lists_to_zip + "%ss, " % field.get_name())
+        
+        return result
+    
+    def standard_field_extraction_with_common_parent(self, field):
+        
+        result = ""
+        
+        if "," in field.get_name():
+            result += "\t\t\tmultifield_%s = item.select('%s')[0]\n" % (str(self.multifield_counter), field.get_selector())
+            value_separator = field.get_name().split("(")[1].split(")")[0]
+            field_names = [name.strip() for name in field.get_name().split("(")[0].split(",")]
+            main_value = field.get_name().split("[")[1].split("]")[0]
+            default_tuple = "("
+            parsing_row = "\t\t\t"
+            
+            for name in field_names:
+                parsing_row += "%s, " % name
+                if name == main_value:
+                    default_tuple += "multifield_%s.get_text().strip(), " % str(self.multifield_counter)
+                else:
+                    default_tuple += "None, "
+            
+            default_tuple = default_tuple[:-2]
+            default_tuple += ")"
+                    
+            parsing_row = parsing_row[:-2]
+            result += parsing_row
+            result +=  " = tuple(multifield_%s.get_text().strip().split('%s') if len(multifield_%s.get_text().strip().split('%s')) == %s else %s)\n" % (str(self.multifield_counter), value_separator, str(self.multifield_counter), value_separator, str(len(field_names)), default_tuple)
+            
+            if field.get_selector().endswith("> a"):
+                result +=  "\t\t\t%s_link = multifield_%s.get('href').strip()\n" % (main_value, str(self.multifield_counter))
+            
+            self.set_multifield_counter(self.multifield_counter+1)
+                
+        else:
+            if field.get_selector().endswith("img"):
+                result +=  "\t\t\t%s = item.select('%s')[0].get('src').strip()\n" % (field.get_name(), field.get_selector())
+            elif field.get_selector().endswith("> a"):
+                result +=  "\t\t\t%s_link = item.select('%s')[0].get('href').strip()\n" % (field.get_name(), field.get_selector())
+            else:
+                result +=  "\t\t\t%s = item.select('%s')[0].get_text().strip()\n" % (field.get_name(), field.get_selector())
+                
+        return result
+    
     # ------------------ GETTERS & SETTERS ------------------ #
     
     def get_C(self):
@@ -325,3 +394,33 @@ class Extractors(object):
             raise ValueError("driver_utils cannot be None")
         
         self.driver_utils = driver_utils
+        
+    def get_common_parent_selector(self):
+        return self.common_parent_selector
+    
+    def set_common_parent_selector(self, common_parent_selector):
+        
+        if not isinstance(common_parent_selector, str):
+            raise TypeError("common_parent_selector must be a string")
+        
+        self.common_parent_selector = common_parent_selector
+        
+    def get_multifield_counter(self):
+        return self.multifield_counter
+    
+    def set_multifield_counter(self, multifield_counter):
+        
+        if not isinstance(multifield_counter, int):
+            raise TypeError("multifield_counter must be an integer")
+        
+        self.multifield_counter = multifield_counter
+        
+    def get_data_lists_to_zip(self):
+        return self.data_lists_to_zip
+        
+    def set_data_lists_to_zip(self, data_lists_to_zip):
+        
+        if not isinstance(data_lists_to_zip, str):
+            raise TypeError("data_lists_to_zip must be a string")
+        
+        self.data_lists_to_zip = data_lists_to_zip

@@ -1,8 +1,9 @@
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -20,6 +21,7 @@ ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost']
 
 INSTALLED_APPS = [
     'authentication',
+    'data',
     'location',
     'products',
     'stats',
@@ -32,6 +34,7 @@ INSTALLED_APPS = [
     'graphene_django',
     'scraper',
     'corsheaders',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -106,7 +109,9 @@ AUTHENTICATION_BACKENDS = [
 
 GRAPHQL_JWT = {
     "JWT_VERIFY_EXPIRATION": True,
-    "JWT_EXPIRATION_DELTA": timedelta(minutes=10),
+    "JWT_EXPIRATION_DELTA": timedelta(days=7),
+    "JWT_ALGORITHM": "HS256",
+    "JWT_SECRET_KEY": "my_secret"
 }
 
 # Internationalization
@@ -125,6 +130,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = 'media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

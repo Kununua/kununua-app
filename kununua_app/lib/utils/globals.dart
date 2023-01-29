@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 HttpLink _getLink(){
 
@@ -22,5 +23,4 @@ HttpLink _getLink(){
 }
 
 ValueNotifier<GraphQLClient> client = ValueNotifier(GraphQLClient(cache: GraphQLCache(), link: _getLink()));
-String jwtToken = '';
-Map<String, dynamic> currentUser = <String, dynamic>{};
+SharedPreferences? prefs;
