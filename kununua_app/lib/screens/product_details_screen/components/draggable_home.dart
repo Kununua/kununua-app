@@ -204,6 +204,9 @@ class _DraggableHomeState extends State<DraggableHome> {
             final bool fullyExpanded = streams[1];
 
             return SliverAppBar(
+              iconTheme: IconThemeData(
+                color: fullyCollapsed ? Colors.white : kPrimaryColor, //change your color here
+              ),
               backgroundColor:
                   !fullyCollapsed ? widget.backgroundColor : widget.appBarColor,
               leading: widget.alwaysShowLeadingAndAction

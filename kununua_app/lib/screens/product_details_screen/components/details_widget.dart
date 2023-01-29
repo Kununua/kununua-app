@@ -21,7 +21,6 @@ class DetailsWidget extends StatelessWidget {
     return DraggableHome(
               title: Container(),
               appBarColor: kPrimaryColor,
-              alwaysShowTitle: false,
               backgroundColor: const Color.fromARGB(255, 231, 231, 231),
               shadowBorder: true,
               curvedBodyRadius: 40,
