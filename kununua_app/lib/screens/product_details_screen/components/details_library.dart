@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:kununua_app/screens/main_screen.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/utils/extensions/string_extension.dart';
+import 'package:kununua_app/utils/requests.dart';
 import 'package:kununua_app/widgets/kununua_grid.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:kununua_app/utils/globals.dart' as globals;
+import 'package:kununua_app/widgets/kununua_nav_bar/kununua_nav_bar.dart';
 
 class ProductNameRow extends StatelessWidget {
   
@@ -20,6 +25,7 @@ class ProductNameRow extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 10),
             child: Text(
               productName.capitalizeFirstOfEach(),
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.black,
                 fontSize: 24,
@@ -223,6 +229,23 @@ class _AddToCartState extends State<AddToCart> {
 
   int amount = 1;
 
+  Future<bool> addProductToCart() async {
+
+    final MutationOptions addEntryToCartOptions = MutationOptions(
+      document: gql(addToCart),
+      variables: <String, dynamic>{
+        'userToken': globals.prefs!.getString('jwtToken'),
+        'productId': widget.productId,
+        'amount': amount,
+      },
+    );
+
+    final productResult = await globals.client.value.mutate(addEntryToCartOptions);
+
+    return !productResult.hasException;
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -232,7 +255,25 @@ class _AddToCartState extends State<AddToCart> {
         height: kAddToCartButtonHeight,
         child: ElevatedButton(
           onPressed: (){
-            debugPrint("Amount: $amount");
+            addProductToCart().then((added){
+              if(added){
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (context) => const MainScreen(
+                      firstScreen: Screens.cart,
+                    ),
+                  ),
+                  (route) => false,
+                );
+              }else{
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("No se ha podido añadir el producto al carrito"),
+                  ),
+                );
+              }
+              }
+            );
           }, 
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(kPrimaryColor),

@@ -8,7 +8,13 @@ import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/widgets/kununua_nav_bar/kununua_nav_bar.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+
+  final Screens firstScreen;
+
+  const MainScreen({
+    super.key,
+    this.firstScreen = Screens.home,
+  });
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -16,7 +22,13 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
 
-  Screens _currentScreen = Screens.home;
+  late Screens _currentScreen;
+
+  @override
+  void initState() {
+    _currentScreen = widget.firstScreen;
+    super.initState();
+  }
 
   Widget _loadScreen(Screens screen){
     switch(screen){

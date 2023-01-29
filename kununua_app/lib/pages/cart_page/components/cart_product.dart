@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:kununua_app/screens/main_screen.dart';
 import 'package:kununua_app/utils/extensions/string_extension.dart';
+import 'package:kununua_app/utils/requests.dart';
+import 'package:kununua_app/utils/globals.dart' as globals;
+import 'package:kununua_app/widgets/kununua_confirm.dart';
+import 'package:kununua_app/widgets/kununua_nav_bar/kununua_nav_bar.dart';
 
 class CartProduct extends StatefulWidget {
   
@@ -28,6 +34,23 @@ class _CartProductState extends State<CartProduct> {
   void initState() {
     super.initState();
     amount = widget.quantity;
+  }
+
+  Future<bool> editCartEntryRequest(int productId, int amount) async {
+    Map<String, dynamic> product = {};
+
+    final MutationOptions editCartEntryOptions = MutationOptions(
+      document: gql(editCartEntry),
+      variables: <String, dynamic>{
+        'userToken': globals.prefs!.getString('jwtToken'),
+        'productId': productId,
+        'amount': amount,
+      },
+    );
+
+    final entryResult = await globals.client.value.mutate(editCartEntryOptions);
+
+    return !entryResult.hasException;
   }
 
   @override
@@ -63,7 +86,7 @@ class _CartProductState extends State<CartProduct> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    (widget.product["name"] as String).capitalizeFirstOfEach(),
+                    (widget.product["name"] as String).limitCharacters(25).capitalizeFirstOfEach(),
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -90,11 +113,54 @@ class _CartProductState extends State<CartProduct> {
                         children: [
                           IconButton(
                             onPressed: () {
-                              setState(() {
-                                if (amount > 1){
-                                  amount--;
+                              if(amount - 1 == 0){
+                                showDialogWidget(
+                                  context,
+                                  KununuaConfirm(
+                                    title: "Eliminar producto",
+                                    text: "¿Está seguro de que desea eliminar este producto del carrito?",
+                                    onConfirm: () {
+                                      Navigator.of(context).pop();
+                                      editCartEntryRequest(int.parse(widget.product["id"]), 0).then((edited){
+                                        if(edited){
+                                          Navigator.of(context).pushReplacement(
+                                            MaterialPageRoute(
+                                              builder: (context) => const MainScreen(
+                                                firstScreen: Screens.cart,
+                                              )
+                                            ),
+                                          );
+                                        }else{
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text("No se ha podido editar la entrada del carrito. Por favor, inténtelo de nuevo."),
+                                            ),
+                                          );
+                                        }
+                                      });
+                                    },
+                                    onCancel: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                );
+                              }else{
+                                editCartEntryRequest(int.parse(widget.product["id"]), amount-1).then((edited){
+                                if(edited){
+                                  setState(() {
+                                    if (amount > 1){
+                                      amount--;
+                                    }
+                                  });
+                                }else{
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("No se ha podido editar la entrada del carrito. Por favor, inténtelo de nuevo."),
+                                    ),
+                                  );
                                 }
                               });
+                              }
                             },
                             icon: const Icon(Icons.remove),
                           ),
@@ -107,8 +173,18 @@ class _CartProductState extends State<CartProduct> {
                           ),
                           IconButton(
                             onPressed: () {
-                              setState(() {
-                                amount++;
+                              editCartEntryRequest(int.parse(widget.product["id"]), amount+1).then((edited){
+                                if(edited){
+                                  setState(() {
+                                    amount++;
+                                  });
+                                }else{
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("No se ha podido editar la entrada del carrito. Por favor, inténtelo de nuevo."),
+                                    ),
+                                  );
+                                }
                               });
                             },
                             icon: const Icon(Icons.add),

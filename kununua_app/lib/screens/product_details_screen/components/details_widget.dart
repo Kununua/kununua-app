@@ -18,10 +18,7 @@ class DetailsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final addToCart = GlobalKey();
-
     return DraggableHome(
-              leading: Platform.isIOS ? const Icon(Icons.arrow_back_ios) : const Icon(Icons.arrow_back),
               title: Container(),
               appBarColor: kPrimaryColor,
               alwaysShowTitle: false,
@@ -53,7 +50,7 @@ class DetailsWidget extends StatelessWidget {
                         isGlutenFree: product['isGlutenFree'],
                         isEco: product['isEco'],
                         isFreezed: product['isFreezed'],
-                        isFromCountry: product['isFromCountry'],
+                        isFromCountry: product['isFromCountry'] ?? false,
                         isWithoutLactose: product['isWithoutLactose'],
                         isWithoutSugar: product['isWithoutSugar'],
                       ),
@@ -62,7 +59,6 @@ class DetailsWidget extends StatelessWidget {
                 ),
               ],
               bottomNavigationBar: AddToCart(
-                  key: addToCart,
                   productId: int.parse(product['id']),
                 ),
             );

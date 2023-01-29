@@ -68,7 +68,6 @@ class ProductGridScreen extends StatelessWidget {
               return const Center(
                 child: CircularProgressIndicator(),
               );
-              ;
             }
           },
         ),

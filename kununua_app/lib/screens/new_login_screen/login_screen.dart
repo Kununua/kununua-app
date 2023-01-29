@@ -229,10 +229,11 @@ class LoginScreen extends StatelessWidget {
           ),
         ],
         onSubmitAnimationCompleted: () {
-          Navigator.of(context).pushReplacement(
+          Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (context) => const MainScreen(),
             ),
+            (route) => false,
           );
         },
         onRecoverPassword: _recoverPassword,

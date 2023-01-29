@@ -129,7 +129,7 @@ String getProductsByCategory = """
     }
 """;
 
-/* ------------------------------- CART RETRIEVAL ------------------------------- */
+/* ------------------------------- CART ------------------------------- */
 
 String getProductsInCart = """
 
@@ -137,6 +137,7 @@ String getProductsInCart = """
       getCart(userToken: \$userToken){
         quantity
         product{
+          id
           name
           supermarket{
             name
@@ -145,6 +146,36 @@ String getProductsInCart = """
           offerPrice
           unitPrice
           imageEncoded
+        }
+      }
+    }
+
+""";
+
+String addToCart = """
+
+    mutation addEntryToCart(\$userToken: String!, \$productId: Int!, \$amount: Int!){
+      addEntryToCart(userToken: \$userToken, productId: \$productId, amount: \$amount){
+        entry{
+          quantity
+          product{
+            name
+          }
+        }
+      }
+    }
+
+""";
+
+String editCartEntry = """
+
+    mutation editCartEntry(\$userToken: String!, \$productId: Int!, \$amount: Int!){
+      editCartEntry(userToken: \$userToken, productId: \$productId, amount: \$amount){
+        entry{
+          quantity
+          product{
+            name
+          }
         }
       }
     }

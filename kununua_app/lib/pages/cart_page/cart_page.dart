@@ -36,7 +36,6 @@ class CartPage extends StatelessWidget {
     List<Widget> cartProducts = [];
 
     for (Map<String, dynamic> product in products) {
-      //print(product);
       cartProducts.add(CartProduct(
         quantity: product['quantity'],
         product: product['product']
@@ -52,9 +51,15 @@ class CartPage extends StatelessWidget {
       future: _getProductsInCart(),
       builder: (context, products){
         if(products.hasData){
-          return ListView(
-            children: _buildCartProducts(products.data!),
-          );
+          if ((products.data ?? []).isEmpty){
+            return const Center(
+              child: Text('No tienes productos en el carrito'),
+            );
+          }else{
+            return ListView(
+              children: _buildCartProducts(products.data!),
+            );
+          }
         }else{
           return const Center(
             child: CircularProgressIndicator(),
