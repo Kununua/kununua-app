@@ -86,7 +86,9 @@ class _CartProductState extends State<CartProduct> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    (widget.product["name"] as String).limitCharacters(25).capitalizeFirstOfEach(),
+                    (widget.product["name"] as String)
+                        .limitCharacters(18)
+                        .capitalizeFirstOfEach(),
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

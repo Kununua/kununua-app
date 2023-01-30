@@ -17,7 +17,6 @@ class ProductGridScreen extends StatelessWidget {
   });
 
   Future<List<Map<String, dynamic>>> _getProductsByCategory() async {
-    List<Map<String, dynamic>> products = [];
 
     final MutationOptions getProducts = MutationOptions(
       document: gql(getProductsByCategory),
