@@ -7,11 +7,6 @@ class ProductType(DjangoObjectType):
   class Meta:
     model = Product
     
-  image_encoded = graphene.String()
-  
-  def resolve_image_encoded(self, info):
-    return encode_image(self.image.url)
-    
 class SupermarketType(DjangoObjectType):
   class Meta:
     model = Supermarket

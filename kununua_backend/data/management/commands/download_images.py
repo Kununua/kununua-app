@@ -31,7 +31,7 @@ def download_pictures(products):
             
             url = product.image
             supermarket = normalize(product.supermarket.name)
-            file_name = normalize(supermarket + "/" +product.name.replace(' ', '_').replace(",", "_").replace("/", "")) + '_' + supermarket + '.jpg'
+            file_name = normalize(supermarket + "/" +product.name.replace(' ', '_').replace(",", "_").replace("/", "")) + '_' + supermarket.replace(' ', '_') + '.jpg'
     
             if picture_in_media(file_name):
                 product.image = "products/images/%s" % (file_name)
@@ -54,7 +54,6 @@ def remove_backgrounds(products):
     print("In future updates, this function will remove the background of the images.")
 
 def picture_in_media(file_name):
-    
     return os.path.exists("media/products/images/%s" % (file_name))
 
 def normalize(s):

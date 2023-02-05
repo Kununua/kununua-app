@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:kununua_app/keys.dart';
 
-const  List<String> imageKeys = ['imageEncoded', 'profilePicture'];
+const  List<String> imageKeys = ['image', 'profilePicture'];
 
 class HelperFunctions{
 
@@ -48,7 +49,7 @@ class HelperFunctions{
     return serializedData;
   }
 
-  static ImageProvider _getImage(encodedImage){
-    return MemoryImage(base64Decode(encodedImage));
+  static ImageProvider _getImage(image){
+    return NetworkImage(FLUTTER_APP_MEDIA_BASE_URL + image);
   }
 }

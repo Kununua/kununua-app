@@ -93,7 +93,7 @@ class PriceRow extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "${offerPrice}",
+                      "$offerPrice",
                       style: const TextStyle(
                         color: kPrimaryColor,
                         fontSize: 24,

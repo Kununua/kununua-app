@@ -29,7 +29,8 @@ class ProductsQuery(object):
   
   def resolve_get_products_with_offer(self, info):
     
-    products = Product.objects.filter(offer_price__isnull=False)[:20]
+    #TODO: Rehacer
+    products = Product.objects.all()[:20]
     
     return products
   

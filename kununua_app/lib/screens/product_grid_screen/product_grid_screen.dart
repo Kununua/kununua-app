@@ -53,7 +53,7 @@ class ProductGridScreen extends StatelessWidget {
                       children:
                           snapshot.data.map<Widget>((product) => ProductGridCell(
                                 id: int.parse(product['id']),
-                                image: product['imageEncoded'],
+                                image: product['image'],
                                 title: product['name'],
                                 price: product['price'],
                                 offerPrice: product['offerPrice'] ?? '',
