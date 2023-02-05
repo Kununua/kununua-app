@@ -43,19 +43,22 @@ class Product{
     +unit_price: String
     +product_image: Image
     +product_url: url {Unique}
-    +offer_price: float {Nullable}
-    +unit_offer_price: float {Nullable}
     +is_vegetarian: bool {Nullable}
     +is_gluten_free: bool {Nullable}
+    +is_from_country: bool {Nullable}
     +is_freezed: bool {Nullable}
     +is_eco: bool {Nullable}
     +is_without_sugar: bool {Nullable}
     +is_without_lactose: bool {Nullable}
     ..
-    + / is_from_country: bool
-    + / weight_unit: String
-    ..
     +get_average_rating(): float {Transient}
+}
+
+class Offer{
+    +amount_prod_one: float
+    +amount_prod_two: float {Nullable}
+    +discount: float {min=0, max=1}
+    +affects_product_one: bool
 }
 
 class Category{
@@ -130,6 +133,7 @@ Country "*" --> "1" Currency: has
 Product "*" --> "0..1" Category: has
 Product "*" --> "1" Supermarket: is in
 Product "1" --> "0..*" PriceHistory: has
+Product "1..2" --> "1" Offer: has
 Supermarket "*" --> "1" Country: is in
 Rating "*" --> "1" Product: rates
 List *-- ProductEntry
