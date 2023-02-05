@@ -85,9 +85,7 @@ String getProductById = """
     		isEco
     		isWithoutSugar
     		isWithoutLactose
-        offerPrice
-        unitOfferPrice
-        imageEncoded
+        image
         supermarket{
           name
           mainUrl
@@ -114,9 +112,7 @@ String getProductsByCategory = """
         name
         price
         unitPrice
-        offerPrice
-        unitOfferPrice
-        imageEncoded
+        image
         supermarket{
           country{
             currency{
@@ -144,9 +140,7 @@ String getOfferProducts = """
     isEco
     isWithoutSugar
     isWithoutLactose
-    offerPrice
-    unitOfferPrice
-    imageEncoded
+    image
     supermarket{
       name
       mainUrl
@@ -180,9 +174,8 @@ String getProductsInCart = """
             name
           }
           price
-          offerPrice
           unitPrice
-          imageEncoded
+          image
         }
       }
     }

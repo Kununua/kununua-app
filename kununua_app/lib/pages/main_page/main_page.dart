@@ -33,7 +33,7 @@ class MainPage extends StatelessWidget {
       offerProducts.add(
         MainPageCell(
           product: product,
-          bgImage: product['imageEncoded'],
+          bgImage: product['image'],
         )
       );
     }

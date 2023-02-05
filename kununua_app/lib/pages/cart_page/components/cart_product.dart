@@ -73,7 +73,7 @@ class _CartProductState extends State<CartProduct> {
       child: Row(
         children: [
           Image(
-            image: widget.product['imageEncoded'],
+            image: widget.product['image'],
             width: 100,
             height: 100,
             fit: BoxFit.cover
