@@ -41,6 +41,8 @@ class Product(models.Model):
     is_eco = models.BooleanField(_("is_eco"), default=False, null=True)
     is_without_sugar = models.BooleanField(_("is_without_sugar"), default=False, null=True)
     is_without_lactose = models.BooleanField(_("is_without_lactose"), default=False, null=True)
+    offer_price = models.DecimalField(_("offer_price"), max_digits=10, decimal_places=2, null=True)
+    unit_offer_price = models.CharField(_("unit_offer_price"), max_length=16, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
     supermarket = models.ForeignKey(Supermarket, on_delete=models.CASCADE)
     
@@ -49,15 +51,6 @@ class Product(models.Model):
     
     def __str__(self):
         return f"Product[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, url: {self.url}]"
-    
-class Offer(models.Model):
-    product_one = models.ForeignKey(Product, on_delete=models.CASCADE, related_name=_("product_one"))
-    product_two = models.ForeignKey(Product, on_delete=models.CASCADE, related_name=_("product_two"), null=True)
-    amount_prod_one = models.PositiveIntegerField(_("amount_prod_one"))
-    amount_prod_two = models.PositiveIntegerField(_("amount_prod_two"), null=True)
-    discount = models.FloatField(_("discount"), validators=[MinValueValidator(0), MaxValueValidator(1)])
-    affects_product_one = models.BooleanField(_("affects_product_one"), default=False)
-    
     
 class Rating(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
