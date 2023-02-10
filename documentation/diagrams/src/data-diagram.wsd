@@ -3,8 +3,6 @@
 ' --------------- CONFIG ----------------
 
 title Kununua Data Model
-'!theme minty
-'!theme materia
 skinparam defaultFontName Serif
 
 ' --------------- CLASSES ----------------
@@ -39,23 +37,23 @@ class Address{
 class Product{
     +name: String
     +brand: String
-    +price: float
-    +unit_price: String
     +product_image: Image
-    +product_url: url {Unique}
-    +offer_price: float {Nullable}
-    +unit_offer_price: float {Nullable}
     +is_vegetarian: bool {Nullable}
     +is_gluten_free: bool {Nullable}
     +is_freezed: bool {Nullable}
     +is_eco: bool {Nullable}
     +is_without_sugar: bool {Nullable}
     +is_without_lactose: bool {Nullable}
-    ..
-    + / is_from_country: bool
-    + / weight_unit: String
+    +is_from_country: bool {Nullable}
     ..
     +get_average_rating(): float {Transient}
+}
+
+class Price{
+    +price: float
+    +weight: String
+    +amount: int {Nullable}
+    +url: URL {Unique}
 }
 
 class Category{
@@ -118,19 +116,27 @@ if is_list_product == true --> class related to List. Cart relation is null
 else --> class related to Cart. List relation is null
 end note
 
+note bottom of Price
+if amount == null --> the product is not a pack
+else if amount == 1 --> the product has an offer
+else --> the product is a pack
+end note
+
 ' --------------- RELATIONS ----------------
 
 AbstractUser <|-- KununuaUser
 KununuaUser *-- Address
 KununuaUser "*" --> "1" Country: lives in
-KununuaUser "1" --> "0..*" Rating: gives
+KununuaUser "1" <-- "0..*" Rating: gives
 KununuaUser "1" --> "0..*" List: writes
 KununuaUser "1" --> "1" Cart: has
 Country "*" --> "1" Currency: has
 Product "*" --> "0..1" Category: has
+Product "1" <-- "*" Price: of
 Product "*" --> "1" Supermarket: is in
 Product "1" --> "0..*" PriceHistory: has
 Supermarket "*" --> "1" Country: is in
+Supermarket "1" <-- "*" Price: of
 Rating "*" --> "1" Product: rates
 List *-- ProductEntry
 Cart *-- ProductEntry
