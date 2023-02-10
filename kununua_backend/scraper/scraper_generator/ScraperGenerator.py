@@ -4,6 +4,7 @@ from ..utils.SeleniumUtils import SeleniumUtils
 from selenium import webdriver
 import time
 from pathlib import Path
+from ..configuration_tools import ConfigurationTools
 
 from django.conf import settings
 
@@ -33,10 +34,7 @@ class ScraperGenerator(object):
         
         # zipcode configuration section
         
-        selenium_utils.get_element_by_css_selector("#change-cp").click()
-        selenium_utils.get_element_by_css_selector("#seleccionarCp").send_keys("41009")
-        selenium_utils.get_element_by_css_selector("#aceptarPorCp").click()
-        time.sleep(10)
+        ConfigurationTools.zipcode_mercadona(selenium_utils)
         
         # -----------------------------
         

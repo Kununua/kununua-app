@@ -21,20 +21,18 @@ class ProductShelf(object):
         self.close()
         self.shelf = None
         
-    def create_shelf(self, supermarket, categories, products):
-        if not isinstance(supermarket, Supermarket):
-            raise TypeError("supermarket must be a string")
-        if not isinstance(categories, list):
-            raise TypeError("categories must be a list")
+    def create_shelf(self, products):
         if not isinstance(products, list):
             raise TypeError("products must be a list")
-        data = zip(categories, products)
         is_new = False
         if not os.path.exists(self.path):
             is_new = True
             
         self.open()
-        self.shelf[supermarket.name] = data
+        
+        supermarket = products[0].supermarket
+        
+        self.shelf[supermarket.name] = products
         
         if is_new:
             self.shelf['supermarkets'] = {}

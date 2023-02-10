@@ -2,17 +2,19 @@ from bs4 import BeautifulSoup
 from ...utils.SeleniumUtils import SeleniumUtils
 from selenium import webdriver
 from ...configuration_tools import ConfigurationTools
-from products.models import Supermarket, Category, Product
+from products.models import Supermarket, Category
+from ...models import ProductScraped
 from location.models import Country
 from ...utils.ProductShelf import ProductShelf
 from tqdm import tqdm
+
+supermarket = Supermarket(name="El Jamón", zipcode="41009", main_url="https://www.supermercadoseljamon.com/inicio", country=Country.objects.get(code='ESP'))
 
 def extract_data(url, path, driver, selenium_utils):
 	driver.get(url)
 	selenium_utils.navigate_to(path)
  
 	products = []
-	categories = []
 	category_selector = path.split(';')[-1].strip()
  
 	while True:
@@ -28,15 +30,13 @@ def extract_data(url, path, driver, selenium_utils):
 			if item.select('.precio > span.tachado'):
 				offer_price = float(item.select('.precio > span:nth-child(2)')[0].get_text().replace("€","").replace(",",".").strip())
 				unit_price = item.select('.texto-porKilo')[0].get_text().strip()
-				unit_offer_price = unit_price
 				price = float(item.select('.precio > span.tachado')[0].get_text().replace("€","").replace(",",".").strip())
 			else:
 				offer_price = None
-				unit_offer_price = None
-				price = float(item.select('.precio > span')[0].get_text().replace("€","").replace(",",".").strip())
 				unit_price = item.select('.texto-porKilo')[0].get_text().strip()
+				price = float(item.select('.precio > span')[0].get_text().replace("€","").replace(",",".").strip())
 			product_image = item.select('.imgwrap > img')[0].get('src').strip()
-			is_from_country = True if item.find('img', alt='Andaluz') else None
+			is_from_country = True if item.find('img', alt='Andaluz') else False
 			is_gluten_free = True if item.find('img', alt='Sin Gluten') else False
 			is_freezed = True if item.find('img', alt='Congelado') else False
 			is_vegan = True if item.find('img', alt='Vegano') else False
@@ -44,9 +44,7 @@ def extract_data(url, path, driver, selenium_utils):
 			is_without_sugar = True if item.find('img', alt='Sin Azucar') else False
 			is_without_lactose = True if item.find('img', alt='Sin Lactosa') else False
 			
-			products.append(Product(name=name, brand=brand, weight_unit=None, price=price, unit_price=unit_price, offer_price=offer_price, unit_offer_price=unit_offer_price, image=product_image, is_from_country=is_from_country, is_gluten_free=is_gluten_free, is_freezed=is_freezed, is_vegetarian=is_vegan, is_eco=is_eco, is_without_sugar=is_without_sugar, is_without_lactose=is_without_lactose, url=name_link))
-			
-			categories.append(Category(name=category))
+			products.append(ProductScraped(name=name, price=price, unit_price=unit_price, brand=brand, offer_price=offer_price, image=product_image, is_from_country=is_from_country, is_gluten_free=is_gluten_free, is_freezed=is_freezed, is_vegetarian=is_vegan, is_eco=is_eco, is_without_sugar=is_without_sugar, is_without_lactose=is_without_lactose, url=name_link, supermarket=supermarket, category=Category(name=category)))
    
 		# Finish pagination configuration in this section
 		try:
@@ -54,7 +52,7 @@ def extract_data(url, path, driver, selenium_utils):
 		except Exception:
 			break
   
-	return products, categories
+	return products
 
 def scraper():
     
@@ -73,17 +71,15 @@ def scraper():
 	tree_paths = ['None; #banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(1) > a.link-botcategoria > span', 'None; #banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(2) > a.link-botcategoria > span', 'None; #banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(3) > a.link-botcategoria > span', 'None; #banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(4) > a.link-botcategoria > span', 'None; #banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(5) > a.link-botcategoria > span', 'None; #banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(6) > a.link-botcategoria > span', 'None; #banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(7) > a.link-botcategoria > span', 'None; #banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(8) > a.link-botcategoria > span', 'None; #banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(9) > a.link-botcategoria > span', 'None; #banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(10) > a.link-botcategoria > span', 'None; #banner > div.wrapper-menus > div.contenido-menuCategorias > div > div > ul > li:nth-child(11) > a.link-botcategoria > span'] 
 
 	products = []
-	categories = []
  
 	print("Extracting data...")
 
 	for path in tqdm(tree_paths): 
-		products_to_add, categories_to_add = extract_data('https://www.supermercadoseljamon.com/inicio', path, driver, selenium_utils)
+		products_to_add = extract_data('https://www.supermercadoseljamon.com/inicio', path, driver, selenium_utils)
 		
 		products += products_to_add
-		categories += categories_to_add
 
 	driver.quit()
 
-	shelve_util = ProductShelf('data/shelves/products')
-	shelve_util.create_shelf(Supermarket(name="El Jamón", zipcode="41009", main_url="https://www.supermercadoseljamon.com/inicio", country=Country.objects.get(code='ESP')), categories, products)
+	shelve_util = ProductShelf('data/shelves/new-products-scraped')
+	shelve_util.create_shelf(products)

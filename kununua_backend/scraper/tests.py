@@ -143,3 +143,40 @@ class ScraperElJamonTest(TestCase):
     
     def test_scraper_el_jamon(self):
         scraper_el_jamon.scraper()
+        
+class GeneratorMercadonaStandardCase(TestCase):
+    def setUp(self):
+        options = webdriver.ChromeOptions()
+        options.headless = False # Change to True if you want to run the scraper in headless mode
+        self.driver = webdriver.Chrome(options=options)
+        
+        tree_mercadona = self.generate_tree_for_mercadona()
+        
+        self.generator = ScraperGenerator(url="https://www.mercadona.es", 
+                                          country="Spain",
+                                          tree=tree_mercadona, 
+                                          C=[".product-cell__description-name", ".product-price__unit-price", "button > div.product-cell__info > div.product-format.product-format__size--cell > span:nth-child(2)", "button > div.product-cell__image-wrapper > img"], 
+                                          driver=self.driver, 
+                                          elem_details=None, 
+                                          num_pag=None,
+                                          common_parent_selector=".product-cell")
+    
+    def tearDown(self):           
+        super().tearDown()
+        self.driver.quit()
+    
+    def test_generate_scraper_for_el_jamon(self):
+        self.driver.get(self.generator.get_url())
+        self.generator.generate()
+        
+    def generate_tree_for_mercadona(self):
+        
+        result_tree = Tree()
+        
+        root = Node(selector="#root > header > div.header__left > nav > a:nth-child(1)", parent=None)
+        result_tree.add(root)
+        for i in range(26):
+            child = Node(selector="#root > div.grid-layout > div.grid-layout__sidebar > ul > li:nth-child(%d) > div > button > span > label" % (i+1), parent=root)
+            result_tree.add(child)
+
+        return result_tree

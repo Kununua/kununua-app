@@ -29,11 +29,7 @@ class Category(models.Model):
 class Product(models.Model):
     name = models.CharField(_("name"), max_length=256)
     brand = models.CharField(_("brand"), max_length=64, default=_("Marca blanca"))
-    price = models.DecimalField(_("price"), max_digits=10, decimal_places=2)
-    unit_price = models.CharField(_("unit_price"), max_length=16)
-    weight_unit = models.CharField(_("weight_unit"), max_length=8, default="Kg", null=True)
     image = models.ImageField(_("image"), upload_to="products/images/", null=True)
-    url = models.URLField(_("url"), unique=True)
     is_vegetarian = models.BooleanField(_("is_vegetarian"), default=False, null=True)
     is_gluten_free = models.BooleanField(_("is_gluten_free"), default=False, null=True)
     is_freezed = models.BooleanField(_("is_freezed"), default=False, null=True)
@@ -41,17 +37,27 @@ class Product(models.Model):
     is_eco = models.BooleanField(_("is_eco"), default=False, null=True)
     is_without_sugar = models.BooleanField(_("is_without_sugar"), default=False, null=True)
     is_without_lactose = models.BooleanField(_("is_without_lactose"), default=False, null=True)
-    offer_price = models.DecimalField(_("offer_price"), max_digits=10, decimal_places=2, null=True)
-    unit_offer_price = models.CharField(_("unit_offer_price"), max_length=16, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
-    supermarket = models.ForeignKey(Supermarket, on_delete=models.CASCADE)
     
     def get_average_rating(self):
         return Rating.objects.filter(product=self).aggregate(models.Avg('rating'))['rating__avg']
     
     def __str__(self):
-        return f"Product[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, url: {self.url}]"
+        return f"Product[name: {self.name}, brand: {self.brand}]"
+
+class Price(models.Model):
     
+    price = models.DecimalField(_("price"), max_digits=10, decimal_places=2)
+    weight = models.CharField(_("weight"), max_length=8, null=True)
+    amount = models.PositiveIntegerField(_("amount"), null=True)
+    url = models.URLField(_("url"), unique=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    supermarket = models.ForeignKey(Supermarket, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"Product[name: {self.product.name}, price: {self.price}, amount: {self.amount}, supermarket: {self.supermarket.name}, url: {self.url}]"
+    
+
 class Rating(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     user = models.ForeignKey(KununuaUser, on_delete=models.CASCADE)
