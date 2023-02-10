@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from location.models import Country, Currency
 from scraper.scrapers.spain import scraper_el_jamon
+from scraper.scrapers.spain import scraper_mercadona
 import pandas as pd
 
 class Command(BaseCommand):
@@ -9,4 +10,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         
-        scraper_el_jamon.scraper()
+        scraper_mercadona.scraper()

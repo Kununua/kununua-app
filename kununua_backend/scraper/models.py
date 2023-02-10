@@ -1,51 +1,55 @@
 from django.db import models
 from products.models import Category, Supermarket
+from django.utils.translation import gettext_lazy as _
 
 class ProductScraped(object):
     
-    def __init__(self, name=None, price=None, unit_price=None, brand=None, image=None, offer_price=None, 
+    def __init__(self, name=None, price=None, unit_price=None, weight=None, brand=None, image=None, offer_price=None, 
                  is_vegetarian=False, is_gluten_free=False, 
                  is_freezed=False, is_from_country=False, is_eco=False, 
                  is_without_sugar=False, is_without_lactose=False, url=None, category=None, 
                  supermarket=None):
         
         if type(name) is not str:
-            raise ValueError("Product name cannot be None and must be a string")
+            raise ValueError(_("Product name cannot be None and must be a string"))
         if type(price) is not float:
-            raise ValueError("Product price cannot be None and must be a float")
-        if type(unit_price) is not str:
-            raise ValueError("Product unit_price cannot be None and must be a string")
-        if type(brand) is not str:
-            raise ValueError("Product brand cannot be None and must be a string")
+            raise ValueError(_("Product price cannot be None and must be a float"))
+        if unit_price is not None and type(unit_price) is not str:
+            raise ValueError(_("Product unit_price must be None or string"))
+        if weight is not None and type(weight) is not str:
+            raise ValueError(_("Product weight must be None or string"))
+        if brand is not None and type(brand) is not str:
+            raise ValueError(_("Product brand must be None or string"))
         if type(image) is not str:
-            raise ValueError("Product image cannot be None and must be a string")
+            raise ValueError(_("Product image cannot be None and must be a string"))
         if offer_price is not None and type(offer_price) is not float:
-            raise ValueError("Product offer_price must be None or float")
+            raise ValueError(_("Product offer_price must be None or float"))
         if type(is_vegetarian) is not bool:
-            raise ValueError("Product is_vegetarian cannot be None and must be a boolean")
+            raise ValueError(_("Product is_vegetarian cannot be None and must be a boolean"))
         if type(is_gluten_free) is not bool:
-            raise ValueError("Product is_gluten_free cannot be None and must be a boolean")
+            raise ValueError(_("Product is_gluten_free cannot be None and must be a boolean"))
         if type(is_freezed) is not bool:
-            raise ValueError("Product is_freezed cannot be None and must be a boolean")
+            raise ValueError(_("Product is_freezed cannot be None and must be a boolean"))
         if type(is_from_country) is not bool:
-            raise ValueError("Product is_from_country cannot be None and must be a boolean")
+            raise ValueError(_("Product is_from_country cannot be None and must be a boolean"))
         if type(is_eco) is not bool:
-            raise ValueError("Product is_eco cannot be None and must be a boolean")
+            raise ValueError(_("Product is_eco cannot be None and must be a boolean"))
         if type(is_without_sugar) is not bool:
-            raise ValueError("Product is_without_sugar cannot be None and must be a boolean")
+            raise ValueError(_("Product is_without_sugar cannot be None and must be a boolean"))
         if type(is_without_lactose) is not bool:
-            raise ValueError("Product is_without_lactose cannot be None and must be a boolean")
-        if type(url) is not str:
-            raise ValueError("Product url cannot be None and must be a string")
+            raise ValueError(_("Product is_without_lactose cannot be None and must be a boolean"))
+        if brand is not None and type(url) is not str:
+            raise ValueError(_("Product url must be None or string"))
         if type(category) is not Category:
-            raise ValueError("Product category cannot be None and must be a Category object")
+            raise ValueError(_("Product category cannot be None and must be a Category object"))
         if type(supermarket) is not Supermarket:
-            raise ValueError("Product supermarket cannot be None and must be a Supermarket object")
+            raise ValueError(_("Product supermarket cannot be None and must be a Supermarket object"))
         
         
         self.name = name
         self.price = price
         self.unit_price = unit_price
+        self.weight = weight
         self.brand = brand
         self.image = image
         self.offer_price = offer_price
@@ -61,4 +65,4 @@ class ProductScraped(object):
         self.supermarket = supermarket
         
     def __str__(self):
-        return f"Product[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, brand: {self.brand}, offer_price: {self.offer_price}, category: {self.category.name}, supermarket: {self.supermarket.name}]"
+        return f"Product[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, weight:{self.weight}, brand: {self.brand}, offer_price: {self.offer_price}, category: {self.category.name}, supermarket: {self.supermarket.name}, url={self.url}]"

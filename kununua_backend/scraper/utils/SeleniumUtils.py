@@ -16,19 +16,25 @@ class SeleniumUtils(object):
         
         return WebDriverWait(self.driver, timeout=self.timeout).until(lambda d: d.find_element(by=By.ID, value=id))
     
-    def get_element_by_css_selector(self, css_selector):
+    def get_element_by_css_selector(self, css_selector, timeout=None):
         
         if not isinstance(css_selector, str):
             raise TypeError("css_selector must be a string")
         
-        return WebDriverWait(self.driver, timeout=self.timeout).until(lambda d: d.find_element(by=By.CSS_SELECTOR, value=css_selector))
+        if timeout:
+            return WebDriverWait(self.driver, timeout=timeout).until(lambda d: d.find_element(by=By.CSS_SELECTOR, value=css_selector))
+        else:
+            return WebDriverWait(self.driver, timeout=self.timeout).until(lambda d: d.find_element(by=By.CSS_SELECTOR, value=css_selector))
     
-    def get_elements_by_css_selector(self, css_selector):
+    def get_elements_by_css_selector(self, css_selector, timeout=None):
         
         if not isinstance(css_selector, str):
             raise TypeError("css_selector must be a string")
         
-        return WebDriverWait(self.driver, timeout=self.timeout).until(lambda d: d.find_elements(by=By.CSS_SELECTOR, value=css_selector))
+        if timeout:
+            return WebDriverWait(self.driver, timeout=timeout).until(lambda d: d.find_elements(by=By.CSS_SELECTOR, value=css_selector))
+        else:
+            return WebDriverWait(self.driver, timeout=self.timeout).until(lambda d: d.find_elements(by=By.CSS_SELECTOR, value=css_selector))
     
     def get_element_by_text(self, text):
         
@@ -46,7 +52,6 @@ class SeleniumUtils(object):
         """
         
         steps_to_take = path.split(";")
-        
         for step in steps_to_take:
             if step != 'None':  
                 element = self.get_element_by_css_selector(step.strip())
