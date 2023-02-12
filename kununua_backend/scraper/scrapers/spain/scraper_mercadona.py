@@ -46,7 +46,6 @@ def extract_data(url, path, driver, selenium_utils):
 			#url = get_element_url(selenium_utils, driver, element, grid_url)
 
 			product = ProductScraped(name=name, price=price, weight=weight, image=image, is_pack=is_pack, url=None, supermarket=supermarket, category=Category(name=category))
-			if product.is_pack: print(product)
    
 			products.append(product)
 		# Finish pagination configuration in this section

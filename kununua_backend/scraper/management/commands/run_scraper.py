@@ -17,6 +17,6 @@ class Command(BaseCommand):
         new_shelve_util.load_data_from_shelf(shelve_util.get_shelve())
         
         shelve_util.close()
-        new_shelve_util.open()
-        print(new_shelve_util)
-        new_shelve_util.close()
+        # new_shelve_util.open()
+        # print(new_shelve_util)
+        # new_shelve_util.close()

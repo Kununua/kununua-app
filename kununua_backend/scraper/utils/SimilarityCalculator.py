@@ -1,6 +1,6 @@
 import jellyfish
 
-class SimilarityHelper(object):
+class SimilarityCalculator(object):
     
     def __init__(self):
         self.mem = {}

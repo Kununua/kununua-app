@@ -4,12 +4,14 @@ from django.utils.translation import gettext_lazy as _
 
 class ProductScraped(object):
     
-    def __init__(self, name=None, price=None, unit_price=None, weight=None, brand=None, image=None, offer_price=None, 
+    def __init__(self, pseudo_id = None, name=None, price=None, unit_price=None, weight=None, brand=None, image=None, offer_price=None, 
                  is_vegetarian=False, is_gluten_free=False, 
                  is_freezed=False, is_from_country=False, is_eco=False, 
                  is_without_sugar=False, is_without_lactose=False, url=None, 
                  is_pack=False, category=None, supermarket=None):
         
+        if pseudo_id is not None and type(pseudo_id) is not int:
+            raise ValueError(_("Product pseudo_id must be None or float"))
         if type(name) is not str:
             raise ValueError(_("Product name cannot be None and must be a string"))
         if type(price) is not float:
@@ -47,7 +49,7 @@ class ProductScraped(object):
         if type(supermarket) is not Supermarket:
             raise ValueError(_("Product supermarket cannot be None and must be a Supermarket object"))
         
-        
+        self.pseudo_id = pseudo_id
         self.name = name
         self.price = price
         self.unit_price = unit_price
@@ -72,13 +74,14 @@ class ProductScraped(object):
     
 class PackScrapped(object):
     
-    def __init__(self, product_id=None, amount=None, price=None, weigth=None, image=None, url=None):
+    def __init__(self, product_id=None, amount=None, price=None, weight=None, image=None, url=None):
+        
         self.product_id = product_id
         self.amount = amount
         self.price = price
-        self.weigth = weigth
+        self.weight = weight
         self.image = image
         self.url = url
         
     def __str__(self):
-        return f"Pack[product_id: {self.product_id}, amount: {self.amount}, price: {self.price}, weigth: {self.weigth}, image: {self.image}, url: {self.url}]"
+        return f"Pack[product_id: {self.product_id}, amount: {self.amount}, price: {self.price}, weight: {self.weight}, image: {self.image}, url: {self.url}]"
