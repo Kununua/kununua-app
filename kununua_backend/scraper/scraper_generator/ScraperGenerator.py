@@ -4,7 +4,7 @@ from ..utils.SeleniumUtils import SeleniumUtils
 from selenium import webdriver
 import time
 from pathlib import Path
-from ..configuration_tools import ConfigurationTools
+from ..utils.ConfigurationTools import ConfigurationTools
 
 from django.conf import settings
 

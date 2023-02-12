@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from ...utils.SeleniumUtils import SeleniumUtils
 from selenium import webdriver
-from ...configuration_tools import ConfigurationTools
+from ...utils.ConfigurationTools import ConfigurationTools
 from ...utils.ProductShelf import ProductShelf
 from ...models import ProductScraped
 from products.models import Supermarket, Category
@@ -42,9 +42,13 @@ def extract_data(url, path, driver, selenium_utils):
 				weight = item.select('.footnote1-r')[0].get_text().strip()
 			image = item.select('button > div.product-cell__image-wrapper > img')[0].get('src').strip()
 			category = soup.select(category_selector)[0].get_text().strip()
+			is_pack = "pack" in item.select(".product-price__extra-price")[0].get_text().lower()
 			#url = get_element_url(selenium_utils, driver, element, grid_url)
 
-			products.append(ProductScraped(name=name, price=price, weight=weight, image=image, url=None, supermarket=supermarket, category=Category(name=category)))
+			product = ProductScraped(name=name, price=price, weight=weight, image=image, is_pack=is_pack, url=None, supermarket=supermarket, category=Category(name=category))
+			if product.is_pack: print(product)
+   
+			products.append(product)
 		# Finish pagination configuration in this section
 		try:
 			ConfigurationTools.run_pagination_mercadona(selenium_utils)

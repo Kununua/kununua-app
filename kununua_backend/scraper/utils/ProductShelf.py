@@ -7,7 +7,13 @@ class ProductShelf(object):
             raise TypeError("path must be a string")
         
         self.path = path
-        self.shelf = None
+        
+        if not os.path.exists(self.path):
+            self.shelf = shelve.open(self.path)
+            self.shelf['supermarkets'] = {}
+            self.shelf.close()
+        else:
+            self.shelf = shelve.open(self.path)
     
     def open(self):
         self.shelf = shelve.open(self.path)
@@ -22,24 +28,17 @@ class ProductShelf(object):
         self.shelf = None
         
     def create_shelf(self, products):
-        if not isinstance(products, list):
-            raise TypeError("products must be a list")
-        is_new = False
-        if not os.path.exists(self.path):
-            is_new = True
+        
+        self._validate_creation_parameters(products)
             
         self.open()
         
-        supermarket = products[0].supermarket
+        supermarkets = {product.supermarket.name for product in products}
         
-        self.shelf[supermarket.name] = products
+        self._classify_products(products, supermarkets)
         
-        if is_new:
-            self.shelf['supermarkets'] = {}
-            
-        supermarkets = self.shelf['supermarkets']
-        supermarkets[supermarket.name] = supermarket
-        self.shelf['supermarkets'] = supermarkets
+        for supermarket in supermarkets:
+            self.shelf['supermarkets'][str(supermarket)] = supermarket
         
         self.close()
 
@@ -65,4 +64,41 @@ class ProductShelf(object):
         Product.objects.bulk_create(products)
         
         self.close()
-                
+        
+    def load_data_from_shelf(self, data_shelf):
+        
+        products = []
+        
+        for key in data_shelf:
+            if key != 'supermarkets':
+                products += data_shelf[key]
+        
+        self.create_shelf(products)
+        self.close()
+        
+    def __str__(self):
+        result = ''
+
+        for key in self.shelf:
+            result += "------------------ " + key.upper() + " ------------------" + '\n\n' + str([str(product) for product in self.shelf[key]][:20]) + '...\n------------------------------------------------------\n'
+            
+        return result
+        
+    # ------------------ Private methods ------------------ #
+    
+    def _validate_creation_parameters(self, products):
+        if not isinstance(products, list):
+            raise TypeError("products must be a list")
+        
+    def _classify_products(self, products, supermarkets):
+        
+        for supermarket in supermarkets:
+            self.shelf[supermarket] = [product for product in products if product.supermarket.name == supermarket]
+        
+    # ------------------ Getters and setters ------------------ #
+    
+    def get_shelve(self):
+        
+        self.open()
+        
+        return self.shelf

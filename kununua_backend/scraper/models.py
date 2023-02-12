@@ -7,8 +7,8 @@ class ProductScraped(object):
     def __init__(self, name=None, price=None, unit_price=None, weight=None, brand=None, image=None, offer_price=None, 
                  is_vegetarian=False, is_gluten_free=False, 
                  is_freezed=False, is_from_country=False, is_eco=False, 
-                 is_without_sugar=False, is_without_lactose=False, url=None, category=None, 
-                 supermarket=None):
+                 is_without_sugar=False, is_without_lactose=False, url=None, 
+                 is_pack=False, category=None, supermarket=None):
         
         if type(name) is not str:
             raise ValueError(_("Product name cannot be None and must be a string"))
@@ -38,8 +38,10 @@ class ProductScraped(object):
             raise ValueError(_("Product is_without_sugar cannot be None and must be a boolean"))
         if type(is_without_lactose) is not bool:
             raise ValueError(_("Product is_without_lactose cannot be None and must be a boolean"))
-        if brand is not None and type(url) is not str:
+        if url is not None and type(url) is not str:
             raise ValueError(_("Product url must be None or string"))
+        if type(is_pack) is not bool:
+            raise ValueError(_("Product is_pack flag must be boolean"))
         if type(category) is not Category:
             raise ValueError(_("Product category cannot be None and must be a Category object"))
         if type(supermarket) is not Supermarket:
@@ -61,8 +63,22 @@ class ProductScraped(object):
         self.is_without_sugar = is_without_sugar
         self.is_without_lactose = is_without_lactose
         self.url = url
+        self.is_pack = is_pack
         self.category = category
         self.supermarket = supermarket
         
     def __str__(self):
         return f"Product[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, weight:{self.weight}, brand: {self.brand}, offer_price: {self.offer_price}, category: {self.category.name}, supermarket: {self.supermarket.name}, url={self.url}]"
+    
+class PackScrapped(object):
+    
+    def __init__(self, product_id=None, amount=None, price=None, weigth=None, image=None, url=None):
+        self.product_id = product_id
+        self.amount = amount
+        self.price = price
+        self.weigth = weigth
+        self.image = image
+        self.url = url
+        
+    def __str__(self):
+        return f"Pack[product_id: {self.product_id}, amount: {self.amount}, price: {self.price}, weigth: {self.weigth}, image: {self.image}, url: {self.url}]"
