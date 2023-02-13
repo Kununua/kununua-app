@@ -1,4 +1,5 @@
 import jellyfish
+from django.utils.translation import gettext_lazy as _
 
 class SimilarityCalculator(object):
     
@@ -6,6 +7,11 @@ class SimilarityCalculator(object):
         self.mem = {}
     
     def compute_string_similarity(self, string1, string2):
+        if not isinstance(string1, str):
+            raise TypeError(_("string1 must be a string"))
+        if not isinstance(string2, str):
+            raise TypeError(_("string2 must be a string"))
+        
         if not string1 and not string2:
             return 1.0
         
