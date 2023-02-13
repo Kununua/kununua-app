@@ -15,6 +15,7 @@ class CategoryFinder():
     def __init__(self):
         self.mem = {}
         self.dict = self._init_dict()
+        self.translations = {'es':{}}
         
     def _init_dict(self):
         if os.path.exists(PATH_SHELVE):
@@ -146,16 +147,36 @@ class CategoryFinder():
             return final_category
         
         if code != 'en':
+            if code not in self.translations:
+                self.translations[code] = {}
+            
             translator = GoogleTranslator(source=code, target='en')
-            title = translator.translate(title).lower().strip()
-            category = translator.translate(category).lower().strip()
+            
+            if title in self.translations[code]:
+                title = self.translations[code][title]
+            else:
+                original_title = title
+                title = translator.translate(title).lower().strip()
+                self.translations[code][original_title] = title
+                
+            if category in self.translations[code]:
+                category = self.translations[code][category]
+            else:
+                original_category = category
+                category = translator.translate(category).lower().strip()
+                self.translations[code][original_category] = category
             
         if category in self.mem and title in self.mem[category]:
             return self.mem[category][title]
         
-        result = []   
+        result = []
+        translator = GoogleTranslator(source='es', target='en')
         for cat in categories:
-            cat_name = translator.translate(cat.name).lower().strip()
+            if cat.name in self.translations['es']:
+                cat_name = self.translations['es'][cat.name]
+            else:
+                cat_name = translator.translate(cat.name).lower().strip()
+                self.translations['es'][cat.name] = cat_name
             score = self._compute_synonyms(title, category, cat_name)
             result.append((cat, score))
         result = sorted(result, key=lambda x: x[1], reverse=False)
