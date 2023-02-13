@@ -11,12 +11,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         
+        # scraper_el_jamon.scraper()
+        
         shelve_util = ProductShelf('data/shelves/new-products-scraped')
         new_shelve_util = ProductShelf('data/shelves/new-shelve-classified')
         
         new_shelve_util.load_data_from_shelf(shelve_util.get_shelve())
         
         shelve_util.close()
-        # new_shelve_util.open()
-        # print(new_shelve_util)
-        # new_shelve_util.close()
+        new_shelve_util.open()
+        print(new_shelve_util)
+        new_shelve_util.close()

@@ -32,15 +32,15 @@ class ProductShelf(object):
         
     def create_shelf(self, products):
         self._validate_creation_parameters(products)
-            
+        
         self.open()
         
         next_pseudo_id = self._get_next_pseudo_id()
         
         supermarkets = {product.supermarket.name for product in products}
         
-        #self._standard_save(products, supermarkets)
-        self._classify_products(products, supermarkets, next_pseudo_id)
+        self._standard_save(products, supermarkets)
+        #self._classify_products(products, supermarkets, next_pseudo_id)
         
         for supermarket in supermarkets:
             self.shelf['supermarkets'][str(supermarket)] = supermarket
@@ -120,6 +120,8 @@ class ProductShelf(object):
         
         similarity_calculator = SimilarityCalculator()
         
+        self.open()
+        
         for supermarket in supermarkets:
             
             products_to_add = []
@@ -142,6 +144,8 @@ class ProductShelf(object):
             
             self.shelf[supermarket]['products'] = products_to_add
             self.shelf[supermarket]['packs'] = packs_to_add
+            
+        self.close()
             
     def _search_product_of_pack_id(self, product, supermarket_products, similarity_calculator, supermarket):
         

@@ -4,7 +4,8 @@ from django.utils.translation import gettext_lazy as _
 
 class ProductScraped(object):
     
-    def __init__(self, pseudo_id = None, name=None, price=None, unit_price=None, weight=None, brand=None, image=None, offer_price=None, 
+    def __init__(self, pseudo_id = None, name=None, price=None, unit_price=None, weight=None, brand=None, 
+                 amount=None, image=None, offer_price=None, 
                  is_vegetarian=False, is_gluten_free=False, 
                  is_freezed=False, is_from_country=False, is_eco=False, 
                  is_without_sugar=False, is_without_lactose=False, url=None, 
@@ -22,6 +23,8 @@ class ProductScraped(object):
             raise ValueError(_("Product weight must be None or string"))
         if brand is not None and type(brand) is not str:
             raise ValueError(_("Product brand must be None or string"))
+        if amount is not None and type(amount) is not int:
+            raise ValueError(_("Product amount must be None or int"))
         if type(image) is not str:
             raise ValueError(_("Product image cannot be None and must be a string"))
         if offer_price is not None and type(offer_price) is not float:
@@ -55,6 +58,7 @@ class ProductScraped(object):
         self.unit_price = unit_price
         self.weight = weight
         self.brand = brand
+        self.amount = amount
         self.image = image
         self.offer_price = offer_price
         self.is_vegetarian = is_vegetarian
@@ -70,7 +74,7 @@ class ProductScraped(object):
         self.supermarket = supermarket
         
     def __str__(self):
-        return f"Product[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, weight:{self.weight}, brand: {self.brand}, offer_price: {self.offer_price}, category: {self.category.name}, supermarket: {self.supermarket.name}, url={self.url}]"
+        return f"Product[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, weight: {self.weight}, offer_price: {self.offer_price}, supermarket: {self.supermarket.name}, amount={self.amount}]"
     
 class PackScrapped(object):
     
