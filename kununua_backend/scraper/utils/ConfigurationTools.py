@@ -28,4 +28,20 @@ class ConfigurationTools():
     @staticmethod
     def run_pagination_mercadona(selenium_utils):
         selenium_utils.get_element_by_css_selector("#root > div.grid-layout > div.grid-layout__main-container > div.grid-layout__content > div > div > button", timeout=2).click()
-		
+        
+    # -------------------------------- CARREFOUR -------------------------------- #
+    
+    @staticmethod
+    def zipcode_carrefour(selenium_utils, driver):
+        selenium_utils.get_element_by_id('onetrust-accept-btn-handler').click()
+        selenium_utils.get_element_by_css_selector("#app > div > main > div.home-view__main > div.page > div > div > div > div.hst-container-item.cms-distributor-cat > div > div > div > ul > li:nth-child(3) > div > div > a > div:nth-child(2) > h2").click()
+        selenium_utils.get_element_by_css_selector("#app > div > nav > div:nth-child(2) > div.wizard.modal-active > div > div > span").click()
+        driver.get('https://www.carrefour.es/')
+        
+    @staticmethod
+    def run_pagination_carrefour(selenium_utils, current_page):
+        
+        selenium_utils.get_element_by_css_selector(".pagination__main").click()
+        selenium_utils.get_element_by_css_selector("#app > div > main > div.plp-food-view__main > div.plp-food-view__container > div.plp-food-view__list > div.plp-food-view__results-list-container > div.plp-food-view__pagination > div > div.pagination__container > div.pagination__expandable-content > ul > li:nth-child(%d) > a" % (current_page + 1)).click()
+        print("Page passed")
+        

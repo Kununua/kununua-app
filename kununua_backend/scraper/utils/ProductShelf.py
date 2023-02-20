@@ -1,4 +1,4 @@
-import shelve, os
+import shelve, os, json
 from products.models import Product, Category, Supermarket
 from .SimilarityCalculator import SimilarityCalculator
 from ..models import PackScrapped
@@ -44,6 +44,8 @@ class ProductShelf(object):
         
         for supermarket in supermarkets:
             self.shelf['supermarkets'][str(supermarket)] = supermarket
+            
+        self._update_json_categories(products)
         
         self.close()
 
@@ -110,6 +112,31 @@ class ProductShelf(object):
             return 1
         else:
             return max(highest_pseudo_ids) + 1
+        
+    def _update_json_categories(self, products):
+        categories_to_translate = {product.category.name for product in products}
+        
+        try:
+            with open('data/categories.json', 'r', encoding='utf-8') as f:
+                categories_dict = json.load(f)
+        except FileNotFoundError:
+            raise FileNotFoundError("categories.json not found in: 'data/categories.json'")
+        
+        categories_to_translate = categories_to_translate.union(set(categories_dict.keys()))
+        new_categories_dict = {}
+        
+        for category in sorted(categories_to_translate):
+            if category not in categories_dict:
+                new_categories_dict[category.lower().capitalize()] = ''
+            else:
+                new_categories_dict[category] = categories_dict[category]
+                
+        os.remove('data/categories.json')
+        
+        new_categories_json = json.dumps(new_categories_dict, indent=4, ensure_ascii=False)
+        
+        with open('data/categories.json', 'w', encoding='utf-8') as f:
+            f.write(new_categories_json)
         
     def _standard_save(self, products, supermarkets):
         

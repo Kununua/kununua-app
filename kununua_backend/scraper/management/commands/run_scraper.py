@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from location.models import Country, Currency
 from scraper.scrapers.spain import scraper_el_jamon
 from scraper.scrapers.spain import scraper_mercadona
+from scraper.scrapers.spain import scraper_carrefour
 from scraper.utils.ProductShelf import ProductShelf
 import pandas as pd
 
@@ -11,14 +12,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         
-        # scraper_el_jamon.scraper()
+        scraper_carrefour.scraper()
         
-        shelve_util = ProductShelf('data/shelves/new-products-scraped')
-        new_shelve_util = ProductShelf('data/shelves/new-shelve-classified')
+        # shelve_util = ProductShelf('data/shelves/new-products-scraped')
+        # new_shelve_util = ProductShelf('data/shelves/new-shelve-classified')
         
-        new_shelve_util.load_data_from_shelf(shelve_util.get_shelve())
+        # new_shelve_util.load_data_from_shelf(shelve_util.get_shelve())
         
-        shelve_util.close()
-        new_shelve_util.open()
-        print(new_shelve_util)
-        new_shelve_util.close()
+        # shelve_util.close()
+        # new_shelve_util.open()
+        # print(new_shelve_util)
+        # new_shelve_util.close()
