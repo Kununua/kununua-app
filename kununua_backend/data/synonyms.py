@@ -90,7 +90,7 @@ class CategoryFinder():
                     vector2 = self.dict[w]
             except KeyError:
                 #raise KeyError(_(f'{w} not in dict'))
-                print(_(f'{w} not in dict'))#Revisar
+                #print(_(f'{w} not in dict'))#Revisar
                 continue
         if vector1 is None or vector2 is None: #Revisar
             return float("inf")
@@ -179,11 +179,13 @@ class CategoryFinder():
                 self.translations['es'][cat.name] = cat_name
             score = self._compute_synonyms(title, category, cat_name)
             result.append((cat, score))
+            if score == 0.0:
+                break
         result = sorted(result, key=lambda x: x[1], reverse=False)
         
         if not result: #Revisar
             return None
-        print(result)
+        #print(result)
         category_result = result[0][0]
         if category not in self.mem:
             self.mem[category] = {}
