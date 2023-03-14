@@ -1,5 +1,8 @@
-import shelve, os
+import shelve, os, json
 from products.models import Product, Category, Supermarket
+from .SimilarityCalculator import SimilarityCalculator
+from ..models import PackScrapped
+from data.similarities_threshold import THRESHOLDS
 
 class ProductShelf(object):
     def __init__(self, path):
@@ -7,7 +10,13 @@ class ProductShelf(object):
             raise TypeError("path must be a string")
         
         self.path = path
-        self.shelf = None
+        
+        if not os.path.exists(self.path):
+            self.shelf = shelve.open(self.path)
+            self.shelf['supermarkets'] = {}
+            self.shelf.close()
+        else:
+            self.shelf = shelve.open(self.path)
     
     def open(self):
         self.shelf = shelve.open(self.path)
@@ -22,24 +31,21 @@ class ProductShelf(object):
         self.shelf = None
         
     def create_shelf(self, products):
-        if not isinstance(products, list):
-            raise TypeError("products must be a list")
-        is_new = False
-        if not os.path.exists(self.path):
-            is_new = True
-            
+        self._validate_creation_parameters(products)
+        
         self.open()
         
-        supermarket = products[0].supermarket
+        next_pseudo_id = self._get_next_pseudo_id()
         
-        self.shelf[supermarket.name] = products
+        supermarkets = {product.supermarket.name for product in products}
         
-        if is_new:
-            self.shelf['supermarkets'] = {}
+        self._standard_save(products, supermarkets)
+        #self._classify_products(products, supermarkets, next_pseudo_id)
+        
+        for supermarket in supermarkets:
+            self.shelf['supermarkets'][str(supermarket)] = supermarket
             
-        supermarkets = self.shelf['supermarkets']
-        supermarkets[supermarket.name] = supermarket
-        self.shelf['supermarkets'] = supermarkets
+        self._update_json_categories(products)
         
         self.close()
 
@@ -65,4 +71,136 @@ class ProductShelf(object):
         Product.objects.bulk_create(products)
         
         self.close()
+        
+    def load_data_from_shelf(self, data_shelf):
+        
+        products = []
+        
+        for key in data_shelf:
+            if key != 'supermarkets':
+                products += data_shelf[key]
+        
+        self.create_shelf(products)
+        self.close()
+        
+    def __str__(self):
+        result = ''
+
+        for key in self.shelf:
+            result += "------------------ " + key.upper() + " ------------------" + '\n\n' + str([str(product) for product in self.shelf[key]][:20]) + '...\n------------------------------------------------------\n'
+            
+        return result
+        
+    # ------------------ Private methods ------------------ #
+    
+    def _validate_creation_parameters(self, products):
+        if not isinstance(products, list):
+            raise TypeError("products must be a list")
+        
+    def _get_next_pseudo_id(self):
+        
+        highest_pseudo_ids = []
+        
+        for key in self.shelf:
+            if key != 'supermarkets':
+                try:
+                    highest_pseudo_ids.append(max([product.pseudo_id for product in self.shelf[key]]))
+                except Exception:
+                    pass
+        
+        if len(highest_pseudo_ids) == 0:
+            return 1
+        else:
+            return max(highest_pseudo_ids) + 1
+        
+    def _update_json_categories(self, products):
+        categories_to_translate = {product.category.name for product in products}
+        
+        try:
+            with open('data/categories.json', 'r', encoding='utf-8') as f:
+                categories_dict = json.load(f)
+        except FileNotFoundError:
+            raise FileNotFoundError("categories.json not found in: 'data/categories.json'")
+        
+        categories_to_translate = categories_to_translate.union(set(categories_dict.keys()))
+        new_categories_dict = {}
+        
+        for category in sorted(categories_to_translate):
+            if category not in categories_dict:
+                new_categories_dict[category.lower().capitalize()] = ''
+            else:
+                new_categories_dict[category] = categories_dict[category]
                 
+        os.remove('data/categories.json')
+        
+        new_categories_json = json.dumps(new_categories_dict, indent=4, ensure_ascii=False)
+        
+        with open('data/categories.json', 'w', encoding='utf-8') as f:
+            f.write(new_categories_json)
+        
+    def _standard_save(self, products, supermarkets):
+        
+        for supermarket in supermarkets:
+            self.shelf[str(supermarket)] = [product for product in products if product.supermarket.name == supermarket]
+        
+    def _classify_products(self, products, supermarkets, next_pseudo_id):
+        
+        similarity_calculator = SimilarityCalculator()
+        
+        self.open()
+        
+        for supermarket in supermarkets:
+            
+            products_to_add = []
+            packs_to_add = []
+            
+            supermarket_products = [product for product in products if product.supermarket.name == supermarket]
+            
+            for product in supermarket_products:
+                
+                if product.is_pack:
+                    product_of_pack_id = self._search_product_of_pack_id(product, supermarket_products, similarity_calculator, supermarket)
+                    
+                    if product_of_pack_id is not None:
+                        packs_to_add.append(PackScrapped(product_id=product_of_pack_id, amount=None, price=product.price, weight=product.weight, image=product.image, url=product.url))
+                        continue
+                
+                product.pseudo_id = next_pseudo_id
+                products_to_add.append(product)
+                next_pseudo_id += 1
+            
+            self.shelf[supermarket]['products'] = products_to_add
+            self.shelf[supermarket]['packs'] = packs_to_add
+            
+        self.close()
+            
+    def _search_product_of_pack_id(self, product, supermarket_products, similarity_calculator, supermarket):
+        
+        match = None
+        highest_similarity = 0
+        for product_to_compare in supermarket_products:
+            
+            similarity_coef = similarity_calculator.compute_string_similarity(product_to_compare.name, product.name)
+            
+            if product_to_compare.category.name == product.category.name and product_to_compare.supermarket.name == product.supermarket.name and product_to_compare.is_pack == False and similarity_coef > highest_similarity and product_to_compare.weight in product.weight:
+                highest_similarity = similarity_coef
+                match = product_to_compare
+                
+        if highest_similarity > THRESHOLDS[supermarket]:
+            print(f"'{product.name}' single product is: '{match.name} ({match.weight})' ({product.weight})")
+        else:
+            match = None
+            
+        if match is None:
+            print(f"The pack {product.name} will be stored as a single product ({product.weight})")
+
+        return match.pseudo_id if match is not None else None
+        
+        
+    # ------------------ Getters and setters ------------------ #
+    
+    def get_shelve(self):
+        
+        self.open()
+        
+        return self.shelf

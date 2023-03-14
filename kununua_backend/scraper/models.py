@@ -4,12 +4,15 @@ from django.utils.translation import gettext_lazy as _
 
 class ProductScraped(object):
     
-    def __init__(self, name=None, price=None, unit_price=None, weight=None, brand=None, image=None, offer_price=None, 
+    def __init__(self, pseudo_id = None, name=None, price=None, unit_price=None, weight=None, brand=None, 
+                 amount=None, image=None, offer_price=None, 
                  is_vegetarian=False, is_gluten_free=False, 
                  is_freezed=False, is_from_country=False, is_eco=False, 
-                 is_without_sugar=False, is_without_lactose=False, url=None, category=None, 
-                 supermarket=None):
+                 is_without_sugar=False, is_without_lactose=False, url=None, 
+                 is_pack=False, category=None, supermarket=None):
         
+        if pseudo_id is not None and type(pseudo_id) is not int:
+            raise ValueError(_("Product pseudo_id must be None or float"))
         if type(name) is not str:
             raise ValueError(_("Product name cannot be None and must be a string"))
         if type(price) is not float:
@@ -20,6 +23,8 @@ class ProductScraped(object):
             raise ValueError(_("Product weight must be None or string"))
         if brand is not None and type(brand) is not str:
             raise ValueError(_("Product brand must be None or string"))
+        if amount is not None and type(amount) is not int:
+            raise ValueError(_("Product amount must be None or int"))
         if type(image) is not str:
             raise ValueError(_("Product image cannot be None and must be a string"))
         if offer_price is not None and type(offer_price) is not float:
@@ -38,19 +43,22 @@ class ProductScraped(object):
             raise ValueError(_("Product is_without_sugar cannot be None and must be a boolean"))
         if type(is_without_lactose) is not bool:
             raise ValueError(_("Product is_without_lactose cannot be None and must be a boolean"))
-        if brand is not None and type(url) is not str:
+        if url is not None and type(url) is not str:
             raise ValueError(_("Product url must be None or string"))
+        if type(is_pack) is not bool:
+            raise ValueError(_("Product is_pack flag must be boolean"))
         if type(category) is not Category:
             raise ValueError(_("Product category cannot be None and must be a Category object"))
         if type(supermarket) is not Supermarket:
             raise ValueError(_("Product supermarket cannot be None and must be a Supermarket object"))
         
-        
+        self.pseudo_id = pseudo_id
         self.name = name
         self.price = price
         self.unit_price = unit_price
         self.weight = weight
         self.brand = brand
+        self.amount = amount
         self.image = image
         self.offer_price = offer_price
         self.is_vegetarian = is_vegetarian
@@ -61,8 +69,23 @@ class ProductScraped(object):
         self.is_without_sugar = is_without_sugar
         self.is_without_lactose = is_without_lactose
         self.url = url
+        self.is_pack = is_pack
         self.category = category
         self.supermarket = supermarket
         
     def __str__(self):
-        return f"Product[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, weight:{self.weight}, brand: {self.brand}, offer_price: {self.offer_price}, category: {self.category.name}, supermarket: {self.supermarket.name}, url={self.url}]"
+        return f"Product[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, weight: {self.weight}, offer_price: {self.offer_price}, supermarket: {self.supermarket.name}, amount={self.amount}]"
+    
+class PackScrapped(object):
+    
+    def __init__(self, product_id=None, amount=None, price=None, weight=None, image=None, url=None):
+        
+        self.product_id = product_id
+        self.amount = amount
+        self.price = price
+        self.weight = weight
+        self.image = image
+        self.url = url
+        
+    def __str__(self):
+        return f"Pack[product_id: {self.product_id}, amount: {self.amount}, price: {self.price}, weight: {self.weight}, image: {self.image}, url: {self.url}]"
