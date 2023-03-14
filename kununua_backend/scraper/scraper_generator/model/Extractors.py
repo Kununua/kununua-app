@@ -338,6 +338,7 @@ class Extractors(object):
             if field.get_selector().endswith("img"):
                 result +=  "\t\t\t%s = item.select('%s')[0].get('src').strip()\n" % (field.get_name(), field.get_selector())
             elif field.get_selector().endswith("> a"):
+                result +=  "\t\t\t%s = item.select('%s')[0].get_text().strip()\n" % (field.get_name(), field.get_selector())
                 result +=  "\t\t\t%s_link = item.select('%s')[0].get('href').strip()\n" % (field.get_name(), field.get_selector())
             else:
                 result +=  "\t\t\t%s = item.select('%s')[0].get_text().strip()\n" % (field.get_name(), field.get_selector())

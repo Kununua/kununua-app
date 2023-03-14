@@ -22,9 +22,10 @@ class Supermarket(models.Model):
         
 class Category(models.Model):
     name = models.CharField(_("name"), max_length=64, unique=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
     
     def __str__(self):
-        return f"Category[name: {self.name}]"
+        return f"Category[name: {self.name}, parent: {self.parent.name if self.parent else None}]"
 
 class Product(models.Model):
     name = models.CharField(_("name"), max_length=256)

@@ -165,7 +165,7 @@ class GeneratorMercadonaStandardCase(TestCase):
         super().tearDown()
         self.driver.quit()
     
-    def test_generate_scraper_for_el_jamon(self):
+    def test_generate_scraper_for_mercadona(self):
         self.driver.get(self.generator.get_url())
         self.generator.generate()
         
@@ -178,5 +178,57 @@ class GeneratorMercadonaStandardCase(TestCase):
         for i in range(26):
             child = Node(selector="#root > div.grid-layout > div.grid-layout__sidebar > ul > li:nth-child(%d) > div > button > span > label" % (i+1), parent=root)
             result_tree.add(child)
+
+        return result_tree
+    
+class GeneratorCarrefourStandardCase(TestCase):
+    def setUp(self):
+        options = webdriver.ChromeOptions()
+        options.headless = False # Change to True if you want to run the scraper in headless mode
+        self.driver = webdriver.Chrome(options=options)
+        
+        tree_mercadona = self.generate_tree_for_carrefour()
+        
+        self.generator = ScraperGenerator(url="https://www.carrefour.es/", 
+                                          country="Spain",
+                                          tree=tree_mercadona, 
+                                          C=[".product-card__price", ".product-card__price-per-unit", ".product-card__detail > h2 > a", ".product-card__image"], 
+                                          driver=self.driver, 
+                                          elem_details=None, 
+                                          num_pag=None,
+                                          common_parent_selector=".product-card")
+    
+    def tearDown(self):           
+        super().tearDown()
+        self.driver.quit()
+    
+    def test_generate_scraper_for_carrefour(self):
+        self.driver.get(self.generator.get_url())
+        self.generator.generate()
+        
+    def generate_tree_for_carrefour(self):
+        
+        result_tree = Tree()
+        
+        number_of_subcategories = {
+            'Productos Frescos': 9,
+            'La despensa': 9,
+            'Bebidas': 8,
+            'Limplieza y Hogar': 12,
+            'Perfumería e Higiene': 8,
+            'Bebé': 5,
+            'Mascotas': 5,
+            'Parafarmacia': 8,
+        }
+        
+        root = Node(selector="#app > div > main > div.home-view__main > div.page > div > div > div > div.hst-container-item.cms-distributor-cat > div > div > div > ul > li:nth-child(3) > div > div > a > div:nth-child(2) > h2", parent=None)
+        result_tree.add(root)
+        
+        for i in range(3, 11):
+            child = Node(selector="#app > div > nav > div:nth-child(2) > div.home-food-view__nav > div.horizontal-navigation > div > div.carousel__elements > div > div:nth-child(%d)" % (i), parent=root)
+            result_tree.add(child)
+            for j in range(list(number_of_subcategories.values())[i-3]):
+                grandchild = Node(selector="#app > div > nav > div.plp-food-view__nav > div.horizontal-navigation.plp-food-view__nav-level--first > div.carousel.horizontal-navigation__second-level--parent > div.carousel__elements > div > div:nth-child(%d)" % (j+1), parent=child)
+                result_tree.add(grandchild)
 
         return result_tree

@@ -11,7 +11,6 @@ from django.conf import settings
 
 class ScraperGenerator(object):
     
-    # TODO se ha añadido el pais como parametro para poder hacer el scraping de cualquier pais
     def __init__(self, url, country, tree, C, driver, elem_details=None, num_pag=None, common_parent_selector=None):
         
         self.set_url(url)
@@ -34,14 +33,14 @@ class ScraperGenerator(object):
         
         # zipcode configuration section
         
-        ConfigurationTools.zipcode_mercadona(selenium_utils)
+        ConfigurationTools.zipcode_carrefour(selenium_utils, self.driver)
         
         # -----------------------------
         
         tree_paths = self.get_tree().calculate_tree_paths()
         main_scraper += "\ttree_paths = %s \n" % (tree_paths)
         main_scraper += "\n"
-        main_scraper += "\tfor path in tree_paths: \n"
+        main_scraper += "\tfor path in tqdm(tree_paths): \n"
         main_scraper += "\t\textract_data('%s', path, driver, selenium_utils) \n" % (self.get_url())
         main_scraper += "\n"
         main_scraper += "\tdriver.quit()"
@@ -131,8 +130,11 @@ class ScraperGenerator(object):
         result = "from bs4 import BeautifulSoup\n"
         result += "from ...utils.SeleniumUtils import SeleniumUtils\n"
         result += "from selenium import webdriver\n"
-        result += "from ...configuration_tools import ConfigurationTools\n"
-        result += "import itertools\n"
+        result += "from ...utils.ConfigurationTools import ConfigurationTools\n"
+        result += "from ...models import ProductScraped\n"
+        result += "from location.models import Country\n"
+        result += "from products.models import Supermarket, Category\n"
+        result += "from tqdm import tqdm\n"
         result += "\n"
         
         return result
