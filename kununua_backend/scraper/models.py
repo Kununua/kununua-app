@@ -74,9 +74,9 @@ class ProductScraped(object):
         self.supermarket = supermarket
         
     def __str__(self):
-        return f"Product[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, weight: {self.weight}, offer_price: {self.offer_price}, supermarket: {self.supermarket.name}, amount={self.amount}]"
+        return f"ProductScraped[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, weight: {self.weight}, offer_price: {self.offer_price}, supermarket: {self.supermarket.name}, amount={self.amount}]"
     
-class PackScrapped(object):
+class PackScraped(object):
     
     def __init__(self, product_id=None, amount=None, price=None, weight=None, image=None, url=None):
         
@@ -88,4 +88,4 @@ class PackScrapped(object):
         self.url = url
         
     def __str__(self):
-        return f"Pack[product_id: {self.product_id}, amount: {self.amount}, price: {self.price}, weight: {self.weight}, image: {self.image}, url: {self.url}]"
+        return f"PackScraped[product_id: {self.product_id}, amount: {self.amount}, price: {self.price}, weight: {self.weight}, image: {self.image}, url: {self.url}]"
