@@ -1,9 +1,13 @@
 import shelve, os, json
 from products.models import Product, Category, Supermarket
-from .SimilarityCalculator import SimilarityCalculator
+from location.models import Country
+from .SimilarityCalculator import SimilarityCalculator as sm
 from ..models import PackScrapped
 from data.similarities_threshold import THRESHOLDS
+from data.synonyms import CategoryFinder as cf
 
+CategoryFinder = cf()
+SimilarityCalculator = sm()
 class ProductShelf(object):
     def __init__(self, path):
         if not isinstance(path, str):
@@ -12,11 +16,9 @@ class ProductShelf(object):
         self.path = path
         
         if not os.path.exists(self.path):
-            self.shelf = shelve.open(self.path)
+            self.open()
             self.shelf['supermarkets'] = {}
-            self.shelf.close()
-        else:
-            self.shelf = shelve.open(self.path)
+            self.close()
     
     def open(self):
         self.shelf = shelve.open(self.path)
@@ -39,8 +41,8 @@ class ProductShelf(object):
         
         supermarkets = {product.supermarket.name for product in products}
         
-        self._standard_save(products, supermarkets)
-        #self._classify_products(products, supermarkets, next_pseudo_id)
+        #self._standard_save(products, supermarkets)
+        self._classify_products(products, supermarkets, next_pseudo_id)
         
         for supermarket in supermarkets:
             self.shelf['supermarkets'][str(supermarket)] = supermarket
@@ -51,26 +53,61 @@ class ProductShelf(object):
 
     def read_shelf(self):
         self.open()
-        products = []
-        for key in self.shelf:
-            if key != 'supermarkets': 
-                elements = self.shelf[key]
-                supermarket = self.shelf['supermarkets'][key]
-                try:
-                    supermarket, _ = Supermarket.objects.get_or_create(name=supermarket.name, country=supermarket.country, zipcode=supermarket.zipcode, main_url=supermarket.main_url)
-                    for category, product in elements:
-                        if not Product.objects.filter(url=product.url).exists():
-                            category_name = category.name if isinstance(category, Category) else category
-                            category, _ = Category.objects.get_or_create(name=category_name)
-                            product.category = category
-                            product.supermarket = supermarket
-                            products.append(product)
-                except ValueError:
-                    print("Error creando los productos")
-                    
-        Product.objects.bulk_create(products)
-        
+        self._get_matchings()
+                
         self.close()
+    
+    def _get_matchings(self):
+        products = []
+        while True:
+            keys = [key for key in self.shelf.keys() if key != 'supermarkets']
+            if not keys or len(keys)==1:
+                break
+            first_key = keys[0]
+            keys.remove(first_key)
+            for product in  self.shelf[first_key]["products"]:
+                if product in products:
+                    continue
+                has_match = False
+                matchings = []
+                for key in keys:
+                    #products_per_category = [product for product in self.shelf[key]["products"] if product.category == product.category]
+                    for product_to_compare in self.shelf[key]['products']:
+                        # if product_to_compare.category != product.category:
+                        #     continue
+                        if product_to_compare in products:
+                            continue
+                        name_similarity = SimilarityCalculator.compute_string_similarity(product.name.lower().strip(), product_to_compare.name.lower().strip())
+                        weight_similarity = None
+                        brand_similarity = None
+                        
+                        if product.weight and product_to_compare.weight:
+                            weight_similarity = SimilarityCalculator.compute_string_similarity(product.weight.replace(" ", "").lower().strip(), product_to_compare.weight.replace(" ", "").lower().strip())
+
+                        if product.brand and product_to_compare.brand:
+                            brand_similarity = SimilarityCalculator.compute_string_similarity(product.brand.lower().strip(), product_to_compare.brand.lower().strip())
+                            
+                        if name_similarity > 0.8 and (weight_similarity==None or weight_similarity > 0.8) and (brand_similarity==None or brand_similarity > 0.8):
+                            print(f"Product: {product}; Matching: {product_to_compare}")
+                            print(f"Name similarity: {name_similarity}; Weight similarity: {weight_similarity}; Brand similarity: {brand_similarity}")
+                            products.append(product_to_compare)
+                            matchings.append(product_to_compare)
+                            has_match = True
+                            print("#"*50)
+                            break
+                if has_match:
+                    #Product.objects.create(name=product.name, brand=product.brand, image=product.image, category=product.category)
+                    products.append(product)
+    
+    def _create_supermarket(self, key):
+        supermarket = None
+        if Supermarket.objects.filter(name=key).exists():
+            supermarket = Supermarket.objects.get(name=key)
+        else:
+            main_url = "https://www."+key.lower().replace(" ", "").strip()+".es" if "El Jamón" not in key else "https://www.supermercadoseljamon.com"
+            supermarket = Supermarket.objects.create(name=key, zipcode="41009", main_url=main_url, country=Country.objects.get(name="Spain"))
+        
+        return supermarket
         
     def load_data_from_shelf(self, data_shelf):
         
@@ -79,6 +116,8 @@ class ProductShelf(object):
         for key in data_shelf:
             if key != 'supermarkets':
                 products += data_shelf[key]
+        
+        data_shelf.close()
         
         self.create_shelf(products)
         self.close()
@@ -98,7 +137,6 @@ class ProductShelf(object):
             raise TypeError("products must be a list")
         
     def _get_next_pseudo_id(self):
-        
         highest_pseudo_ids = []
         
         for key in self.shelf:
@@ -147,8 +185,6 @@ class ProductShelf(object):
         
         similarity_calculator = SimilarityCalculator()
         
-        self.open()
-        
         for supermarket in supermarkets:
             
             products_to_add = []
@@ -168,11 +204,9 @@ class ProductShelf(object):
                 product.pseudo_id = next_pseudo_id
                 products_to_add.append(product)
                 next_pseudo_id += 1
-            
-            self.shelf[supermarket]['products'] = products_to_add
-            self.shelf[supermarket]['packs'] = packs_to_add
-            
-        self.close()
+                
+            #if supermarket not in self.shelf:
+            self.shelf[supermarket] = {"products": products_to_add, "packs": packs_to_add}
             
     def _search_product_of_pack_id(self, product, supermarket_products, similarity_calculator, supermarket):
         
@@ -181,10 +215,12 @@ class ProductShelf(object):
         for product_to_compare in supermarket_products:
             
             similarity_coef = similarity_calculator.compute_string_similarity(product_to_compare.name, product.name)
-            
-            if product_to_compare.category.name == product.category.name and product_to_compare.supermarket.name == product.supermarket.name and product_to_compare.is_pack == False and similarity_coef > highest_similarity and product_to_compare.weight in product.weight:
-                highest_similarity = similarity_coef
-                match = product_to_compare
+            try:
+                if product_to_compare.category.name == product.category.name and product_to_compare.supermarket.name == product.supermarket.name and product_to_compare.is_pack == False and similarity_coef > highest_similarity: #and product_to_compare.weight in product.weight:
+                    highest_similarity = similarity_coef
+                    match = product_to_compare
+            except Exception:
+                print(f"Error en la comparación de productos con el producto {product} y el producto a comparar {product_to_compare}")
                 
         if highest_similarity > THRESHOLDS[supermarket]:
             print(f"'{product.name}' single product is: '{match.name} ({match.weight})' ({product.weight})")
