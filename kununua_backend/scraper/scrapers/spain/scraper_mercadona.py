@@ -84,5 +84,5 @@ def scraper():
   
 	driver.quit()
  
-	shelve_util = ProductShelf('data/shelves/new-products-scraped')
+	shelve_util = ProductShelf('data/shelves/productos.dat')
 	shelve_util.create_shelf(products)
