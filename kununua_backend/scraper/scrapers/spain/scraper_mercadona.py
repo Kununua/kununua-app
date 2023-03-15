@@ -2,7 +2,6 @@ from bs4 import BeautifulSoup
 from ...utils.SeleniumUtils import SeleniumUtils
 from selenium import webdriver
 from ...utils.ConfigurationTools import ConfigurationTools
-from ...utils.ProductShelf import ProductShelf
 from ...models import ProductScraped
 from products.models import Supermarket, Category
 from location.models import Country
@@ -57,7 +56,7 @@ def extract_data(url, path, driver, selenium_utils):
 
 	return products
 
-def scraper():
+def scraper(sqlite_api):
 	driver_options = webdriver.ChromeOptions()
 	driver_options.headless = False
 	driver = webdriver.Chrome(options=driver_options)
@@ -84,5 +83,4 @@ def scraper():
   
 	driver.quit()
  
-	shelve_util = ProductShelf('data/shelves/productos.dat')
-	shelve_util.create_shelf(products)
+	sqlite_api.add_products_scraped(products)	

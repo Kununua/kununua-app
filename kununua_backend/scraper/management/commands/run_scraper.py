@@ -3,7 +3,7 @@ from location.models import Country, Currency
 from scraper.scrapers.spain import scraper_el_jamon
 from scraper.scrapers.spain import scraper_mercadona
 from scraper.scrapers.spain import scraper_carrefour
-from scraper.utils.ProductShelf import ProductShelf
+from scraper.utils.ScraperSQLiteAPI import ScraperSQLiteAPI
 import pandas as pd
 
 class Command(BaseCommand):
@@ -12,7 +12,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         
-        scraper_carrefour.scraper()
+        API = ScraperSQLiteAPI()
+        
+        scraper_mercadona.scraper(API)
+        
         
         # shelve_util = ProductShelf('data/shelves/new-products-scraped')
         # new_shelve_util = ProductShelf('data/shelves/new-shelve-classified')

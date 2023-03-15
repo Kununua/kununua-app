@@ -72,3 +72,19 @@ class SQLiteAPI(object):
             self.conn.commit()
         except sqlite3.OperationalError as e:
             print(e)
+    
+    def select_data(self, table_name, columns, condition):
+        if not isinstance(table_name, str):
+            raise ValueError(_("Table name must be a string"))
+        if not isinstance(columns, str):
+            raise ValueError(_("Columns must be a string"))
+        if not isinstance(condition, str) and condition is not None:
+            raise ValueError(_("Condition must be a string"))
+        try:
+            if not condition:
+                self.cursor.execute("SELECT {} FROM {}".format(columns, table_name))
+            else:
+                self.cursor.execute("SELECT {} FROM {} WHERE {}".format(columns, table_name, condition))
+            return self.cursor.fetchall()
+        except sqlite3.OperationalError as e:
+            print(e)
