@@ -2,7 +2,7 @@ import shelve, os, json
 from products.models import Product, Category, Supermarket
 from location.models import Country
 from .SimilarityCalculator import SimilarityCalculator as sm
-from ..models import PackScrapped
+from ..models import PackScraped
 from data.similarities_threshold import THRESHOLDS
 from data.synonyms import CategoryFinder as cf
 
@@ -198,7 +198,7 @@ class ProductShelf(object):
                     product_of_pack_id = self._search_product_of_pack_id(product, supermarket_products, similarity_calculator, supermarket)
                     
                     if product_of_pack_id is not None:
-                        packs_to_add.append(PackScrapped(product_id=product_of_pack_id, amount=None, price=product.price, weight=product.weight, image=product.image, url=product.url))
+                        packs_to_add.append(PackScraped(product_id=product_of_pack_id, amount=None, price=product.price, weight=product.weight, image=product.image, url=product.url))
                         continue
                 
                 product.pseudo_id = next_pseudo_id

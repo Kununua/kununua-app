@@ -2,7 +2,6 @@ from bs4 import BeautifulSoup
 from ...utils.SeleniumUtils import SeleniumUtils
 from selenium import webdriver
 from ...utils.ConfigurationTools import ConfigurationTools
-from ...utils.ProductShelf import ProductShelf
 from ...models import ProductScraped
 from products.models import Supermarket, Category
 from location.models import Country
@@ -45,7 +44,7 @@ def extract_data(url, path, driver, selenium_utils):
 			is_pack = "pack" in item.select(".product-price__extra-price")[0].get_text().lower()
 			#url = get_element_url(selenium_utils, driver, element, grid_url)
 
-			product = ProductScraped(name=name, price=price, weight=weight, image=image, is_pack=is_pack, url=None, supermarket=supermarket, category=Category(name=category))
+			product = ProductScraped(name=name, price=price, weight=weight, image=image, is_pack=is_pack, url=None, supermarket=supermarket, category=category)
    
 			products.append(product)
 		# Finish pagination configuration in this section
@@ -57,13 +56,16 @@ def extract_data(url, path, driver, selenium_utils):
 
 	return products
 
-def scraper():
+def scraper(sqlite_api):
 	driver_options = webdriver.ChromeOptions()
 	driver_options.headless = False
 	driver = webdriver.Chrome(options=driver_options)
 	selenium_utils = SeleniumUtils(timeout=10, driver=driver)
 	
 	driver.get('https://www.mercadona.es')
+ 
+	sql_supermarket = {"name": supermarket.name, "zipcode": supermarket.zipcode, "main_url": supermarket.main_url, "country": supermarket.country.code}
+	sqlite_api._add_supermarket(sql_supermarket)
 	
 	#Include the zipcode configuration in this section
 	
@@ -84,5 +86,4 @@ def scraper():
   
 	driver.quit()
  
-	shelve_util = ProductShelf('data/shelves/productos.dat')
-	shelve_util.create_shelf(products)
+	sqlite_api.add_products_scraped(products)	

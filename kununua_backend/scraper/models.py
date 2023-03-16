@@ -47,8 +47,8 @@ class ProductScraped(object):
             raise ValueError(_("Product url must be None or string"))
         if type(is_pack) is not bool:
             raise ValueError(_("Product is_pack flag must be boolean"))
-        if type(category) is not Category:
-            raise ValueError(_("Product category cannot be None and must be a Category object"))
+        if type(category) is not str:
+            raise ValueError(_("Product category cannot be None and must be a string"))
         if type(supermarket) is not Supermarket:
             raise ValueError(_("Product supermarket cannot be None and must be a Supermarket object"))
         
@@ -74,13 +74,16 @@ class ProductScraped(object):
         self.supermarket = supermarket
         
     def __str__(self):
-        return f"Product[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, weight: {self.weight}, offer_price: {self.offer_price}, supermarket: {self.supermarket.name}, amount={self.amount}]"
+        return f"ProductScraped[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, weight: {self.weight}, offer_price: {self.offer_price}, supermarket: {self.supermarket.name}, amount={self.amount}]"
     
-class PackScrapped(object):
+class PackScraped(object):
     
-    def __init__(self, product_id=None, amount=None, price=None, weight=None, image=None, url=None):
+    def __init__(self, product_scraped=None, amount=None, price=None, weight=None, image=None, url=None):
         
-        self.product_id = product_id
+        if product_scraped is not None and type(product_scraped) is not ProductScraped:
+            raise ValueError(_("Pack product_scraped cannot be None and must be a ProductScraped object"))
+        
+        self.product_scraped = product_scraped
         self.amount = amount
         self.price = price
         self.weight = weight
@@ -88,4 +91,4 @@ class PackScrapped(object):
         self.url = url
         
     def __str__(self):
-        return f"Pack[product_id: {self.product_id}, amount: {self.amount}, price: {self.price}, weight: {self.weight}, image: {self.image}, url: {self.url}]"
+        return f"PackScraped[product_scraped: {self.product_scraped}, amount: {self.amount}, price: {self.price}, weight: {self.weight}, image: {self.image}, url: {self.url}]"
