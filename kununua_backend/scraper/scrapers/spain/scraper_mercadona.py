@@ -44,7 +44,7 @@ def extract_data(url, path, driver, selenium_utils):
 			is_pack = "pack" in item.select(".product-price__extra-price")[0].get_text().lower()
 			#url = get_element_url(selenium_utils, driver, element, grid_url)
 
-			product = ProductScraped(name=name, price=price, weight=weight, image=image, is_pack=is_pack, url=None, supermarket=supermarket, category=Category(name=category))
+			product = ProductScraped(name=name, price=price, weight=weight, image=image, is_pack=is_pack, url=None, supermarket=supermarket, category=category)
    
 			products.append(product)
 		# Finish pagination configuration in this section
@@ -63,6 +63,9 @@ def scraper(sqlite_api):
 	selenium_utils = SeleniumUtils(timeout=10, driver=driver)
 	
 	driver.get('https://www.mercadona.es')
+ 
+	sql_supermarket = {"name": supermarket.name, "zipcode": supermarket.zipcode, "main_url": supermarket.main_url, "country": supermarket.country.code}
+	sqlite_api._add_supermarket(sql_supermarket)
 	
 	#Include the zipcode configuration in this section
 	
