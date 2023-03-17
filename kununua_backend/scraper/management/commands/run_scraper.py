@@ -14,4 +14,4 @@ class Command(BaseCommand):
         
         API = ScraperSQLiteAPI()
         
-        scraper_mercadona.scraper(API)
+        scraper_el_jamon.scraper(API)

@@ -94,7 +94,7 @@ def extract_data(url, path, driver, selenium_utils):
                         is_pack = False
 
                     product = ProductScraped(name=name, price=price, unit_price=unit_price, weight=weight, brand=None, amount=amount, offer_price=offer_price,
-                                            image=image, is_pack=is_pack, url=product_url, supermarket=supermarket, category=Category(name=category))
+                                            image=image, is_pack=is_pack, url=product_url, supermarket=supermarket, category=category)
 
                     products.append(product)
                     
