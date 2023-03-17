@@ -4,6 +4,7 @@ from scraper.scrapers.spain import scraper_el_jamon
 from scraper.scrapers.spain import scraper_mercadona
 from scraper.scrapers.spain import scraper_carrefour
 from scraper.utils.ScraperSQLiteAPI import ScraperSQLiteAPI
+from scraper.utils.MatchingUtil import MatchingUtil
 import pandas as pd
 
 class Command(BaseCommand):
@@ -14,4 +15,6 @@ class Command(BaseCommand):
         
         API = ScraperSQLiteAPI()
         
-        scraper_mercadona.scraper(API)
+        matcher = MatchingUtil(API.get_products_scraped())
+        
+        matcher.post_process_data()

@@ -27,9 +27,15 @@ class Category(models.Model):
     def __str__(self):
         return f"Category[name: {self.name}, parent: {self.parent.name if self.parent else None}]"
 
+class Brand(models.Model):
+    name = models.CharField(_("name"), max_length=64, unique=True, default=_("Marca blanca"))
+    
+    def __str__(self):
+        return f"Brand[name: {self.name}]"
+
 class Product(models.Model):
     name = models.CharField(_("name"), max_length=256)
-    brand = models.CharField(_("brand"), max_length=64, default=_("Marca blanca"))
+    brand = models.ForeignKey(Brand, on_delete=models.DO_NOTHING, null=True)
     image = models.ImageField(_("image"), upload_to="products/images/", null=True)
     is_vegetarian = models.BooleanField(_("is_vegetarian"), default=False, null=True)
     is_gluten_free = models.BooleanField(_("is_gluten_free"), default=False, null=True)

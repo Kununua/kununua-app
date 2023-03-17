@@ -5,7 +5,6 @@ from ...utils.ConfigurationTools import ConfigurationTools
 from products.models import Supermarket, Category
 from ...models import ProductScraped
 from location.models import Country
-from ...utils.ProductShelf import ProductShelf
 from tqdm import tqdm
 
 supermarket = Supermarket(name="El Jamón", zipcode="41009", main_url="https://www.supermercadoseljamon.com/inicio", country=Country.objects.get(code='ESP'))
@@ -95,5 +94,3 @@ def scraper():
 
 	driver.quit()
 
-	shelve_util = ProductShelf('data/shelves/productos.dat')
-	shelve_util.create_shelf(products)

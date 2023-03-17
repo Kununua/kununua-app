@@ -1,9 +1,8 @@
-import os
+import os, json
 from django.utils.translation import gettext as _
 from scraper.utils.SQLiteAPI import SQLiteAPI
-from scraper.models import ProductScraped, PackScraped
-from products.models import Supermarket
-from location.models import Country, Currency
+from scraper.models import ProductScraped
+from location.models import Currency
 import pandas as pd
 
 DB_PATH = os.path.join("data", "db", "scrapers.db")
@@ -26,7 +25,7 @@ class ScraperSQLiteAPI(SQLiteAPI):
         self.create_table(COUNTRY_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, spanish_name TEXT NOT NULL, english_name TEXT NOT NULL, code TEXT NOT NULL, phone_code TEXT, currency INTEGER NULL, FOREIGN KEY(currency) REFERENCES currencies(id)")
         self.create_table(SUPERMARKET_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, zipcode TEXT NOT NULL, main_url TEXT NOT NULL, country INTEGER NOT NULL, FOREIGN KEY(country) REFERENCES countries(id)")
         self.create_table(PRODUCT_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, price REAL NOT NULL, unit_price TEXT, weight TEXT, brand TEXT, amount INTEGER, image TEXT NOT NULL, offer_price REAL, is_vegetarian INTEGER NOT NULL, is_gluten_free INTEGER NOT NULL, is_freezed INTEGER NOT NULL, is_from_country INTEGER NOT NULL, is_eco INTEGER NOT NULL, is_without_sugar INTEGER NOT NULL, is_without_lactose INTEGER NOT NULL, url TEXT, is_pack INTEGER NOT NULL, category TEXT NOT NULL, supermarket INTEGER NOT NULL, FOREIGN KEY(supermarket) REFERENCES supermarkets(id)")
-        self.create_table(PACK_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, amount INTEGER NOT NULL, price REAL NOT NULL, weight TEXT, image TEXT NOT NULL, url TEXT, product_scraped INTEGER NOT NULL, FOREIGN KEY(id) REFERENCES productsScraped(id)")
+        self.create_table(PACK_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, amount INTEGER NOT NULL, price REAL NOT NULL, weight TEXT, image TEXT NOT NULL, url TEXT, product_scraped INTEGER NOT NULL, FOREIGN KEY(product_scraped) REFERENCES productsScraped(id)")
         
         if self.select_data(COUNTRY_TABLE_NAME, "COUNT(*)", None)[0][0] == 0:
             self._populate_initial_data()
@@ -49,6 +48,8 @@ class ScraperSQLiteAPI(SQLiteAPI):
     def add_products_scraped(self, products):
         if not isinstance(products, list):
             raise ValueError(_("Products must be a list"))
+        
+        self._update_json_categories(products)
         for product in products:
             self._add_product_scraped(product)
     
@@ -79,6 +80,31 @@ class ScraperSQLiteAPI(SQLiteAPI):
         columns = "(name, price, unit_price, weight, brand, amount, image, offer_price, is_vegetarian, is_gluten_free, is_freezed, is_from_country, is_eco, is_without_sugar, is_without_lactose, url, is_pack, category, supermarket)"
         
         self.insert_data(PRODUCT_TABLE_NAME + columns, data)
+        
+    def _update_json_categories(self, products):
+        categories_to_translate = {product.category for product in products}
+        
+        try:
+            with open('data/categories.json', 'r', encoding='utf-8') as f:
+                categories_dict = json.load(f)
+        except FileNotFoundError:
+            raise FileNotFoundError("categories.json not found in: 'data/categories.json'")
+        
+        categories_to_translate = categories_to_translate.union(set(categories_dict.keys()))
+        new_categories_dict = {}
+        
+        for category in sorted(categories_to_translate):
+            if category not in categories_dict:
+                new_categories_dict[category.lower().capitalize()] = ''
+            else:
+                new_categories_dict[category] = categories_dict[category]
+                
+        os.remove('data/categories.json')
+        
+        new_categories_json = json.dumps(new_categories_dict, indent=4, ensure_ascii=False)
+        
+        with open('data/categories.json', 'w', encoding='utf-8') as f:
+            f.write(new_categories_json)
     
     @staticmethod
     def _parse_flag(flag):
@@ -99,17 +125,6 @@ class ScraperSQLiteAPI(SQLiteAPI):
         if value is not None:
             return str(value)
         return "null"
-    
-    def add_packs_scraped(self, packs):
-        if not isinstance(packs, list):
-            raise ValueError(_("Packs must be a list"))
-        for pack in packs:
-            self._add_pack_scraped(pack)
-        
-    def _add_pack_scraped(self, pack):
-        if not isinstance(pack, PackScraped):
-            raise ValueError(_("Pack must be a PackScraped object"))
-        self.insert_data(PACK_TABLE_NAME, pack.__dict__)
     
     def add_supermarkets(self, supermarkets):
         if not isinstance(supermarkets, list):
@@ -194,7 +209,7 @@ class ScraperSQLiteAPI(SQLiteAPI):
             raise ValueError(_("Columns must be a string"))
         if condition is not None and not isinstance(condition, str):
             raise ValueError(_("Condition must be a string"))
-        return self.select_data(SUPERMARKET_TABLE_NAME, columns, condition)
+        return self.select_data(SUPERMARKET_TABLE_NAME + " LEFT JOIN " + COUNTRY_TABLE_NAME, columns, condition)
 
     def get_countries(self, columns="*", condition=None):
         if not isinstance(columns, str):
