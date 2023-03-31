@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from ...utils.SeleniumUtils import SeleniumUtils
 from selenium import webdriver
 from ...utils.ConfigurationTools import ConfigurationTools
-from products.models import Supermarket, Category
+from products.models import Supermarket
 from ...models import ProductScraped
 from location.models import Country
 from tqdm import tqdm
