@@ -16,6 +16,13 @@ supermarket = Supermarket(name="Mercadona", zipcode="41009", main_url="https://w
 #     selenium_utils.get_element_by_css_selector('.product-cell')
 #     return url
 
+def supermarket_in_db(supermarket, sqlite_api):
+		supermarkets = sqlite_api.get_supermarkets()
+		for supermarket_db in supermarkets:
+			if supermarket_db[1] == supermarket.name and supermarket_db[2] == supermarket.zipcode and supermarket_db[3] == supermarket.main_url:
+				return True
+		return False
+
 def extract_data(url, path, driver, selenium_utils):
 	driver.get(url)
 	selenium_utils.navigate_to(path)
@@ -64,8 +71,9 @@ def scraper(sqlite_api):
 	
 	driver.get('https://www.mercadona.es')
  
-	sql_supermarket = {"name": supermarket.name, "zipcode": supermarket.zipcode, "main_url": supermarket.main_url, "country": supermarket.country.code}
-	sqlite_api._add_supermarket(sql_supermarket)
+	if not supermarket_in_db(supermarket, sqlite_api):
+		sql_supermarket = {"name": supermarket.name, "zipcode": supermarket.zipcode, "main_url": supermarket.main_url, "country": supermarket.country.code}
+		sqlite_api._add_supermarket(sql_supermarket)
 	
 	#Include the zipcode configuration in this section
 	
@@ -86,4 +94,4 @@ def scraper(sqlite_api):
   
 	driver.quit()
  
-	sqlite_api.add_products_scraped(products)	
+	sqlite_api.add_products_scraped(products)
