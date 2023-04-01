@@ -1,0 +1,64 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>Acme NFT</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/matching_training.css' %}">
+
+</head>
+
+<body>
+
+    <div class="products-container">
+        <div class="product">
+            <img src="{{product1.image}}" alt="Producto1">
+            <span><bold>Nombre: </bold>{{ product1.name }}</span>
+            <span><bold>Precio: </bold>{{ product1.price }}</span>
+            <span><bold>Precio unitario: </bold>{{ product1.unit_price }}</span>
+            <span><bold>Peso: </bold>{{ product1.weight }}</span>
+            <span><bold>Marca: </bold>{{ product1.brand }}</span>
+            <span><bold>Precio oferta: </bold>{{ product1.offer_price }}</span>
+            <span><bold>Categoría: </bold>{{ product1.category }}</span>
+            <span><bold>Supermercado: </bold>{{ product1.supermarket }}</span>
+            <a target=”_blank” href="{{ product2.url }}">Enlace a web</a>
+        </div>
+        <h1>VS</h1>
+        <div class="product">
+            <img src="{{product2.image}}" alt="Producto1">
+            <span><bold>Nombre: </bold>{{ product2.name }}</span>
+            <span><bold>Precio: </bold>{{ product2.price }}</span>
+            <span><bold>Precio unitario: </bold>{{ product2.unit_price }}</span>
+            <span><bold>Peso: </bold>{{ product2.weight }}</span>
+            <span><bold>Marca: </bold>{{ product2.brand }}</span>
+            <span><bold>Precio oferta: </bold>{{ product2.offer_price }}</span>
+            <span><bold>Categoría: </bold>{{ product2.category }}</span>
+            <span><bold>Supermercado: </bold>{{ product2.supermarket }}</span>
+            <a target=”_blank” href="{{ product2.url }}">Enlace a web</a>
+        </div>
+    </div>
+
+    <h2>¿Hacen match estos productos?</h2>
+
+    <div class="buttons-container">
+        <form action="{% url 'scraper:matching_training' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="prod1_id" value="{{ product1.id }}">
+            <input type="hidden" name="prod2_id" value="{{ product2.id }}">
+            <input type="hidden" name="matching" value="False">
+            <input type="submit" id="no-button" value="NO">
+        </form>
+        
+        <form action="{% url 'scraper:matching_training' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="prod1_id" value="{{ product1.id }}">
+            <input type="hidden" name="prod2_id" value="{{ product2.id }}">
+            <input type="hidden" name="matching" value="True">
+            <input type="submit" id="yes-button" value="SÍ">
+        </form>
+    </body>
+
+</html>
