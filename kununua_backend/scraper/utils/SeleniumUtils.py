@@ -41,7 +41,7 @@ class SeleniumUtils(object):
         if not isinstance(text, str):
             raise TypeError("text must be a string")
         
-        return WebDriverWait(self.driver, timeout=self.timeout).until(lambda d: d.find_element(By.xpath("//*[text()='%s']" % text)))
+        return WebDriverWait(self.driver, timeout=self.timeout).until(lambda d: d.find_element(By.XPATH, "//*[text()='%s']" % text))
     
     def navigate_to(self, path):
         

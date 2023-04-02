@@ -5,6 +5,7 @@ from scraper.scrapers.spain import scraper_mercadona
 from scraper.scrapers.spain import scraper_carrefour
 from scraper.utils.ScraperSQLiteAPI import ScraperSQLiteAPI
 import pandas as pd
+import time
 
 class Command(BaseCommand):
         
@@ -14,4 +15,7 @@ class Command(BaseCommand):
         
         API = ScraperSQLiteAPI()
         
-        scraper_mercadona.scraper(API)
+        start = time.time()
+        scraper_carrefour.scraper(API)
+        end = time.time()
+        print(f"Time: {end - start}")
