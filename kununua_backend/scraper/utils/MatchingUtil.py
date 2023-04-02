@@ -6,6 +6,7 @@ from scraper.models import ProductScraped, PackScraped
 from scraper.utils.SimilarityCalculator import SimilarityCalculator
 from data.similarities_threshold import THRESHOLDS, NAME_SIMILARITY_THRESHOLD
 from scraper.utils.ScraperSQLiteAPI import ScraperSQLiteAPI
+from scraper.utils.ClassificatorSQLiteAPI import ClassificatorSQLiteAPI
 
 DISTANCE_UNITS = ["km", "m", "dm", "cm", "mm"]
 VOLUME_UNITS = ["kl", "l", "dl", "cl", "ml"]
@@ -14,6 +15,7 @@ MASS_UNITS = ["kg", "g", "dg", "cg", "mg"]
 class MatchingUtil(object):
     def __init__(self, sqlite_products):
         self.sqlite_products = sqlite_products
+        self.classificator_api = ClassificatorSQLiteAPI()
         self.similarity = SimilarityCalculator()
         self.packs_scraped = []
         self.supermarkets = []
@@ -24,7 +26,6 @@ class MatchingUtil(object):
         self.nlp = stanza.Pipeline('es')
         
     def post_process_data(self):
-        
         print("Phase 0: Loading supermarkets into postgres...")
         self._save_supermarkets()
         print("Phase 1: Parsing sqlite result to products objects...")
@@ -39,6 +40,24 @@ class MatchingUtil(object):
         self._products_matching()
         # print("Phase 6: Translating and injecting into postgres...")
         print("Done!")
+        
+    def post_process_data_for_training(self):
+        print("Phase 0: Loading supermarkets into postgres...")
+        self._save_supermarkets()
+        print("Phase 1: Parsing sqlite result to products objects...")
+        self._parse_sqlite_products(self.sqlite_products)
+        print("Phase 2: Performing brands matching...")
+        self._brands_matching()
+        print("Phase 3: Performing packs matching...")
+        self._packs_matching()
+        print("Phase 4: Performing categories matching...")
+        self._categories_matching()
+        print("Phase 5: Storing products in new db...")
+        self._stores_data(self.products_scraped)
+        print("Phase 6: Storing possible matches in new db...")
+        self._stores_possible_matches()
+        print("Done!")
+        
         
         
     # ------------------------------- PRIVATE FUNCTIONS -------------------------------
@@ -299,7 +318,13 @@ class MatchingUtil(object):
         if weight1 == weight2:
             return True
         
-        return self._parse_weight_to_is(weight1) == self._parse_weight_to_is(weight2)
+        parsed_weight1 = self._parse_weight_to_is(weight1)
+        parsed_weight2 = self._parse_weight_to_is(weight2)
+        
+        if parsed_weight1 is None or parsed_weight2 is None:
+            return None
+        
+        return parsed_weight1 == parsed_weight2
     
     @staticmethod
     def _parse_weight_to_is(weight):
@@ -421,6 +446,54 @@ class MatchingUtil(object):
             self.categories_mem[old_category] = category
         
         return category
+    
+    def _stores_possible_matches(self):
+        sqlite_products = self.classificator_api.get_products_scraped()
+        products = self._parse_classificator_sqlite_products(sqlite_products)
+        
+        total_matches = 0
+        
+        while products:
+            
+            product = products.pop(0)
+            
+            for product_to_compare in products:
+                if product.supermarket == product_to_compare.supermarket or product.category != product_to_compare.category or product.brand != product_to_compare.brand or not self._same_weight(product.weight, product_to_compare.weight):
+                    continue
+                total_matches += 1
+                print(f"Posible matching {total_matches}")
+                self.classificator_api.add_match(product, product_to_compare, None)
+        
+        print("Total matches: ", total_matches)
+        
+    def _stores_data(self, products):
+        self.classificator_api.add_products_scraped(products)
+        
+    def _parse_classificator_sqlite_products(self, sqlite_products):
+        return [ProductScraped(
+                                            pseudo_id = int(product[0]),
+                                            name=str(product[1]),
+                                            price=float(product[2]),
+                                            unit_price=str(product[3]) if product[3] else None,
+                                            weight=str(product[4]) if product[4] else None,
+                                            brand=str(product[5]) if product[5] else None,
+                                            amount=int(product[6]) if product[6] else None,
+                                            image=str(product[7]),
+                                            offer_price=float(product[8]) if product[8] else None,
+                                            is_vegetarian=bool(product[9]),
+                                            is_gluten_free=bool(product[10]),
+                                            is_freezed=bool(product[11]),
+                                            is_from_country=bool(product[12]),
+                                            is_eco=bool(product[13]),
+                                            is_without_sugar=bool(product[14]),
+                                            is_without_lactose=bool(product[15]),
+                                            url=str(product[16]) if product[16] else None,
+                                            is_pack=bool(product[17]),
+                                            category=str(product[18]),
+                                            supermarket=str(product[19]),
+                                            )
+                                        for product in sqlite_products
+                                    ]
     
     # -----------------------------------------------------------------
     # ---------------------------- PHASE 6 ----------------------------

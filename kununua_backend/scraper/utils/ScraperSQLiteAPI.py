@@ -110,8 +110,7 @@ class ScraperSQLiteAPI(SQLiteAPI):
     def _parse_flag(flag):
         if flag:
             return 1
-        else:
-            return 0
+        return 0
     
     @staticmethod
     def _parse_str(string):

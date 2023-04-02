@@ -80,7 +80,7 @@ class CarrefourScraperLogic(object):
 
                         unit_price = item.select(
                             '.product-card__price-per-unit')[0].get_text().strip()
-                        product_url = item.select(
+                        product_url = supermarket.main_url[:-1] + item.select(
                             '.product-card__detail > h2 > a')[0].get('href').strip()
                         image = item.select('.product-card__image')[0].get('src').strip()
                         name = raw_name.lower().replace('.', '').strip()

@@ -49,7 +49,7 @@ class ProductScraped(object):
             raise ValueError(_("Product is_pack flag must be boolean"))
         if type(category) is not str and not isinstance(category, Category):
             raise ValueError(_("Product category cannot be None and must be a string or Category object"))
-        if type(supermarket) is not Supermarket:
+        if type(supermarket) is not Supermarket and not isinstance(supermarket, str):
             raise ValueError(_("Product supermarket cannot be None and must be a Supermarket object"))
         
         self.pseudo_id = pseudo_id
