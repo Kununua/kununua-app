@@ -1,4 +1,6 @@
 import json, stanza
+import math
+import re
 from products.models import Product, Brand, Supermarket, Category, Price
 from location.models import Country
 from data.functions.get_brands_list import get_brands_list
@@ -11,6 +13,52 @@ from scraper.utils.ClassificatorSQLiteAPI import ClassificatorSQLiteAPI
 DISTANCE_UNITS = ["km", "m", "dm", "cm", "mm"]
 VOLUME_UNITS = ["kl", "l", "dl", "cl", "ml"]
 MASS_UNITS = ["kg", "g", "dg", "cg", "mg"]
+NUMBERS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ",", "."]
+
+UNIT_TRANSLATIONS = {
+    "km": "km",
+    "m": "m",
+    "dm": "dm",
+    "cm": "cm",
+    "mm": "mm",
+    "kl": "kl",
+    "l": "l",
+    "dl": "dl",
+    "cl": "cl",
+    "ml": "ml",
+    "kg": "kg",
+    "g": "g",
+    "dg": "dg",
+    "cg": "cg",
+    "mg": "mg",
+    'gr': 'g',
+    'grs': 'g',
+    'gramo': 'g',
+    'gramos': 'g',
+    'kilo': 'kg',
+    'kilogramo': 'kg',
+    'kilogramos': 'kg',
+    'litro': 'l',
+    'litros': 'l',
+    'mililitro': 'ml',
+    'mililitros': 'ml',
+    'centilitro': 'cl',
+    'centilitros': 'cl',
+    'kgs': 'kg',
+    'kilos': 'kg',
+    'metros': 'm',
+    'metro': 'm',
+    'centimetros': 'cm',
+    'centimetro': 'cm',
+    'milimetros': 'mm',
+    'milimetro': 'mm',
+    'centímetros': 'cm',
+    'centímetro': 'cm',
+    'milímetros': 'mm',
+    'milímetro': 'mm',
+}
+
+
 
 class MatchingUtil(object):
     def __init__(self, sqlite_products):
@@ -36,7 +84,9 @@ class MatchingUtil(object):
         self._packs_matching()
         print("Phase 4: Performing categories matching...")
         self._categories_matching()
-        print("Phase 5: Performing products matching...")
+        print("Phase 5: Performing weight unification...")
+        self._weight_unification()
+        print("Phase 6: Performing products matching...")
         self._products_matching()
         # print("Phase 6: Translating and injecting into postgres...")
         print("Done!")
@@ -52,9 +102,11 @@ class MatchingUtil(object):
         self._packs_matching()
         print("Phase 4: Performing categories matching...")
         self._categories_matching()
-        print("Phase 5: Storing products in new db...")
+        print("Phase 5: Performing weight unification...")
+        self._weight_unification()
+        print("Phase 6: Storing products in new db...")
         self._stores_data(self.products_scraped)
-        print("Phase 6: Storing possible matches in new db...")
+        print("Phase 7: Storing possible matches in new db...")
         self._stores_possible_matches()
         print("Done!")
         
@@ -236,6 +288,99 @@ class MatchingUtil(object):
     # -----------------------------------------------------------------
     # ---------------------------- PHASE 5 ----------------------------
     
+    def _weight_unification(self):
+        
+        for product in self.products_scraped:
+            if not product.weight and product.unit_price or product.supermarket.name == "Carrefour":
+                product = self._unify_weight(product)
+            elif product.weight and not product.unit_price:
+                product = self._unify_unit_price(product)
+        
+    def _unify_weight(self, product):
+        
+        price = float(product.price)
+        unit_price = product.unit_price
+        weight_unit = unit_price.split("/")[1].strip()
+        weight_unit_aux_value = re.sub('[a-z]+', '', weight_unit.lower())
+        round_to = 1 if "ud" not in weight_unit and "unidad" not in weight_unit else 0
+        unit_price_value = float(unit_price.split("/")[0].replace(".", "").replace(",", ".").replace("€", "").strip())
+        
+        try:
+            weight_value = price/unit_price_value
+        except ZeroDivisionError:
+            product.unit_price = f"{price} €/ud"
+            product.weight = "1ud"
+            return product
+        
+        if weight_unit_aux_value:
+            weight_value = str(weight_value * float(weight_unit_aux_value))
+        else:
+            weight_value = str(weight_value)
+        
+        try:
+            weight_unit = UNIT_TRANSLATIONS[re.sub('[0-9]+', '', weight_unit.lower()).strip()]
+        
+            if weight_value.startswith("0."):
+                
+                weight_value_float = float(weight_value)
+                
+                index = self.get_unit_family(weight_unit).index(weight_unit)
+                
+                if index == 0:
+                    weight_value_float = weight_value_float*1000
+                elif index > 1:
+                    parsing_factor = index-1
+                    weight_value_float = weight_value_float/(10**parsing_factor)
+                
+                weight = str(round(weight_value_float, round_to)) + self.get_unit_family(weight_unit)[1]
+            
+            elif "." in weight_value:
+                weight = str(round(float(weight_value), round_to)) + weight_unit
+            else:
+                weight = str(round(float(weight_value), round_to)) + weight_unit
+            
+            product.weight = weight
+            
+        except KeyError:
+            product.weight = weight_value + weight_unit
+            
+        return product
+    
+    def _unify_unit_price(self, product):
+        
+        price = product.price
+        weight = product.weight
+        try:
+            weight_unit = UNIT_TRANSLATIONS[re.sub('[0-9]+', '', weight.lower()).strip()]
+        except KeyError:
+            product.unit_price = f"{price} €/ud"
+            product.weight = "1ud"
+            return product
+        weight_value = float(re.sub('[a-z]+', '', weight.lower()))
+        
+        selected_unit_family = self.get_unit_family(weight_unit)
+        
+        unit_price_value = price/weight_value
+        
+        if weight_unit in selected_unit_family[0] and math.floor(unit_price_value) > 100:
+            
+            weight_unit = selected_unit_family[1]
+            unit_price_value = unit_price_value/1000
+            
+        elif weight_unit in selected_unit_family[1] and float('%.2f'%unit_price_value) == 0 :
+            
+            weight_unit = selected_unit_family[0]
+            unit_price_value = unit_price_value*1000
+            
+        product.unit_price = str(unit_price_value) + " €/" + weight_unit
+        
+        return product
+        
+        
+    
+    # -----------------------------------------------------------------
+    # ---------------------------- PHASE 6 ----------------------------
+    
     def _products_matching(self):
         products = self.products_scraped
         
@@ -325,40 +470,6 @@ class MatchingUtil(object):
             return None
         
         return parsed_weight1 == parsed_weight2
-    
-    @staticmethod
-    def _parse_weight_to_is(weight):
-        
-        result = None
-        weight = weight.lower()
-        selected_unit_list = None
-        
-        for unit in DISTANCE_UNITS + VOLUME_UNITS + MASS_UNITS:
-            if unit in weight:
-                try:
-                    weight = float(weight.replace(unit, "").strip())
-                except ValueError:
-                    break
-                
-                if unit in DISTANCE_UNITS:
-                    selected_unit_list = DISTANCE_UNITS
-                elif unit in VOLUME_UNITS:
-                    selected_unit_list = VOLUME_UNITS
-                elif unit in MASS_UNITS:
-                    selected_unit_list = MASS_UNITS
-                    
-                index = selected_unit_list.index(unit)
-                
-                if index == 0:
-                    result = weight/1000
-                elif index == 1:
-                    result = weight
-                else:
-                    parsing_factor = index-1
-                    result = weight*10**parsing_factor
-                break
-            
-        return result
     
     def _similarity_calculator(self, doc1, doc2, brand):
         
@@ -547,3 +658,58 @@ class MatchingUtil(object):
         return result
     
     # -----------------------------------------------------------------
+    
+    @staticmethod
+    def get_unit_family(unit):
+        if unit in DISTANCE_UNITS:
+            return DISTANCE_UNITS
+        elif unit in VOLUME_UNITS:
+            return VOLUME_UNITS
+        elif unit in MASS_UNITS:
+            return MASS_UNITS
+        else:
+            return None
+        
+    @staticmethod
+    def _parse_weight_to_is(weight, to_kilo_units=False):
+        
+        result = None
+        weight = weight.lower()
+        selected_unit_list = None
+        
+        for unit in DISTANCE_UNITS + VOLUME_UNITS + MASS_UNITS:
+            if unit in weight:
+                try:
+                    weight = float(weight.replace(unit, "").strip())
+                except ValueError:
+                    break
+                
+                if unit in DISTANCE_UNITS:
+                    selected_unit_list = DISTANCE_UNITS
+                elif unit in VOLUME_UNITS:
+                    selected_unit_list = VOLUME_UNITS
+                elif unit in MASS_UNITS:
+                    selected_unit_list = MASS_UNITS
+                    
+                index = selected_unit_list.index(unit)
+                
+                if not to_kilo_units:
+                    if index == 0:
+                        result = weight*1000
+                    elif index == 1:
+                        result = weight
+                    else:
+                        parsing_factor = index-1
+                        result = weight/10**parsing_factor
+                    break
+                else:
+                    if index == 0:
+                        result = weight
+                    elif index == 1:
+                        result = weight/1000
+                    else:
+                        parsing_factor = index-1
+                        result = weight/10**(parsing_factor+3)
+                    break
+            
+        return result

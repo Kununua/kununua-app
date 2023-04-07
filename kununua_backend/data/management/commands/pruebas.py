@@ -1,3 +1,5 @@
+import math
+import re
 from django.core.management.base import BaseCommand
 import stanza, itertools
 
@@ -42,6 +44,34 @@ bastones de zanahoria para conejos enanos vitakraft  50grs
 31,40 €/kg
 1.57"""
 
+UNIT_TRANSLATIONS = {
+    'gr': 'g',
+    'grs': 'g',
+    'gramo': 'g',
+    'gramos': 'g',
+    'kilo': 'kg',
+    'kilogramo': 'kg',
+    'kilogramos': 'kg',
+    'litro': 'l',
+    'litros': 'l',
+    'mililitro': 'ml',
+    'mililitros': 'ml',
+    'centilitro': 'cl',
+    'centilitros': 'cl',
+    'kgs': 'kg',
+    'kilos': 'kg',
+    'metros': 'm',
+    'metro': 'm',
+    'centimetros': 'cm',
+    'centimetro': 'cm',
+    'milimetros': 'mm',
+    'milimetro': 'mm',
+    'centímetros': 'cm',
+    'centímetro': 'cm',
+    'milímetros': 'mm',
+    'milímetro': 'mm',
+}
+
 class Command(BaseCommand):
     help = 'Populates the database with the supported brands'
 
@@ -57,98 +87,95 @@ class Command(BaseCommand):
             else:
                 return None
         
-        nlp = stanza.Pipeline('es')
+        price = 1.90
+        weight = "1000GR"
         
-        splitted_pruebas = PRUEBAS.split("\n")
+        weight_unit = UNIT_TRANSLATIONS[re.sub('[0-9]+', '', weight.lower())]
+        weight_value = float(re.sub('[a-z]+', '', weight.lower()))
         
-        i = 0
+        print(weight_unit)
+        print(weight_value)
         
-        while i < len(splitted_pruebas):
-            phrase = splitted_pruebas[i]
-            doc1 = nlp(phrase)
-            price = float(splitted_pruebas[i+2])
-            unit_price = splitted_pruebas[i+1]
-            weight_unit = unit_price.split("/")[1].strip()
-            for number in NUMBERS:
-                    weight_unit = weight_unit.replace(number, "")
-            round_to = 1 if "ud" not in weight_unit and "unidad" not in weight_unit else 0
+        selected_unit_family = get_unit_family(weight_unit)
+        
+        print(selected_unit_family)
+        
+        unit_price_value = price/weight_value
+        
+        if weight_unit in selected_unit_family[0] and math.floor(unit_price_value) > 100:
             
-            weight = "Error"
+            weight_unit = selected_unit_family[1]
+            unit_price_value = unit_price_value/1000
             
-            numeros = []
+        elif weight_unit in selected_unit_family[1] and float('%.2f'%unit_price_value) == 0 :
             
-            sentence = doc1.sentences[0]
+            print(unit_price_value)
             
-            for word in sentence.words:
-                if word.upos == 'NUM':
-                    numeros.append((word.text.lower(), sentence.words[word.head-1].text if word.head > 0 else "root"))
+            weight_unit = selected_unit_family[0]
+            unit_price_value = unit_price_value*1000
             
-            for numero in numeros:
-                
-                replaced_number = numero[0]
-                
-                for number in NUMBERS:
-                    replaced_number = replaced_number.replace(number, "")
-                
-                selected_unit_family = get_unit_family(weight_unit)
-                
-                if replaced_number == "":
+        print(str(unit_price_value) + " €/" + weight_unit)
+        
+        # def get_unit_family(unit):
+        #     if unit in DISTANCE_UNITS:
+        #         return DISTANCE_UNITS
+        #     elif unit in VOLUME_UNITS:
+        #         return VOLUME_UNITS
+        #     elif unit in MASS_UNITS:
+        #         return MASS_UNITS
+        #     else:
+        #         return None
+        
+        # splitted_pruebas = PRUEBAS.split("\n")
+        
+        # i = 0
+        
+        # while i < len(splitted_pruebas):
+        #     phrase = splitted_pruebas[i]
+        #     price = float(splitted_pruebas[i+2])
+        #     unit_price = splitted_pruebas[i+1]
+        #     weight_unit = unit_price.split("/")[1].strip()
+        #     for number in NUMBERS:
+        #             weight_unit = weight_unit.replace(number, "")
+        #     round_to = 1 if "ud" not in weight_unit and "unidad" not in weight_unit else 0
+            
+        #     weight = "Error"
+            
+        #     numeros = []
                     
-                    if selected_unit_family:
-                        for unit in selected_unit_family:
-                            if unit in numero[1]:
-                                weight = numero[0] + unit
-                                break
-                    elif weight_unit in numero[1]:
-                        weight = numero[0] + numero[1]
-                        break
-                    
-                else:
-                    if selected_unit_family:
-                        for unit in selected_unit_family:
-                            if unit in replaced_number:
-                                weight = numero[0]
-                                for number in NUMBERS:
-                                    weight = weight.replace(number, "")
-                                weight = numero[0].replace(weight, "") + unit
-                                break
-                    elif weight_unit in replaced_number:
-                        weight = numero[0]
-                        break
-                    
-            if weight == "Error":
+        #     if weight == "Error":
                 
-                unit_price_value = float(unit_price.split("/")[0].replace(",", ".").replace("€", "").strip())
+        #         unit_price_value = float(unit_price.split("/")[0].replace(",", ".").replace("€", "").strip())
                 
-                weight_value = str(price/unit_price_value)
+        #         weight_value = str(price/unit_price_value)
                 
-                if weight_value.startswith("0."):
+        #         if weight_value.startswith("0."):
                     
-                    weight_value_float = float(weight_value)
+        #             weight_value_float = float(weight_value)
                     
-                    index = get_unit_family(weight_unit).index(weight_unit)
+        #             index = get_unit_family(weight_unit).index(weight_unit)
                     
-                    if index == 0:
-                        weight_value_float = weight_value_float*1000
-                    elif index == 1:
-                        continue
-                    else:
-                        parsing_factor = index-1
-                        weight_value_float = weight_value_float/(10**parsing_factor)
+        #             if index == 0:
+        #                 weight_value_float = weight_value_float*1000
+        #             elif index == 1:
+        #                 continue
+        #             else:
+        #                 parsing_factor = index-1
+        #                 weight_value_float = weight_value_float/(10**parsing_factor)
                     
-                    weight = str(round(weight_value_float, round_to)) + get_unit_family(weight_unit)[1]
+        #             weight = str(round(weight_value_float, round_to)) + get_unit_family(weight_unit)[1]
                 
-                elif "." in weight_value:
-                    weight = str(round(float(weight_value), round_to)) + weight_unit
-                else:
-                    weight = str(round(float(weight_value), round_to)) + weight_unit
+        #         elif "." in weight_value:
+        #             weight = str(round(float(weight_value), round_to)) + weight_unit
+        #         else:
+        #             weight = str(round(float(weight_value), round_to)) + weight_unit
                   
-            phrase = phrase.replace(weight, "")
+        #     phrase = phrase.replace(weight, "")
               
-            if "/" in weight:
-                weight = weight.split("/")[1][:-1]
+        #     if "/" in weight:
+        #         weight = weight.split("/")[1][:-1]
                     
-            i += 3
-            print(f"Numeros: {numeros}")
-            print(f"Producto: {phrase} | Peso: {weight}")
-            print("---------------------------------")
+        #     i += 3
+        #     print(f"Numeros: {numeros}")
+        #     print(f"Producto: {phrase} | Peso: {weight}")
+        #     print("---------------------------------")
