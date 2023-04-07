@@ -60,11 +60,12 @@ class CarrefourScraperLogic(object):
         while current_page*PRODUCTS_PER_PAGE < number_of_items:
             print(current_page)
             driver.get(category_url + '?offset=%d' % (current_page*PRODUCTS_PER_PAGE))
+            extra_scroll = 0
             while True:
                 page_source = driver.page_source
                 soup = BeautifulSoup(page_source, 'lxml')
                 common_parent = soup.select('.product-card-list__item .product-card')
-                if len(common_parent) >= 10 or number_of_items - current_page*PRODUCTS_PER_PAGE < 10:
+                if (len(common_parent) >= 10 or number_of_items - current_page*PRODUCTS_PER_PAGE < 10) and extra_scroll > 4:
                     for item in common_parent:
                         raw_name = item.select(
                             '.product-card__detail > h2 > a')[0].get_text().strip()
@@ -111,14 +112,20 @@ class CarrefourScraperLogic(object):
                         else:
                             is_pack = False
 
-                        product = ProductScraped(name=name, price=price, unit_price=unit_price, weight=weight, brand=None, amount=amount, offer_price=offer_price,
-                                                image=image, is_pack=is_pack, url=product_url, supermarket=supermarket, category=category)
+                        product = ProductScraped(name=name, price=price, unit_price=unit_price, 
+                                                weight=weight, brand=None, amount=amount,
+                                                offer_price=offer_price, image=image, is_pack=is_pack, 
+                                                url=product_url,
+                                                supermarket=supermarket, category=category)
 
                         products.append(product)
                         
                     current_page += 1
                     break
                 else:
+                    
+                    if len(common_parent) >= 10 or number_of_items - current_page*PRODUCTS_PER_PAGE < 10:
+                        extra_scroll += 1
                     driver.execute_script("window.scrollBy(0, 500);")
                     time.sleep(1)
                     
