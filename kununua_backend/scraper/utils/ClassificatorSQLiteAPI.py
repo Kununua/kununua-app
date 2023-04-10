@@ -76,7 +76,7 @@ class ClassificatorSQLiteAPI(SQLiteAPI):
     @staticmethod
     def _parse_is_match(is_match):
         if is_match is not None:
-            if is_match:
+            if is_match == "True":
                 return 1
             return 0
         return "null"

@@ -172,7 +172,7 @@ class MatchingUtil(object):
                 brand, new = Brand.objects.get_or_create(name__iexact=product.brand, defaults={'name': product.brand})
                 if new:
                     with open('data/datasets/clean/brands.csv', 'a') as f:
-                        f.write(f"{product.brand}\n")
+                        f.write(f"\n{product.brand}")
                 
                 product.brand = brand
                 
@@ -186,8 +186,8 @@ class MatchingUtil(object):
                     if brand.lower() in product.name.lower():
                         pg_brand, new = Brand.objects.get_or_create(name__iexact=brand, defaults={'name': brand})
                         if new:
-                            with open('data/datasets/clean/brands.csv', 'w') as f:
-                                f.write(f"{product.brand}\n")
+                            with open('data/datasets/clean/brands.csv', 'a') as f:
+                                f.write(f"\n{pg_brand.name}")
                         product.brand = pg_brand
                         result.append(product)
                         break
@@ -469,7 +469,11 @@ class MatchingUtil(object):
         if parsed_weight1 is None or parsed_weight2 is None:
             return None
         
-        return parsed_weight1 == parsed_weight2
+        return (parsed_weight1 == parsed_weight2 + 1 or 
+                parsed_weight1 == parsed_weight2 - 1 or 
+                parsed_weight1 + 1 == parsed_weight2 or 
+                parsed_weight1 - 1 == parsed_weight2 or 
+                parsed_weight1 == parsed_weight2)
     
     def _similarity_calculator(self, doc1, doc2, brand):
         
