@@ -169,10 +169,10 @@ class MatchingUtil(object):
         
         for product in self.products_scraped:
             if product.brand:
-                brand, new = Brand.objects.get_or_create(name__iexact=product.brand, defaults={'name': product.brand})
+                brand, new = Brand.objects.get_or_create(name__iexact=product.brand.lower().title(), defaults={'name': product.brand.lower().title()})
                 if new:
                     with open('data/datasets/clean/brands.csv', 'a') as f:
-                        f.write(f"\n{product.brand}")
+                        f.write(f"\n{product.brand.lower().title()}")
                 
                 product.brand = brand
                 
