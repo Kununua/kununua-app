@@ -573,7 +573,7 @@ class MatchingUtil(object):
             product = products.pop(0)
             
             for product_to_compare in products:
-                if product.supermarket == product_to_compare.supermarket or product.category != product_to_compare.category or product.brand != product_to_compare.brand or not self._same_weight(product.weight, product_to_compare.weight):
+                if product.supermarket == product_to_compare.supermarket or product.category != product_to_compare.category or product.brand != product_to_compare.brand or not self._same_weight(product.weight, product_to_compare.weight) or product.brand is None or product_to_compare.brand is None:
                     continue
                 total_matches += 1
                 print(f"Posible matching {total_matches}")
