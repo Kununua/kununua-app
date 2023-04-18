@@ -14,6 +14,7 @@ DISTANCE_UNITS = ["km", "m", "dm", "cm", "mm"]
 VOLUME_UNITS = ["kl", "l", "dl", "cl", "ml"]
 MASS_UNITS = ["kg", "g", "dg", "cg", "mg"]
 NUMBERS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ",", "."]
+NO_IMAGE_CARREFOUR = "data:image/jpeg;base64,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"
 
 UNIT_TRANSLATIONS = {
     "km": "km",
@@ -87,8 +88,10 @@ class MatchingUtil(object):
         print("Phase 5: Performing weight unification...")
         self._weight_unification()
         print("Phase 6: Performing products matching...")
-        self._products_matching()
-        # print("Phase 6: Translating and injecting into postgres...")
+        self._non_semanthic_products_matching()
+        #self._products_matching()
+        print("Phase 7: Translating and injecting into postgres...")
+        self._build_products()
         print("Done!")
         
     def post_process_data_for_training(self):
@@ -169,10 +172,10 @@ class MatchingUtil(object):
         
         for product in self.products_scraped:
             if product.brand:
-                brand, new = Brand.objects.get_or_create(name__iexact=product.brand, defaults={'name': product.brand})
+                brand, new = Brand.objects.get_or_create(name__iexact=product.brand.lower().title(), defaults={'name': product.brand.lower().title()})
                 if new:
                     with open('data/datasets/clean/brands.csv', 'a') as f:
-                        f.write(f"{product.brand}\n")
+                        f.write(f"\n{product.brand.lower().title()}")
                 
                 product.brand = brand
                 
@@ -186,8 +189,8 @@ class MatchingUtil(object):
                     if brand.lower() in product.name.lower():
                         pg_brand, new = Brand.objects.get_or_create(name__iexact=brand, defaults={'name': brand})
                         if new:
-                            with open('data/datasets/clean/brands.csv', 'w') as f:
-                                f.write(f"{product.brand}\n")
+                            with open('data/datasets/clean/brands.csv', 'a') as f:
+                                f.write(f"\n{pg_brand.name}")
                         product.brand = pg_brand
                         result.append(product)
                         break
@@ -381,6 +384,32 @@ class MatchingUtil(object):
     # -----------------------------------------------------------------
     # ---------------------------- PHASE 6 ----------------------------
     
+    def _non_semanthic_products_matching(self):
+        
+        products = self.products_scraped
+        result = []
+        total_matches = 0
+        
+        while products:
+            product = products.pop(0)
+            similar_products = [product]
+                
+            for product_to_compare in products:
+                # Reemplazar product.category != product_to_compare.category -> self._get_root_category(product.category) != self._get_root_category(product_to_compare.category)
+                if product.supermarket == product_to_compare.supermarket or product.category != product_to_compare.category or product.brand != product_to_compare.brand or not self._same_weight(product.weight, product_to_compare.weight):
+                    continue
+                
+                total_matches += 1
+                similar_products.append(product_to_compare)
+            
+            products = [product for product in products if product not in similar_products]
+            result.append(similar_products)
+            
+        print(f"Total matchings: {total_matches}")
+        print(f"Result: {result[:10]}")
+        
+        self.final_matches = result
+    
     def _products_matching(self):
         products = self.products_scraped
         
@@ -405,8 +434,6 @@ class MatchingUtil(object):
         
         
         i = 0
-        
-        print(result[:10])
         
         for match in result:
             if match and len(match) > 1:
@@ -469,7 +496,11 @@ class MatchingUtil(object):
         if parsed_weight1 is None or parsed_weight2 is None:
             return None
         
-        return parsed_weight1 == parsed_weight2
+        return (parsed_weight1 == parsed_weight2 + 1 or 
+                parsed_weight1 == parsed_weight2 - 1 or 
+                parsed_weight1 + 1 == parsed_weight2 or 
+                parsed_weight1 - 1 == parsed_weight2 or 
+                parsed_weight1 == parsed_weight2)
     
     def _similarity_calculator(self, doc1, doc2, brand):
         
@@ -607,41 +638,53 @@ class MatchingUtil(object):
                                     ]
     
     # -----------------------------------------------------------------
-    # ---------------------------- PHASE 6 ----------------------------
+    # ---------------------------- PHASE 7 ----------------------------
     
-    # def _build_products(self):
-    #     for match in self.final_matches:
-    #         key_product = match[0]
-    #         product, _ = Product.objects.get_or_create(
-    #             name=key_product.name, 
-    #             brand=key_product.brand, 
-    #             image=key_product.image, 
-    #             is_vegetarian=self._get_flag(match, "is_vegetarian"),
-    #             is_gluten_free=self._get_flag(match, "is_gluten_free"),
-    #             is_eco=self._get_flag(match, "is_eco"),
-    #             is_freezed=self._get_flag(match, "is_freezed"),
-    #             is_without_sugar=self._get_flag(match, "is_without_sugar"),
-    #             is_without_lactose=self._get_flag(match, "is_without_lactose"),
-    #             is_from_country=self._get_flag(match, "is_from_country"),
-    #             category = self._get_leaf_category(match)
-    #             )
-    #         for product in match:
+    def _build_products(self):
+        
+        for match in self.final_matches:
+            key_product = match[0]
+            try:
+                product, _ = Product.objects.get_or_create(
+                    name=key_product.name, 
+                    brand=key_product.brand, 
+                    image=key_product.image if key_product.supermarket.name != "Carrefour" and key_product.image != NO_IMAGE_CARREFOUR else "products/images/nodisponible.png", 
+                    is_vegetarian=self._get_flag(match, "is_vegetarian"),
+                    is_gluten_free=self._get_flag(match, "is_gluten_free"),
+                    is_eco=self._get_flag(match, "is_eco"),
+                    is_freezed=self._get_flag(match, "is_freezed"),
+                    is_without_sugar=self._get_flag(match, "is_without_sugar"),
+                    is_without_lactose=self._get_flag(match, "is_without_lactose"),
+                    is_from_country=self._get_flag(match, "is_from_country"),
+                    category = self._get_leaf_category(match)
+                )
                 
-    #             # for pack in self.packs_scraped.filter(product_scraped=product):
-    #             #     pack.product = product
-    #             #     pack.save()
                 
-    #             price = Price.objects.create(
+                for other_product in match:
+                    for pack in filter(lambda p: p.product_scraped == other_product, self.packs_scraped):
+                        
+                        pack_price, _ = Price.objects.get_or_create(
+                            price = pack.price,
+                            weight = pack.weight,
+                            amount = pack.amount,
+                            url = pack.url,
+                            supermarket = pack.product_scraped.supermarket,
+                            product = product
+                        )
                     
-    #             )
-    
-    @staticmethod
-    def _get_flag(products, flag):
-        for product in products:
-            if product.__dict__[flag]:
-                return True
-            
-        return False
+                    other_product_price, _ = Price.objects.get_or_create(
+                        price = other_product.offer_price if other_product.offer_price is not None else other_product.price,
+                        weight = other_product.weight,
+                        amount = 1 if other_product.offer_price else None,
+                        url = other_product.url,
+                        supermarket = other_product.supermarket,
+                        product = product
+                    )
+                    
+            except Exception as e:
+                print(e)
+                print(key_product.name)
+                break
     
     def _get_leaf_category(self, products):
         result = []
@@ -713,3 +756,11 @@ class MatchingUtil(object):
                     break
             
         return result
+    
+    @staticmethod
+    def _get_flag(products, flag):
+        for product in products:
+            if product.__dict__[flag]:
+                return True
+            
+        return False
