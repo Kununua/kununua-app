@@ -11,7 +11,9 @@ class Supermarket(models.Model):
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     
     class Meta:
-        unique_together = ('name', 'country', 'zipcode')
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'country', 'zipcode'], name='unique_supermarket')
+        ]
     
     def __str__(self):
         return f"Supermarket[name: {self.name}, zipcode: {self.zipcode}, main_url: {self.main_url}, country: {self.country}]"
@@ -67,7 +69,9 @@ class Rating(models.Model):
     rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     
     class Meta:
-        unique_together = ('product', 'user')
+        constraints = [
+            models.UniqueConstraint(fields=['product', 'user'], name='unique_rating')
+        ]
         
     def _str_(self):
         return f"Rating[product: {self.product}, user: {self.user}, rating: {self.rating}]"
