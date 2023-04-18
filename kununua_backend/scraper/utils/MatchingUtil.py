@@ -395,8 +395,7 @@ class MatchingUtil(object):
             similar_products = [product]
                 
             for product_to_compare in products:
-                # Reemplazar product.category != product_to_compare.category -> self._get_root_category(product.category) != self._get_root_category(product_to_compare.category)
-                if product.supermarket == product_to_compare.supermarket or product.category != product_to_compare.category or product.brand != product_to_compare.brand or not self._same_weight(product.weight, product_to_compare.weight):
+                if product.supermarket == product_to_compare.supermarket or self._get_root_category(product.category) != self._get_root_category(product_to_compare.category) or product.brand != product_to_compare.brand or not self._same_weight(product.weight, product_to_compare.weight):
                     continue
                 
                 total_matches += 1
@@ -406,7 +405,6 @@ class MatchingUtil(object):
             result.append(similar_products)
             
         print(f"Total matchings: {total_matches}")
-        print(f"Result: {result[:10]}")
         
         self.final_matches = result
     
