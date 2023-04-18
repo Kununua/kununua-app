@@ -32,7 +32,7 @@ class Brand(models.Model):
 class Product(models.Model):
     name = models.CharField(_("name"), max_length=256)
     brand = models.ForeignKey(Brand, on_delete=models.DO_NOTHING, null=True)
-    image = models.ImageField(_("image"), upload_to="products/images/", null=True)
+    image = models.ImageField(_("image"), upload_to="products/images/", null=True, max_length=1024)
     is_vegetarian = models.BooleanField(_("is_vegetarian"), default=False, null=True)
     is_gluten_free = models.BooleanField(_("is_gluten_free"), default=False, null=True)
     is_freezed = models.BooleanField(_("is_freezed"), default=False, null=True)
@@ -51,11 +51,11 @@ class Product(models.Model):
 class Price(models.Model):
     
     price = models.DecimalField(_("price"), max_digits=10, decimal_places=2)
-    weight = models.CharField(_("weight"), max_length=8, null=True)
+    weight = models.CharField(_("weight"), max_length=24, null=True)
     amount = models.PositiveIntegerField(_("amount"), null=True)
-    url = models.URLField(_("url"), unique=True)
+    url = models.URLField(_("url"), null=True, max_length=1024)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    supermarket = models.ForeignKey(Supermarket, on_delete=models.CASCADE)
+    supermarket = models.ForeignKey(Supermarket, on_delete=models.DO_NOTHING)
     
     def __str__(self):
         return f"Product[name: {self.product.name}, price: {self.price}, amount: {self.amount}, supermarket: {self.supermarket.name}, url: {self.url}]"
