@@ -28,10 +28,14 @@ class Command(BaseCommand):
         
         def improve_cart(items_in_cart, max_supermarkets, allowed_supermarkets=None, not_improved_mem=None):
             
+            # Separate items that need to be optimiced from those that doesn't
+            # Also define the number of product to improve in order to check that the optimization result includes all the products.
             item_to_upgrade_ids = [id for id in items_in_cart.keys() if not items_in_cart[id]["is_locked"]]
             items_to_not_upgrade_ids = set(items_in_cart)-set(item_to_upgrade_ids)
             number_of_products_to_improve = Price.objects.filter(pk__in=items_in_cart).values('product').distinct().count()
             
+            # Check if the cart contains repeated locked products 
+            # (this is two prices of the same product locked in the cart)
             if items_to_not_upgrade_ids:
                 locked_products = Price.objects.filter(pk__in=items_to_not_upgrade_ids)
                 
@@ -40,10 +44,16 @@ class Command(BaseCommand):
             else:
                 locked_products = []
             
+            # Save the ids of the products that are already optimiced (locked products)
             optimiced_ids = [p.product.pk for p in locked_products]
             
             improved_products = []
             not_improved_products = []
+            
+            # Enters here if there are no supermarkets on which optimize the cart.
+            # If allowed_supermarkets is defined (only happens when the recursion starts), sets that list as current supermarkets
+            # current_supermarket is a variable that control on how many supermarkets the cart is being divided.
+            # It's also used to determine if the products can be optimized for the given allowed_supermarkets.
             if not allowed_supermarkets:
                 current_supermarkets = set(map(lambda p: (p.supermarket.name, p.supermarket.zipcode), locked_products))
             
@@ -52,6 +62,7 @@ class Command(BaseCommand):
             else:
                 current_supermarkets = allowed_supermarkets
             
+            # Save the quantity that exists on the cart for each product
             products_to_optimice = {}
             
             for item_id in item_to_upgrade_ids:
@@ -60,6 +71,9 @@ class Command(BaseCommand):
                 
                 products_to_optimice[item_product.pk] = items_in_cart[item_id]["quantity"]
             
+            # Get the Price objects that optimice the cart.
+            # If allowed_supermarkets is given, the query is forced to find the min price only on those supermarkets
+            # This first variable, product_multipliers, is used to multiply the price of each product by the quantity that exists on the cart.
             product_multipliers = product_multipliers = Case(
                 *[When(product__pk=pk, then=Value(multiplier, output_field=DecimalField())) for pk, multiplier in products_to_optimice.items()]
             )
@@ -77,7 +91,9 @@ class Command(BaseCommand):
                                                 .values('product') \
                                                 .annotate(min_price=Min(F('price')*product_multipliers)) \
                                                 .order_by('min_price')
-            # print(optimal_prices)             
+            
+            # Once we have the optimal prices, we check if the cart can be optimized that way, or exceeds the max_supermarkets condition.
+            # All the products that cannot be added because the number of supermarkets is exceeded are saved in not_improved_products.
             for product in list(optimal_prices):
                 
                 if product['product'] in optimiced_ids:
@@ -101,6 +117,8 @@ class Command(BaseCommand):
                     else:
                         not_improved_products.append(options[0])
             
+            # If there are not_improved_products, we run a recursion with the different possible supermarkets combinations
+            # and then, take the one that minimize the total price.
             if len(not_improved_products) > 0:
                 
                 if not_improved_products == not_improved_mem:
@@ -119,11 +137,13 @@ class Command(BaseCommand):
                         except ArithmeticError:
                             possible_results[i] = None
                             
-                    # print(possible_results)
-                            
                     min_value = min(possible_results, key=lambda x: sum([p.price for p in possible_results[x]]) if possible_results[x] != None else 10000000)
                     
                     return possible_results[min_value]
+            
+            # In other case, we return the optimized cart.
+            # Have in mind that the function is not meant to return Price objects with the actual price. 
+            # This attribute is multiplied by the quantity of each products in the result of this function.
             
             cart_to_be_returned = list(improved_products) + list(locked_products)
             
@@ -232,8 +252,8 @@ class Command(BaseCommand):
             
             cart_optimization_problem.solve(PULP_CBC_CMD(msg=False))
             
-            for variable in lp_variables:
-                print(variable, lp_variables[variable].varValue)
+            # for variable in lp_variables:
+            #     print(variable, lp_variables[variable].varValue)
                 
         def translate_cart_improvement_result(result, cesta):
             
