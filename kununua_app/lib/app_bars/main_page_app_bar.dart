@@ -4,10 +4,12 @@ import 'package:kununua_app/utils/constants.dart';
 class MainPageAppBar extends StatefulWidget implements PreferredSizeWidget {
 
   final String text;
+  final List<Widget> actions;
 
   const MainPageAppBar({
     super.key,
     required this.text,
+    this.actions = const [],
   });
 
   @override
@@ -29,6 +31,7 @@ class _MainPageAppBarState extends State<MainPageAppBar> {
           fontWeight: FontWeight.bold,
         ),
         backgroundColor: kPrimaryColor,
+      actions: widget.actions,
       );
   }
 }

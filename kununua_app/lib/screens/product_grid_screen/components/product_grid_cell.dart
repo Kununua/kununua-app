@@ -100,7 +100,9 @@ class ProductGridCell extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 9,
                 )),
-            Text(title.limitCharacters(25).capitalizeFirstOfEach(),
+                  Text(title.title(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 12,

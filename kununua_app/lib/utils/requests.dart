@@ -108,18 +108,25 @@ String getProductById = """
 String getProductsByCategory = """
     query getProductsByCategory(\$categoryName: String!){
       getProductsByCategory(category: \$categoryName){
-        id
-        name
-        price
-        unitPrice
-        image
-        supermarket{
-          country{
-            currency{
-              code
-              symbol
+        products {
+          id
+          name
+          image
+          priceSet {
+            price
+            supermarket {
+              country {
+                currency {
+                  code
+                  symbol
+                }
+              }
             }
           }
+        }
+        filters {
+          key
+          options
         }
       }
     }
@@ -158,6 +165,54 @@ String getOfferProducts = """
     }
   }
 }
+""";
+
+String getProductsByName = """
+    query getProductsByName(\$name: String!){
+      getProductsByName(name: \$name){
+        products {
+          id
+          name
+          image
+          priceSet {
+            price
+            supermarket {
+              country {
+                currency {
+                  code
+                  symbol
+                }
+              }
+            }
+          }
+        }
+        filters {
+          key
+          options
+        }
+      }
+    }
+""";
+
+String getProductsFiltered = """
+    query getProductsFiltered(\$supermarkets: [String], \$categories: [String], \$minPrice: Float, \$maxPrice: Float, \$minRating: Float, \$maxRating: Float, \$brands: [String], \$name: String){
+      filterProducts(supermarkets: \$supermarkets, categories: \$categories, minPrice: \$minPrice, maxPrice: \$maxPrice, minRating: \$minRating, maxRating: \$maxRating, brands: \$brands, name: \$name){
+        id
+        name
+        image
+        priceSet {
+          price
+          supermarket {
+            country {
+              currency {
+                code
+                symbol
+              }
+            }
+          }
+        }
+      }
+    }
 """;
 
 /* ------------------------------- CART ------------------------------- */

@@ -9,16 +9,16 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: double.infinity,
-      width: double.infinity,
-      color: kBackgroundColor,
-      child: Center(
-        child: Button(
+    return Flex(
+      direction: Axis.vertical,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Button(
           text: "Cerrar sesión",
           color: Colors.red,
-          action: (){
-
+          paddingContainer: const EdgeInsets.fromLTRB(100, 0, 100, 0),
+          action: () {
             globals.prefs!.remove('jwtToken');
             globals.prefs!.remove('username');
             globals.prefs!.remove('email');
@@ -31,8 +31,8 @@ class ProfilePage extends StatelessWidget {
               ),
             );
           },
-        ),
-      ),
+        )
+      ],
     );
   }
 }
