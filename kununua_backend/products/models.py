@@ -91,10 +91,11 @@ class Cart(models.Model):
 
 class ProductEntry(models.Model):
     quantity = models.PositiveIntegerField(_("quantity"))
+    locked = models.BooleanField(_("locked"), default=False)
     product_price = models.ForeignKey(Price, on_delete=models.CASCADE)
     list = models.ForeignKey(List, on_delete=models.CASCADE, null=True)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, null=True)
     is_list_product = models.BooleanField(_("is_list_product"), default=False)
     
     def __str__(self):
-        return f"ProductEntry[quantity: {self.quantity}, product: {self.product}, list: {self.list}, cart: {self.cart}, is_list_product: {self.is_list_product}]"
+        return f"ProductEntry[quantity: {self.quantity}, product: {self.product_price}, list: {self.list}, cart: {self.cart}, is_list_product: {self.is_list_product}]"

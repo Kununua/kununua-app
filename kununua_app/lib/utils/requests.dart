@@ -226,6 +226,7 @@ String getProductsInCart = """
     query getCart(\$userToken: String!){
       getCart(userToken: \$userToken){
         quantity
+        locked
         productPrice{
           id
           price
@@ -262,8 +263,25 @@ String addToCart = """
 
 String editCartEntry = """
 
-    mutation editCartEntry(\$userToken: String!, \$priceId: Int!, \$amount: Int!){
-      editCartEntry(userToken: \$userToken, priceId: \$priceId, amount: \$amount){
+    mutation editCartEntry(\$userToken: String!, \$priceId: Int!, \$amount: Int, \$locked: Boolean){
+      editCartEntry(userToken: \$userToken, priceId: \$priceId, amount: \$amount, locked: \$locked){
+        entry{
+          quantity
+          productPrice{
+            product{
+              name
+            }
+          }
+        }
+      }
+    }
+
+""";
+
+String upgradeCart = """
+
+    mutation upgradeCart(\$userToken: String!, \$maxSupermarkets: Int){
+      upgradeCart(userToken: \$userToken, maxSupermarkets: \$maxSupermarkets){
         entry{
           quantity
           productPrice{

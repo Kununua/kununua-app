@@ -1,7 +1,8 @@
 import graphene, jwt
 from django.utils.translation import gettext_lazy as _
-from .models import Price, Product, ProductEntry, Cart
+from .models import Price, Product, ProductEntry, Cart, Supermarket
 from .types import ProductType, CartType, ProductEntryType
+from products.utils.cart_improvements_functions import improve_cart, improve_cart_optimization, translate_cart_improvement_result, translate_cart_optimization_improvement_result
 
 class AddImageToProductMutation(graphene.Mutation):
 
@@ -69,7 +70,8 @@ class EditCartEntryMutation(graphene.Mutation):
   class Input:
     user_token = graphene.String(required=True)
     price_id = graphene.Int(required=True)
-    amount = graphene.Int(required=True)
+    amount = graphene.Int(required=False)
+    locked = graphene.Boolean(required=False)
     
   entry = graphene.Field(ProductEntryType)
   
@@ -78,7 +80,8 @@ class EditCartEntryMutation(graphene.Mutation):
     
     user_token = kwargs.get('user_token', '')
     price_id = kwargs.get('price_id', 0)
-    amount = kwargs.get('amount', 0)
+    amount = kwargs.get('amount', None)
+    locked = kwargs.get('locked', None)
     
     try:
       user = jwt.decode(user_token, 'my_secret', algorithms=['HS256'])
@@ -90,23 +93,76 @@ class EditCartEntryMutation(graphene.Mutation):
     else:
       raise ValueError(_("Invalid product"))
     
-    if amount < 0:
+    if amount and amount < 0:
       raise ValueError(_("The amount must be greater than 0"))
     
     existing_entry = ProductEntry.objects.filter(product_price=selected_price, cart__user__username=user['username'])
     
     if len(existing_entry) == 1:
-      if amount == 0:
-        existing_entry[0].delete()
-        return EditCartEntryMutation(entry=None)
-      else:
-        existing_entry[0].quantity = amount
+      if amount:
+        if amount == 0:
+          existing_entry[0].delete()
+          return EditCartEntryMutation(entry=None)
+        else:
+          existing_entry[0].quantity = amount
+          existing_entry[0].save()
+          return EditCartEntryMutation(entry=existing_entry[0])
+        
+      if locked is not None:
+        existing_entry[0].locked = locked
         existing_entry[0].save()
         return EditCartEntryMutation(entry=existing_entry[0])
     else:
       raise ValueError(_("There is no entry for this product in the cart"))
+    
+class UpgradeCartMutation(graphene.Mutation):
+  
+  class Input:
+    user_token = graphene.String(required=True)
+    max_supermarkets = graphene.Int(required=False)
+    
+  entry = graphene.List(ProductEntryType)
+  
+  @staticmethod
+  def mutate(root, info, **kwargs):
+    
+    user_token = kwargs.get('user_token', '')
+    max_supermarkets = kwargs.get('max_supermarkets', None)
+    
+    try:
+      user = jwt.decode(user_token, 'my_secret', algorithms=['HS256'])
+    except jwt.InvalidSignatureError:
+      raise ValueError(_("Invalid token"))
+    
+    user_cart_items = ProductEntry.objects.filter(cart=Cart.objects.get(user__username=user['username']), is_list_product=False)
+    
+    upgrading_dict = dict()
+    
+    for item in user_cart_items:
+      
+      if upgrading_dict.get(item.product_price.id, None) is None:
+        upgrading_dict[item.product_price.id] = {
+          'quantity': 0,
+          'is_locked': 0,
+        }
+        upgrading_dict[item.product_price.id]['quantity'] = item.quantity
+        upgrading_dict[item.product_price.id]['is_locked'] = item.locked
+      else:
+        upgrading_dict[item.product_price.id]['quantity'] = item.quantity
+        upgrading_dict[item.product_price.id]['is_locked'] = item.locked
+      
+    if max_supermarkets and max_supermarkets < Supermarket.objects.all().count() and max_supermarkets > 0:
+      improved_cart_prices = improve_cart(upgrading_dict, max_supermarkets)
+      translate_cart_improvement_result(user_cart_items, improved_cart_prices)
+    else:
+      improved_cart_prices = improve_cart_optimization(upgrading_dict)
+      translate_cart_optimization_improvement_result(user_cart_items, improved_cart_prices)
+    
+    return UpgradeCartMutation(entry=ProductEntry.objects.filter(cart=Cart.objects.get(user__username=user['username']), is_list_product=False))
+      
 
 class ProductsMutation(graphene.ObjectType):
   add_image_to_product = AddImageToProductMutation.Field()
   add_entry_to_cart = AddEntryToCartMutation.Field()
   edit_cart_entry = EditCartEntryMutation.Field()
+  upgrade_cart = UpgradeCartMutation.Field()
