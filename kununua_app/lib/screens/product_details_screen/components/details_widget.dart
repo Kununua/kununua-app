@@ -58,7 +58,7 @@ class DetailsWidget extends StatelessWidget {
                 ),
               ],
               bottomNavigationBar: AddToCart(
-                  productId: int.parse(product['id']),
+                  priceId: int.parse(product['priceSet'][0]['id']),
                 ),
             );
   }

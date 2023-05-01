@@ -140,6 +140,6 @@ Supermarket "1" <-- "*" Price: of
 Rating "*" --> "1" Product: rates
 List *-- ProductEntry
 Cart *-- ProductEntry
-ProductEntry "*" --> "1" Product: appears in
+ProductEntry "*" --> "1" Price: appears in
 
 @enduml

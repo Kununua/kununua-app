@@ -36,14 +36,14 @@ class _CartProductState extends State<CartProduct> {
     amount = widget.quantity;
   }
 
-  Future<bool> editCartEntryRequest(int productId, int amount) async {
+  Future<bool> editCartEntryRequest(int priceId, int amount) async {
     Map<String, dynamic> product = {};
 
     final MutationOptions editCartEntryOptions = MutationOptions(
       document: gql(editCartEntry),
       variables: <String, dynamic>{
         'userToken': globals.prefs!.getString('jwtToken'),
-        'productId': productId,
+        'priceId': priceId,
         'amount': amount,
       },
     );
@@ -73,7 +73,7 @@ class _CartProductState extends State<CartProduct> {
       child: Row(
         children: [
           Image(
-            image: widget.product['image'],
+            image: widget.product['product']['image'],
             width: 100,
             height: 100,
             fit: BoxFit.cover
@@ -86,7 +86,7 @@ class _CartProductState extends State<CartProduct> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    (widget.product["name"] as String)
+                    (widget.product['product']["name"] as String)
                         .title(),
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(

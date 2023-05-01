@@ -214,11 +214,11 @@ class RatingRow extends StatelessWidget {
 
 class AddToCart extends StatefulWidget {
 
-  final int productId;
+  final int priceId;
 
   const AddToCart({
     super.key,
-    required this.productId,
+    required this.priceId,
   });
 
   @override
@@ -235,7 +235,7 @@ class _AddToCartState extends State<AddToCart> {
       document: gql(addToCart),
       variables: <String, dynamic>{
         'userToken': globals.prefs!.getString('jwtToken'),
-        'productId': widget.productId,
+        'priceId': widget.priceId,
         'amount': amount,
       },
     );

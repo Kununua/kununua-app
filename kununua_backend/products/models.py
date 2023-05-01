@@ -91,7 +91,7 @@ class Cart(models.Model):
 
 class ProductEntry(models.Model):
     quantity = models.PositiveIntegerField(_("quantity"))
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product_price = models.ForeignKey(Price, on_delete=models.CASCADE)
     list = models.ForeignKey(List, on_delete=models.CASCADE, null=True)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, null=True)
     is_list_product = models.BooleanField(_("is_list_product"), default=False)

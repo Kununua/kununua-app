@@ -84,6 +84,7 @@ String getProductById = """
         isWithoutSugar
         isWithoutLactose
         priceSet{
+          id
           price
           amount
           weight
@@ -225,15 +226,17 @@ String getProductsInCart = """
     query getCart(\$userToken: String!){
       getCart(userToken: \$userToken){
         quantity
-        product{
+        productPrice{
           id
-          name
+          price
+          product{
+            id
+            name
+            image
+          }
           supermarket{
             name
           }
-          price
-          unitPrice
-          image
         }
       }
     }
@@ -242,12 +245,14 @@ String getProductsInCart = """
 
 String addToCart = """
 
-    mutation addEntryToCart(\$userToken: String!, \$productId: Int!, \$amount: Int!){
-      addEntryToCart(userToken: \$userToken, productId: \$productId, amount: \$amount){
+    mutation addEntryToCart(\$userToken: String!, \$priceId: Int!, \$amount: Int!){
+      addEntryToCart(userToken: \$userToken, priceId: \$priceId, amount: \$amount){
         entry{
           quantity
-          product{
-            name
+          productPrice{
+            product{
+              name
+            }
           }
         }
       }
@@ -257,12 +262,14 @@ String addToCart = """
 
 String editCartEntry = """
 
-    mutation editCartEntry(\$userToken: String!, \$productId: Int!, \$amount: Int!){
-      editCartEntry(userToken: \$userToken, productId: \$productId, amount: \$amount){
+    mutation editCartEntry(\$userToken: String!, \$priceId: Int!, \$amount: Int!){
+      editCartEntry(userToken: \$userToken, priceId: \$priceId, amount: \$amount){
         entry{
           quantity
-          product{
-            name
+          productPrice{
+            product{
+              name
+            }
           }
         }
       }
