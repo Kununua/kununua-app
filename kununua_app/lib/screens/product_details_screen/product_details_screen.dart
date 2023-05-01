@@ -7,8 +7,7 @@ import 'package:kununua_app/utils/requests.dart';
 import 'package:kununua_app/utils/globals.dart' as globals;
 import 'package:kununua_app/utils/helper_functions.dart';
 
-class ProductDetails extends StatelessWidget {
-  
+class ProductDetails extends StatefulWidget {
   final int productId;
   final Map<String, dynamic> product;
   
@@ -18,6 +17,14 @@ class ProductDetails extends StatelessWidget {
     this.product = const {},
   });
 
+  @override
+  State<ProductDetails> createState() => _ProductDetailsState();
+}
+
+class _ProductDetailsState extends State<ProductDetails> {
+
+  late final Future getProductFuture;
+
   Future<Map<String, dynamic>> _getProduct() async{
 
     Map<String, dynamic> product = {};
@@ -25,7 +32,7 @@ class ProductDetails extends StatelessWidget {
     final MutationOptions getProductByIdOptions = MutationOptions(
       document: gql(getProductById),
       variables: <String, dynamic>{
-        'id': productId,
+        'id': widget.productId,
       },
     );
 
@@ -41,13 +48,19 @@ class ProductDetails extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+    getProductFuture = _getProduct();
+  }
+
+  @override
   Widget build(BuildContext context) {
 
-    if(product.isNotEmpty){
-      return DetailsWidget(product: product);
+    if(widget.product.isNotEmpty){
+      return DetailsWidget(product: widget.product);
     }else{
       return FutureBuilder(
-        future: _getProduct(),
+        future: getProductFuture,
         builder: (context, productResult) {
 
           if(productResult.hasData){

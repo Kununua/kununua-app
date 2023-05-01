@@ -75,29 +75,32 @@ String getProductById = """
       getProductById(id: \$id){
         id
         name
-        price
-        unitPrice
-        url
+        image
         isVegetarian
         isGlutenFree
         isFreezed
         isFromCountry
-    		isEco
-    		isWithoutSugar
-    		isWithoutLactose
-        image
-        supermarket{
-          name
-          mainUrl
-          country{
-            spanishName
-            englishName
-            code
-            phoneCode
-            currency{
-              name
+        isEco
+        isWithoutSugar
+        isWithoutLactose
+        priceSet{
+          price
+          amount
+          weight
+          url
+          supermarket{
+            name
+            mainUrl
+            country{
+              spanishName
+              englishName
               code
-              symbol
+              phoneCode
+              currency{
+                name
+                code
+                symbol
+              }
             }
           }
         }
