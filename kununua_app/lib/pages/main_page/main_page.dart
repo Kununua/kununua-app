@@ -42,6 +42,33 @@ class MainPage extends StatelessWidget {
 
   }
 
+  Future<List<Widget>> _getPacks() async {
+    List<Widget> packsProducts = [];
+
+    final QueryOptions getPackProductsOptions = QueryOptions(
+      document: gql(getPacks),
+    );
+
+    final packProductsResult =
+        await globals.client.value.query(getPackProductsOptions);
+
+    if (packProductsResult.hasException) {
+      return [];
+    }
+
+    final packProductsData =
+        HelperFunctions.deserializeListData(packProductsResult);
+
+    for (Map<String, dynamic> product in packProductsData) {
+      packsProducts.add(MainPageCell(
+        product: product,
+        bgImage: product['image'],
+      ));
+    }
+
+    return packsProducts;
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -63,9 +90,11 @@ class MainPage extends StatelessWidget {
                 builder: (context, products){
                   if(products.hasData){
                     if ((products.data ?? []).isEmpty){
-                      return const Center(
+                      return const Padding(
+                          padding: EdgeInsets.only(top: 10),
+                          child: Center(
                         child: Text('No hay productos en oferta'),
-                      );
+                          ));
                     }else{
                       return MainPageRow(rowName: 'En oferta', cells: products.data!);
                     }
@@ -74,6 +103,24 @@ class MainPage extends StatelessWidget {
                   }
                 }
               ),
+            FutureBuilder(
+                future: _getPacks(),
+                builder: (context, products) {
+                  if (products.hasData) {
+                    if ((products.data ?? []).isEmpty) {
+                      return const Padding(
+                          padding: EdgeInsets.only(top: 10),
+                          child: Center(
+                            child: Text('No hay packs disponibles'),
+                          ));
+                    } else {
+                      return MainPageRow(
+                          rowName: 'Packs', cells: products.data!);
+                    }
+                  } else {
+                    return const MainPageRow(rowName: 'Packs', loading: true);
+                  }
+                }),
               const MainPageRow(rowName: 'Volver a comprar'),
               const MainPageRow(rowName: 'Productos más vendidos'),
             ],

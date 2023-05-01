@@ -37,8 +37,10 @@ def download_pictures(products):
                 product.save()
             else:
                 try:
-
-                    res = requests.get(url, stream = True, verify=True)
+                    try:
+                        res = requests.get(url, stream = True, verify=True)
+                    except requests.exceptions.SSLError:
+                        res = requests.get(url, stream = True, verify=False)
 
                     if res.status_code == 200:
                         

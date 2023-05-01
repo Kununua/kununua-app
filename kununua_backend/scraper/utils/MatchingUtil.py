@@ -1,6 +1,5 @@
-import json, stanza
-import math
-import re
+import json, stanza, math, re
+from pathlib import Path
 from products.models import Product, Brand, Supermarket, Category, Price
 from location.models import Country
 from data.functions.get_brands_list import get_brands_list
@@ -281,10 +280,11 @@ class MatchingUtil(object):
         category_splitted = category.split(">")
         
         for i in range(len(category_splitted)):
+            image = f'categories/images/{category_splitted[i].lower().strip().replace(" ", "_")}.png'
             if i > 0:
-                result, _ = Category.objects.get_or_create(name=category_splitted[i], parent=Category.objects.get(name=category_splitted[i-1]))
+                result, _ = Category.objects.get_or_create(name=category_splitted[i].strip(), parent=Category.objects.get(name=category_splitted[i-1].strip()), image=image)
             else:
-                result, _ = Category.objects.get_or_create(name=category_splitted[i])
+                result, _ = Category.objects.get_or_create(name=category_splitted[i].strip(), image=image)
                 
         return result
     

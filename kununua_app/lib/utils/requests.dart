@@ -64,6 +64,7 @@ String getCategories = """
     query getAllCategories{
       getAllCategories{
         name
+        image
       }
     }
     """;
@@ -137,39 +138,77 @@ String getProductsByCategory = """
 """;
 
 String getOfferProducts = """
-  query getProductsWithOffer{
-  getProductsWithOffer{
-    id
-    name
-    price
-    unitPrice
-    url
-    isVegetarian
-    isGlutenFree
-    isFreezed
-    isFromCountry
-    isEco
-    isWithoutSugar
-    isWithoutLactose
-    image
-    supermarket{
+  query getProductsWithOffer {
+    getProductsWithOffer {
+      id
       name
-      mainUrl
-      country{
-        spanishName
-        englishName
-        code
-        phoneCode
-        currency{
+      isVegetarian
+      isGlutenFree
+      isFreezed
+      isFromCountry
+      isEco
+      isWithoutSugar
+      isWithoutLactose
+      image
+      priceSet {
+        price
+        url
+        supermarket {
           name
-          code
-          symbol
+          mainUrl
+          country {
+            spanishName
+            englishName
+            code
+            phoneCode
+            currency {
+              name
+              code
+              symbol
+            }
+          }
         }
       }
     }
   }
-}
 """;
+
+String getPacks = """
+  query getPacks {
+    getPacks {
+      id
+      name
+      isVegetarian
+      isGlutenFree
+      isFreezed
+      isFromCountry
+      isEco
+      isWithoutSugar
+      isWithoutLactose
+      image
+      priceSet {
+        price
+        url
+        supermarket {
+          name
+          mainUrl
+          country {
+            spanishName
+            englishName
+            code
+            phoneCode
+            currency {
+              name
+              code
+              symbol
+            }
+          }
+        }
+      }
+    }
+  }
+""";
+
 
 String getProductsByName = """
     query getProductsByName(\$name: String!){

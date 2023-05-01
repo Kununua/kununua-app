@@ -19,15 +19,9 @@ class MainPageCategoryRow extends StatelessWidget {
 
     final categoriesResult = await globals.client.value.mutate(getAllCategoriesOptions);
 
-    var categoriesList = categoriesResult.data!['getAllCategories'];
-
-    for (var category in categoriesList){
-      categories.add({
-        'name': category['name'],
-      });
-    }
-
-    return categories;
+    var categoriesList = HelperFunctions.deserializeListData(categoriesResult);
+    
+    return categoriesList;
   }
 
   @override
@@ -57,7 +51,7 @@ class MainPageCategoryRow extends StatelessWidget {
                         return Row(
                           children: snapshot.data.map<Widget>((category) => MainPageCategoryCell(
                             categoryName: category['name'],
-                            categoryImage: const AssetImage('assets/images/frescos.png'),
+                              categoryImage: category['image'],
                           )).toList(),
                         );
                       } else {

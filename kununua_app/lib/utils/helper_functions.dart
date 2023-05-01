@@ -10,6 +10,7 @@ class HelperFunctions {
       QueryResult<Object?> queryResult,
       {String? otherOperationName}) {
     String operationName = queryResult.data!.keys.elementAt(1);
+
     final data = otherOperationName != null
         ? queryResult.data![operationName]![otherOperationName]
         : queryResult.data![operationName];

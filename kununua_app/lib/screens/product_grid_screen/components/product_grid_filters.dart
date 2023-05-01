@@ -77,17 +77,17 @@ class ProductGridFilters extends StatelessWidget {
     String? name;
     void applyFilters() async {
       List<Map<String, dynamic>> productsList = [];
-      supermarkets = [...settedFilters['Supermercados']!];
+      supermarkets = [...originalFilters['Supermercados']!];
       supermarkets!.addAll(settedFilters['Supermercados']!);
       if (supermarkets!.isEmpty) {
         supermarkets = null;
       }
-      categories = [...settedFilters['Categorías']!];
+      categories = [...originalFilters['Categorías']!];
       categories!.addAll(settedFilters['Categorías']!);
       if (categories!.isEmpty) {
         categories = null;
       }
-      brands = [...settedFilters['Marcas']!];
+      brands = [...originalFilters['Marcas']!];
       brands!.addAll(settedFilters['Marcas']!);
       if (brands!.isEmpty) {
         brands = null;
@@ -128,7 +128,7 @@ class ProductGridFilters extends StatelessWidget {
       );
 
       final productsResult = await globals.client.value.mutate(getProducts);
-      debugPrint(productsResult.toString());
+      
       productsList = HelperFunctions.deserializeListData(productsResult);
 
       updateProductsList(productsList, settedFilters);

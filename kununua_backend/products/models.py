@@ -21,6 +21,7 @@ class Supermarket(models.Model):
 class Category(models.Model):
     name = models.CharField(_("name"), max_length=64, unique=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+    image = models.ImageField(_("image"), upload_to="categories/images/", max_length=1024)
     
     def __str__(self):
         return f"Category[name: {self.name}, parent: {self.parent.name if self.parent else None}]"

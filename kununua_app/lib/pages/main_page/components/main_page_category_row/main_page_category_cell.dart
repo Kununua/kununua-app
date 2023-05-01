@@ -68,10 +68,13 @@ class MainPageCategoryCell extends StatelessWidget {
                   ),
                   child: Stack(
                     children: [
-                      Image(
+                  ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image(
                         image: categoryImage,
                         fit: BoxFit.cover,
-                      ),
+                        height: 150,
+                      )),
                       Center(
                         child: BlurryContainer(
                           padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
