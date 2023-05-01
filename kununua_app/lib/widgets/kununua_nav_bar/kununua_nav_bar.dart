@@ -54,13 +54,13 @@ class _KununuaNavBarState extends State<KununuaNavBar> {
           //   icon: NavBarIcons.stats,
           //   screen: widget.screen,
           // ),
-          NavBarIcon(
-            onPressed: () => {
-              widget.currentScreenCallback(Screens.search)
-            },
-            icon: NavBarIcons.search,
-            screen: widget.screen,
-          ),
+          // NavBarIcon(
+          //   onPressed: () => {
+          //     widget.currentScreenCallback(Screens.search)
+          //   },
+          //   icon: NavBarIcons.search,
+          //   screen: widget.screen,
+          // ),
           // NavBarIcon(
           //   onPressed: () => {
           //     widget.currentScreenCallback(Screens.cart)
