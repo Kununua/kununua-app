@@ -30,8 +30,7 @@ def download_pictures(products):
         if "products" not in product.image.url:
             
             url = product.image
-            supermarket = normalize(product.supermarket.name)
-            file_name = normalize(supermarket + "/" +product.name.replace(' ', '_').replace(",", "_").replace("/", "")) + '_' + supermarket.replace(' ', '_') + '.jpg'
+            file_name = normalize(product.name.replace(' ', '_').replace(",", "_").replace("/", "")) + '.jpg'
     
             if picture_in_media(file_name):
                 product.image = "products/images/%s" % (file_name)
@@ -39,7 +38,7 @@ def download_pictures(products):
             else:
                 try:
 
-                    res = requests.get(url, stream = True)
+                    res = requests.get(url, stream = True, verify=False)
 
                     if res.status_code == 200:
                         

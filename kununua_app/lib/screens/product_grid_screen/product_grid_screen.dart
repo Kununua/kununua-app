@@ -19,6 +19,7 @@ class ProductGridScreen extends StatefulWidget {
 }
 
 class _ProductGridScreenState extends State<ProductGridScreen> {
+  late final Future getProductsByCategoryFuture;
   Map<String, List<String>> _filters = {};
   Map<String, List<String>> _filtersSetted = {};
   Map<String, List<String>> _originalFilters = {};
@@ -52,6 +53,8 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     _productsList = [];
     _hasBeenUpdated = false;
     super.initState();
+
+    getProductsByCategoryFuture = _getProductsByCategory();
   }
 
   void updateProductsList(List<Map<String, dynamic>> productsList,
@@ -108,7 +111,7 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
       body: Container(
         color: kBackgroundColor,
         child: FutureBuilder(
-          future: _getProductsByCategory(),
+          future: getProductsByCategoryFuture,
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (_productsList.isNotEmpty) {
               return KununuaGrid(
