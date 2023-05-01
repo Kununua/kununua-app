@@ -64,6 +64,7 @@ String getCategories = """
     query getAllCategories{
       getAllCategories{
         name
+        image
       }
     }
     """;
@@ -75,29 +76,33 @@ String getProductById = """
       getProductById(id: \$id){
         id
         name
-        price
-        unitPrice
-        url
+        image
         isVegetarian
         isGlutenFree
         isFreezed
         isFromCountry
-    		isEco
-    		isWithoutSugar
-    		isWithoutLactose
-        image
-        supermarket{
-          name
-          mainUrl
-          country{
-            spanishName
-            englishName
-            code
-            phoneCode
-            currency{
-              name
+        isEco
+        isWithoutSugar
+        isWithoutLactose
+        priceSet{
+          id
+          price
+          amount
+          weight
+          url
+          supermarket{
+            name
+            mainUrl
+            country{
+              spanishName
+              englishName
               code
-              symbol
+              phoneCode
+              currency{
+                name
+                code
+                symbol
+              }
             }
           }
         }
@@ -133,39 +138,77 @@ String getProductsByCategory = """
 """;
 
 String getOfferProducts = """
-  query getProductsWithOffer{
-  getProductsWithOffer{
-    id
-    name
-    price
-    unitPrice
-    url
-    isVegetarian
-    isGlutenFree
-    isFreezed
-    isFromCountry
-    isEco
-    isWithoutSugar
-    isWithoutLactose
-    image
-    supermarket{
+  query getProductsWithOffer {
+    getProductsWithOffer {
+      id
       name
-      mainUrl
-      country{
-        spanishName
-        englishName
-        code
-        phoneCode
-        currency{
+      isVegetarian
+      isGlutenFree
+      isFreezed
+      isFromCountry
+      isEco
+      isWithoutSugar
+      isWithoutLactose
+      image
+      priceSet {
+        price
+        url
+        supermarket {
           name
-          code
-          symbol
+          mainUrl
+          country {
+            spanishName
+            englishName
+            code
+            phoneCode
+            currency {
+              name
+              code
+              symbol
+            }
+          }
         }
       }
     }
   }
-}
 """;
+
+String getPacks = """
+  query getPacks {
+    getPacks {
+      id
+      name
+      isVegetarian
+      isGlutenFree
+      isFreezed
+      isFromCountry
+      isEco
+      isWithoutSugar
+      isWithoutLactose
+      image
+      priceSet {
+        price
+        url
+        supermarket {
+          name
+          mainUrl
+          country {
+            spanishName
+            englishName
+            code
+            phoneCode
+            currency {
+              name
+              code
+              symbol
+            }
+          }
+        }
+      }
+    }
+  }
+""";
+
 
 String getProductsByName = """
     query getProductsByName(\$name: String!){
@@ -222,15 +265,18 @@ String getProductsInCart = """
     query getCart(\$userToken: String!){
       getCart(userToken: \$userToken){
         quantity
-        product{
+        locked
+        productPrice{
           id
-          name
+          price
+          product{
+            id
+            name
+            image
+          }
           supermarket{
             name
           }
-          price
-          unitPrice
-          image
         }
       }
     }
@@ -239,12 +285,14 @@ String getProductsInCart = """
 
 String addToCart = """
 
-    mutation addEntryToCart(\$userToken: String!, \$productId: Int!, \$amount: Int!){
-      addEntryToCart(userToken: \$userToken, productId: \$productId, amount: \$amount){
+    mutation addEntryToCart(\$userToken: String!, \$priceId: Int!, \$amount: Int!){
+      addEntryToCart(userToken: \$userToken, priceId: \$priceId, amount: \$amount){
         entry{
           quantity
-          product{
-            name
+          productPrice{
+            product{
+              name
+            }
           }
         }
       }
@@ -254,12 +302,31 @@ String addToCart = """
 
 String editCartEntry = """
 
-    mutation editCartEntry(\$userToken: String!, \$productId: Int!, \$amount: Int!){
-      editCartEntry(userToken: \$userToken, productId: \$productId, amount: \$amount){
+    mutation editCartEntry(\$userToken: String!, \$priceId: Int!, \$amount: Int, \$locked: Boolean){
+      editCartEntry(userToken: \$userToken, priceId: \$priceId, amount: \$amount, locked: \$locked){
         entry{
           quantity
-          product{
-            name
+          productPrice{
+            product{
+              name
+            }
+          }
+        }
+      }
+    }
+
+""";
+
+String upgradeCart = """
+
+    mutation upgradeCart(\$userToken: String!, \$maxSupermarkets: Int){
+      upgradeCart(userToken: \$userToken, maxSupermarkets: \$maxSupermarkets){
+        entry{
+          quantity
+          productPrice{
+            product{
+              name
+            }
           }
         }
       }

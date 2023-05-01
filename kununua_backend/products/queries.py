@@ -13,6 +13,7 @@ class ProductsQuery(object):
   get_product_by_id = graphene.Field(ProductType, id=graphene.Int())
   get_products_by_category = graphene.Field(ProductFilterType, category=graphene.String())
   get_products_with_offer = graphene.List(ProductType)
+  get_packs = graphene.List(ProductType)
 
   def resolve_get_product_by_id(self, info, id):
       
@@ -22,7 +23,12 @@ class ProductsQuery(object):
   
   def resolve_get_products_by_category(self, info, category):
     
-    products = Product.objects.filter(category__name=category)[:20]
+    try:
+      category = Category.objects.get(name=category)
+    except Category.DoesNotExist:
+      raise ValueError(_("Category does not exist"))
+    
+    products = Product.objects.filter(category=category).exclude(name__iexact='')[:50]
     
     # TODO: Añadir paginación, retraso por codificacion de imagenes, orden, etc.
     
@@ -32,8 +38,13 @@ class ProductsQuery(object):
   
   def resolve_get_products_with_offer(self, info):
     
-    #TODO: Rehacer
-    products = Product.objects.all()[:20]
+    products = Product.objects.filter(price__amount=1).exclude(image="products/images/nodisponible.png").distinct()[:20]
+    
+    return products
+  
+  def resolve_get_packs(self, info):
+    
+    products = Product.objects.filter(price__amount__gt=1).distinct()[:20]
     
     return products
   
@@ -145,7 +156,7 @@ def _get_filters(products):
   
   
   for product in products:
-    if product.brand.name not in brands:
+    if product.brand and product.brand.name not in brands:
       brands.append(product.brand.name)
     if product.category.name not in categories:
       categories.append(product.category.name)

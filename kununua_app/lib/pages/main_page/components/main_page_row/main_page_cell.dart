@@ -47,7 +47,7 @@ class MainPageCell extends StatelessWidget {
         );
       }),
       openBuilder: ((context, closeDetails) {
-        return ProductDetails(product: product);
+        return ProductDetails(productId: int.tryParse(product["id"])!);
       }),
       onClosed: (_){},
     );

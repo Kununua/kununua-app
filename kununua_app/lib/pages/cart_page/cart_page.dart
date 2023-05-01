@@ -37,8 +37,9 @@ class CartPage extends StatelessWidget {
 
     for (Map<String, dynamic> product in products) {
       cartProducts.add(CartProduct(
+        isLocked: product['locked'],
         quantity: product['quantity'],
-        product: product['product']
+        product: product['productPrice']
       ));
     }
 

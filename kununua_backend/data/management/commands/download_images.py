@@ -30,22 +30,24 @@ def download_pictures(products):
         if "products" not in product.image.url:
             
             url = product.image
-            supermarket = normalize(product.supermarket.name)
-            file_name = normalize(supermarket + "/" +product.name.replace(' ', '_').replace(",", "_").replace("/", "")) + '_' + supermarket.replace(' ', '_') + '.jpg'
+            file_name = normalize(product.name.replace(' ', '_').replace(",", "_").replace("/", "")) + '.jpg'
     
             if picture_in_media(file_name):
                 product.image = "products/images/%s" % (file_name)
                 product.save()
             else:
                 try:
-
-                    res = requests.get(url, stream = True)
+                    try:
+                        res = requests.get(url, stream = True, verify=True)
+                    except requests.exceptions.SSLError:
+                        res = requests.get(url, stream = True, verify=False)
 
                     if res.status_code == 200:
                         
                         product.image.save(file_name, res.raw, save=True)
                     
-                except requests.exceptions.MissingSchema:
+                except (requests.exceptions.MissingSchema, requests.exceptions.InvalidSchema):
+                    print("Error")
                     product.image = "products/images/nodisponible.png"
                     product.save()
 

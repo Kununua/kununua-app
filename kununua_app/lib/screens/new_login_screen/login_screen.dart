@@ -197,7 +197,7 @@ class LoginScreen extends StatelessWidget {
           authButtonPadding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
           cardInitialHeight: 400,
         ),
-        logo: const AssetImage('assets/images/google.png'),
+        logo: const AssetImage('assets/images/transparent.png'),
         userType: LoginUserType.name,
         onLogin: _authUser,
         onSignup: _signupUser,
@@ -207,26 +207,26 @@ class LoginScreen extends StatelessWidget {
             label: 'Google',
             callback: _googleLogin,
           ),
-          LoginProvider(
-            button: Buttons.facebook,
-            label: 'Facebook',
-            callback: () async {
-              debugPrint('start facebook sign in');
-              await Future.delayed(loginTime);
-              debugPrint('stop facebook sign in');
-              return null;
-            },
-          ),
-          LoginProvider(
-            button: Buttons.appleDark,
-            label: 'Apple',
-            callback: () async {
-              debugPrint('start facebook sign in');
-              await Future.delayed(loginTime);
-              debugPrint('stop facebook sign in');
-              return null;
-            },
-          ),
+          // LoginProvider(
+          //   button: Buttons.facebook,
+          //   label: 'Facebook',
+          //   callback: () async {
+          //     debugPrint('start facebook sign in');
+          //     await Future.delayed(loginTime);
+          //     debugPrint('stop facebook sign in');
+          //     return null;
+          //   },
+          // ),
+          // LoginProvider(
+          //   button: Buttons.appleDark,
+          //   label: 'Apple',
+          //   callback: () async {
+          //     debugPrint('start facebook sign in');
+          //     await Future.delayed(loginTime);
+          //     debugPrint('stop facebook sign in');
+          //     return null;
+          //   },
+          // ),
         ],
         onSubmitAnimationCompleted: () {
           Navigator.of(context).pushAndRemoveUntil(
