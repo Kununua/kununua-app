@@ -22,7 +22,7 @@ class ProductsQuery(object):
   
   def resolve_get_products_by_category(self, info, category):
     
-    products = Product.objects.filter(category__name=category)[:20]
+    products = Product.objects.filter(category__name=category).exclude(name__iexact='')[:50]
     
     # TODO: Añadir paginación, retraso por codificacion de imagenes, orden, etc.
     
@@ -145,7 +145,7 @@ def _get_filters(products):
   
   
   for product in products:
-    if product.brand.name not in brands:
+    if product.brand and product.brand.name not in brands:
       brands.append(product.brand.name)
     if product.category.name not in categories:
       categories.append(product.category.name)

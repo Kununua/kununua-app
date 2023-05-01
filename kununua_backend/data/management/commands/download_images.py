@@ -38,13 +38,14 @@ def download_pictures(products):
             else:
                 try:
 
-                    res = requests.get(url, stream = True, verify=False)
+                    res = requests.get(url, stream = True, verify=True)
 
                     if res.status_code == 200:
                         
                         product.image.save(file_name, res.raw, save=True)
                     
-                except requests.exceptions.MissingSchema:
+                except (requests.exceptions.MissingSchema, requests.exceptions.InvalidSchema):
+                    print("Error")
                     product.image = "products/images/nodisponible.png"
                     product.save()
 
