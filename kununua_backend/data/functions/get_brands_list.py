@@ -1,4 +1,4 @@
-def get_brands_links(path):
+def get_brands_list(path):
     
     result = []
     

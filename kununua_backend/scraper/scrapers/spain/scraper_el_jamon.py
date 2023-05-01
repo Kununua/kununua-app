@@ -2,10 +2,9 @@ from bs4 import BeautifulSoup
 from ...utils.SeleniumUtils import SeleniumUtils
 from selenium import webdriver
 from ...utils.ConfigurationTools import ConfigurationTools
-from products.models import Supermarket, Category
+from products.models import Supermarket
 from ...models import ProductScraped
 from location.models import Country
-from ...utils.ProductShelf import ProductShelf
 from tqdm import tqdm
 
 supermarket = Supermarket(name="El Jamón", zipcode="41009", main_url="https://www.supermercadoseljamon.com/inicio", country=Country.objects.get(code='ESP'))
@@ -56,7 +55,7 @@ def extract_data(url, path, driver, selenium_utils):
 			except Exception:
 				pass
 
-			product = ProductScraped(name=name, price=price, unit_price=unit_price, weight=weight, brand=brand, amount=amount, offer_price=offer_price, image=product_image, is_from_country=is_from_country, is_gluten_free=is_gluten_free, is_freezed=is_freezed, is_vegetarian=is_vegan, is_eco=is_eco, is_without_sugar=is_without_sugar, is_without_lactose=is_without_lactose, is_pack=is_pack, url=name_link, supermarket=supermarket, category=Category(name=category))
+			product = ProductScraped(name=name, price=price, unit_price=unit_price, weight=weight, brand=brand, amount=amount, offer_price=offer_price, image=product_image, is_from_country=is_from_country, is_gluten_free=is_gluten_free, is_freezed=is_freezed, is_vegetarian=is_vegan, is_eco=is_eco, is_without_sugar=is_without_sugar, is_without_lactose=is_without_lactose, is_pack=is_pack, url=name_link, supermarket=supermarket, category=category)
    
 			products.append(product)
    
@@ -68,7 +67,7 @@ def extract_data(url, path, driver, selenium_utils):
   
 	return products
 
-def scraper():
+def scraper(sqlite_api):
     
 	print("Starting webdriver...")
 	driver_options = webdriver.ChromeOptions()
@@ -77,6 +76,9 @@ def scraper():
 	selenium_utils = SeleniumUtils(timeout=10, driver=driver)
 	
 	driver.get('https://www.supermercadoseljamon.com/inicio')
+ 
+	sql_supermarket = {"name": supermarket.name, "zipcode": supermarket.zipcode, "main_url": supermarket.main_url, "country": supermarket.country.code}
+	sqlite_api._add_supermarket(sql_supermarket)
 	
 	#Include the zipcode configuration in this section
 	ConfigurationTools.zipcode_eljamon(selenium_utils)
@@ -94,6 +96,6 @@ def scraper():
 		products += products_to_add
 
 	driver.quit()
+ 
+	sqlite_api.add_products_scraped(products)
 
-	shelve_util = ProductShelf('data/shelves/productos.dat')
-	shelve_util.create_shelf(products)

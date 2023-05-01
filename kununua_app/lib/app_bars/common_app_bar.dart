@@ -20,6 +20,13 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
           fontWeight: FontWeight.bold,
         ),
         backgroundColor: kPrimaryColor,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.filter_alt),
+          onPressed: () => {Scaffold.of(context).openEndDrawer()},
+          tooltip: "Filtros",
+        )
+      ],
       );
   }
 

@@ -1,0 +1,94 @@
+body{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #cef0cd;
+}
+
+bold{
+    font-weight: bolder;
+}
+
+.products-container{
+    width: 50%;
+    height: 70%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.product{
+    background-color: #ffffff;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.product > img{
+    object-fit: contain;
+    width: 100%;
+    height: 70%;
+    aspect-ratio: 1/1;
+}
+
+.buttons-container{
+    width: 50%;
+    height: 15%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+#yes-button{
+    background-color: rgb(110, 255, 110);
+    width: 100px;
+    height: 100px;
+    border-radius: 15px;
+    border: 1px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 50px;
+    font-weight: bolder;
+    cursor: pointer;
+}
+
+#no-button{
+    background-color: #ff6363;
+    width: 100px;
+    height: 100px;
+    border-radius: 15px;
+    border: 1px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 50px;
+    font-weight: bolder;
+    cursor: pointer;
+}
+
+#yes-button:hover{
+    background-color: rgb(0, 255, 0);
+}
+
+#no-button:hover{
+    background-color: #ff0000;
+}
+
+h2{
+    margin-top: 20px;
+    margin-bottom: 0;
+}
+
+h1{
+    margin: 0 30px
+}

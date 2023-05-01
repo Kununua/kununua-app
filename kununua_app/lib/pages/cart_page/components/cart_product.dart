@@ -87,8 +87,8 @@ class _CartProductState extends State<CartProduct> {
                 children: [
                   Text(
                     (widget.product["name"] as String)
-                        .limitCharacters(18)
-                        .capitalizeFirstOfEach(),
+                        .title(),
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

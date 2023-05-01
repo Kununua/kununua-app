@@ -24,7 +24,7 @@ class ProductNameRow extends StatelessWidget {
     return Container(
             margin: const EdgeInsets.only(bottom: 10),
             child: Text(
-              productName.capitalizeFirstOfEach(),
+        productName.title(),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.black,
@@ -63,7 +63,7 @@ class PriceRow extends StatelessWidget {
                     color: kPrimaryColor,
                   ),
                   Text(
-                    " ${supermarket.capitalizeFirstOfEach()}",
+              " ${supermarket.title()}",
                     style: const TextStyle(
                       color: kPrimaryColor,
                       fontSize: 18,

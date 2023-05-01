@@ -212,7 +212,8 @@ class GeneratorCarrefourStandardCase(TestCase):
         
         number_of_subcategories = {
             'Productos Frescos': 9,
-            'La despensa': 9,
+            'La despensa': 8,
+            'Congelados': 9,
             'Bebidas': 8,
             'Limplieza y Hogar': 12,
             'Perfumería e Higiene': 8,

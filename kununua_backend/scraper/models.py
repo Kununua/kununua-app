@@ -1,5 +1,5 @@
 from django.db import models
-from products.models import Category, Supermarket
+from products.models import Category, Supermarket, Brand
 from django.utils.translation import gettext_lazy as _
 
 class ProductScraped(object):
@@ -21,8 +21,8 @@ class ProductScraped(object):
             raise ValueError(_("Product unit_price must be None or string"))
         if weight is not None and type(weight) is not str:
             raise ValueError(_("Product weight must be None or string"))
-        if brand is not None and type(brand) is not str:
-            raise ValueError(_("Product brand must be None or string"))
+        if brand is not None and type(brand) is not str and not isinstance(brand, Brand):
+            raise ValueError(_("Product brand must be None or string or Brand object"))
         if amount is not None and type(amount) is not int:
             raise ValueError(_("Product amount must be None or int"))
         if type(image) is not str:
@@ -47,9 +47,9 @@ class ProductScraped(object):
             raise ValueError(_("Product url must be None or string"))
         if type(is_pack) is not bool:
             raise ValueError(_("Product is_pack flag must be boolean"))
-        if type(category) is not str:
-            raise ValueError(_("Product category cannot be None and must be a string"))
-        if type(supermarket) is not Supermarket:
+        if type(category) is not str and not isinstance(category, Category):
+            raise ValueError(_("Product category cannot be None and must be a string or Category object"))
+        if type(supermarket) is not Supermarket and not isinstance(supermarket, str):
             raise ValueError(_("Product supermarket cannot be None and must be a Supermarket object"))
         
         self.pseudo_id = pseudo_id
@@ -80,8 +80,8 @@ class PackScraped(object):
     
     def __init__(self, product_scraped=None, amount=None, price=None, weight=None, image=None, url=None):
         
-        if product_scraped is not None and type(product_scraped) is not ProductScraped:
-            raise ValueError(_("Pack product_scraped cannot be None and must be a ProductScraped object"))
+        if product_scraped is not None and type(product_scraped) is not ProductScraped and not isinstance(product_scraped, int):
+            raise ValueError(_("Pack product_scraped cannot be None and must be a ProductScraped object or int"))
         
         self.product_scraped = product_scraped
         self.amount = amount

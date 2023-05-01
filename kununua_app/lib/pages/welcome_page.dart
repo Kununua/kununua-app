@@ -17,7 +17,7 @@ class _WelcomePageState extends State<WelcomePage> {
   void _return(){;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => LoginScreen(),
+        builder: (context) => const LoginScreen(),
       ),
     );
   }

@@ -4,6 +4,8 @@ import 'package:kununua_app/pages/cart_page/cart_page.dart';
 import 'package:kununua_app/pages/main_page/main_page.dart';
 import 'package:kununua_app/pages/not_implemented_page.dart';
 import 'package:kununua_app/pages/profile_page/profile_page.dart';
+import 'package:kununua_app/pages/search_page/search_page.dart';
+import 'package:kununua_app/screens/product_grid_screen/components/product_grid_filters.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/widgets/kununua_nav_bar/kununua_nav_bar.dart';
 
@@ -37,7 +39,7 @@ class _MainScreenState extends State<MainScreen> {
       case Screens.stats:
         return const NotImplementedPage();
       case Screens.search:
-        return const NotImplementedPage();
+        return const SearchPage();
       case Screens.cart:
         return const CartPage();
       case Screens.profile:
@@ -56,8 +58,7 @@ class _MainScreenState extends State<MainScreen> {
           text: kStatsText
         );
       case Screens.search:
-        return const MainPageAppBar(
-          text: kSearchText
+        return MainPageAppBar(text: kSearchText, actions: [Container()]
         );
       case Screens.cart:
         return const MainPageAppBar(
@@ -81,6 +82,11 @@ class _MainScreenState extends State<MainScreen> {
 
     return Scaffold(
       appBar: _loadAppBar(_currentScreen),
+      endDrawer: _currentScreen == Screens.search
+          ? ProductGridFilters(
+              updateProductsList: () => {},
+            )
+          : null,
       body: _loadScreen(_currentScreen),
       bottomNavigationBar: KununuaNavBar(
         screen: _currentScreen,
