@@ -1,14 +1,129 @@
 import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:kununua_app/screens/product_grid_screen/components/product_grid_cell.dart';
 import 'package:kununua_app/utils/constants.dart';
+import 'package:kununua_app/utils/helper_functions.dart';
 import 'package:kununua_app/widgets/button.dart';
+import 'package:kununua_app/utils/requests.dart';
+import 'package:kununua_app/utils/globals.dart' as globals;
+import 'package:kununua_app/widgets/kununua_grid.dart';
+import 'dart:async';
 
-class SearchPage extends StatelessWidget {
-  final int totalResults = 0;
-  const SearchPage({super.key});
+class SearchPage extends StatefulWidget {
+  final List<Map<String, dynamic>> productsList;
+  final Function updateFilters;
+  final int totalResults;
+  const SearchPage(
+      {super.key,
+      required this.updateFilters,
+      required this.productsList,
+      required this.totalResults});
+
+  @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  Map<String, List<String>> _filters = {};
+  Map<String, List<String>> _filtersSetted = {};
+  Map<String, List<String>> _filtersOriginal = {};
+  List<Map<String, List<dynamic>>> _productsList = [];
+  final inputController = TextEditingController();
+  Timer? _debounce;
+
+  @override
+  void dispose() {
+    inputController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    _filters = {
+      'Supermercados': [],
+      'Precio': [],
+      'Puntuación': [],
+      'Categorías': [],
+      'Marcas': [],
+    };
+    super.initState();
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 1000), () async {
+      if (query.trim().isEmpty) {
+        _productsList = [];
+        _filters = {
+          'Supermercados': [],
+          'Precio': [],
+          'Puntuación': [],
+          'Categorías': [],
+          'Marcas': [],
+        };
+        _filtersSetted = {
+          'Supermercados': [],
+          'Precio': [],
+          'Puntuación': [],
+          'Categorías': [],
+          'Marcas': [],
+        };
+        _filtersOriginal = {
+          'Supermercados': [],
+          'Precio': [],
+          'Puntuación': [],
+          'Categorías': [],
+          'Marcas': [],
+          'Nombres': [],
+        };
+        widget.updateFilters(
+            _productsList, _filters, _filtersSetted, _filtersOriginal);
+        return;
+      }
+      final QueryOptions getProducts = QueryOptions(
+        document: gql(getProductsByName),
+        variables: <String, dynamic>{'name': query},
+      );
+
+      final productsResult = await globals.client.value.query(getProducts);
+
+      var productsList = HelperFunctions.deserializeListData(productsResult,
+          otherOperationName: 'products');
+      var filtersList = HelperFunctions.deserializeListData(productsResult,
+          otherOperationName: 'filters');
+
+      for (var filter in filtersList) {
+        List<String> options = [];
+        for (var option in List.from(filter['options'])) {
+          options.add(option);
+        }
+        _filters[filter['key']] = options;
+      }
+      _filtersSetted = {
+        'Supermercados': [],
+        'Precio': [],
+        'Puntuación': [],
+        'Categorías': [],
+        'Marcas': [],
+      };
+      _filtersOriginal = {
+        'Supermercados': [],
+        'Precio': [],
+        'Puntuación': [],
+        'Categorías': [],
+        'Marcas': [],
+        'Nombres': [query],
+      };
+      widget.updateFilters(
+          productsList, _filters, _filtersSetted, _filtersOriginal);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Flex(direction: Axis.vertical, children: [
+    return SingleChildScrollView(
+        child: Flex(direction: Axis.vertical, children: [
       Container(
           margin: const EdgeInsets.all(10),
           padding: const EdgeInsets.fromLTRB(5, 0, 10, 0),
@@ -31,12 +146,13 @@ class SearchPage extends StatelessWidget {
               ),
             ),
           ),
-          child: const TextField(
-              decoration: InputDecoration(
+          child: TextField(
+              onChanged: _onSearchChanged,
+              decoration: const InputDecoration(
                   hintText: "Busca cualquier producto",
                   icon: Icon(Icons.search),
                   border: InputBorder.none),
-              style: TextStyle(
+              style: const TextStyle(
                   backgroundColor: Colors.white,
                   decoration: TextDecoration.none))),
       Flex(
@@ -46,7 +162,7 @@ class SearchPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Text(
-                  "Mostrando $totalResults resultado${totalResults != 1 ? "s" : ""}"),
+                  "Mostrando ${widget.totalResults} resultado${widget.totalResults != 1 ? "s" : ""}"),
               Button(
                 text: "Filtros",
                 action: () => {Scaffold.of(context).openEndDrawer()},
@@ -56,9 +172,36 @@ class SearchPage extends StatelessWidget {
                 icon: const Icon(Icons.filter_alt),
               )
             ],
-          ),
+          )
         ],
-      )
-    ]);
+      ),
+      (widget.productsList.isNotEmpty)
+          ? KununuaGrid(
+              scrollable: true,
+              gridMargin: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+              mainAxisSpacing: 10,
+              crossAxisCount: 2,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: widget.productsList
+                  .map<Widget>((product) => ProductGridCell(
+                        id: int.parse(product['id']),
+                        image: product['image'],
+                        title: product['name'],
+                        price: product['priceSet'][0]['price'],
+                        offerPrice: '',
+                        unitPrice: '',
+                        weightUnit: product['weightUnit'] ?? '',
+                        currency: product['priceSet'][0]['supermarket']
+                                ['country']['currency']['symbol'] ??
+                            product['priceSet'][0]['supermarket']['country']
+                                ['currency']['code'],
+                      ))
+                  .toList())
+          : (inputController.text.isNotEmpty)
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : Container(),
+    ]));
   }
 }

@@ -28,12 +28,62 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   late Screens _currentScreen;
   late int? maxSupermarkets;
+  Map<String, List<String>> _searchFilters = {};
+  Map<String, List<String>> _searchFiltersSetted = {};
+  Map<String, List<String>> _searchOriginalFilters = {};
+  List<Map<String, dynamic>> _searchProductsList = [];
+  int _searchTotalResults = 0;
+  void updateSearchProductsList(List<Map<String, dynamic>> productsList,
+      Map<String, List<String>> filtersSetted) {
+    setState(() {
+      _searchProductsList = productsList;
+      _searchFiltersSetted = filtersSetted;
+      _searchTotalResults = productsList.length;
+    });
+  }
+
+  void updateSearchFilters(
+      List<Map<String, dynamic>> productsList,
+      Map<String, List<String>> filters,
+      Map<String, List<String>> filtersSetted,
+      Map<String, List<String>> originalFilters) {
+    setState(() {
+      _searchProductsList = productsList;
+      _searchFiltersSetted = filtersSetted;
+      _searchFilters = filters;
+      _searchOriginalFilters = originalFilters;
+      _searchTotalResults = productsList.length;
+    });
+  }
 
   @override
   void initState() {
     _currentScreen = widget.firstScreen;
     super.initState();
     maxSupermarkets = null;
+    _searchFilters = {
+      'Supermercados': [],
+      'Precio': [],
+      'Puntuación': [],
+      'Categorías': [],
+      'Marcas': [],
+    };
+    _searchFiltersSetted = {
+      'Supermercados': [],
+      'Precio': [],
+      'Puntuación': [],
+      'Categorías': [],
+      'Marcas': [],
+    };
+    _searchOriginalFilters = {
+      'Supermercados': [],
+      'Precio': [],
+      'Puntuación': [],
+      'Categorías': [],
+      'Marcas': [],
+      'Nombres': [],
+    };
+    _searchTotalResults = 0;
   }
 
   Widget _loadScreen(Screens screen) {
@@ -43,7 +93,10 @@ class _MainScreenState extends State<MainScreen> {
       case Screens.stats:
         return const NotImplementedPage();
       case Screens.search:
-        return const SearchPage();
+        return SearchPage(
+            productsList: _searchProductsList,
+            updateFilters: updateSearchFilters,
+            totalResults: _searchTotalResults);
       case Screens.cart:
         return const CartPage();
       case Screens.profile:
@@ -92,7 +145,10 @@ class _MainScreenState extends State<MainScreen> {
       appBar: _loadAppBar(_currentScreen),
       endDrawer: _currentScreen == Screens.search
           ? ProductGridFilters(
-              updateProductsList: () => {},
+              filters: _searchFilters,
+              updateProductsList: updateSearchProductsList,
+              originalFilters: _searchOriginalFilters,
+              settedFilters: _searchFiltersSetted,
             )
           : null,
       body: _loadScreen(_currentScreen),
@@ -150,7 +206,8 @@ class _MainScreenState extends State<MainScreen> {
                             Button(
                               text: "OPTIMIZAR",
                               action: () {
-                                _upgradeCartRequest(maxSupermarkets).then((edited) {
+                                _upgradeCartRequest(maxSupermarkets)
+                                    .then((edited) {
                                   Navigator.of(context).pop();
                                   if (edited) {
                                     Navigator.of(context).pushReplacement(

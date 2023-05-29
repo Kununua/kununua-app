@@ -75,15 +75,17 @@ class CartQuery(object):
 class FilterQuery(object):
   
   filter_products = graphene.List(ProductType, supermarkets=graphene.List(graphene.String, required=False), categories=graphene.List(graphene.String, required=False), brands=graphene.List(graphene.String, required=False), min_rating=graphene.Float(required=False), max_rating=graphene.Float(required=False), min_price=graphene.Float(required=False), max_price=graphene.Float(required=False), name=graphene.String(required=False))
-  get_products_by_name = graphene.List(ProductFilterType, name=graphene.String())
+  get_products_by_name = graphene.Field(ProductFilterType, name=graphene.String())
   
   def resolve_filter_products(self, info, supermarkets, categories, brands, min_rating, max_rating, min_price, max_price, name):
     
-    limit = 10
+    limit = 20
     q = Q()
 
     if name and name.strip() != '':
       q &= Q(name__icontains=name.strip())
+      q |= Q(brand__name__icontains=name.strip())
+      q |= Q(category__name__icontains=name.strip())
 
     if supermarkets:
       supermarkets = set(supermarkets)
@@ -125,15 +127,19 @@ class FilterQuery(object):
     return products[:limit]  
   
   def resolve_get_products_by_name(self, info, name):
-    
+    q = Q()
     if name and name.strip() != '':
-      products = Product.objects.filter(name__icontains=name.strip())
+      q &= Q(name__icontains=name.strip())
+      q |= Q(brand__name__icontains=name.strip())
+      q |= Q(category__name__icontains=name.strip())
+      products = Product.objects.filter(q).distinct()
     else:
       raise ValueError(_("Name is required"))
     
     products = products[:20]
+    filters = _get_filters(products)
     
-    return ProductFilterType(products = products, filters = _get_filters(products))
+    return ProductFilterType(products = products, filters = filters)
           
   
 def _has_category(category, categories):
