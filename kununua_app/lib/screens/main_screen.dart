@@ -11,6 +11,8 @@ import 'package:kununua_app/widgets/button.dart';
 import 'package:kununua_app/widgets/kununua_nav_bar/kununua_nav_bar.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:kununua_app/utils/requests.dart';
+import 'package:kununua_app/widgets/expandable_floating_action_button/expandable_floating_action_button.dart';
+import 'package:kununua_app/widgets/expandable_floating_action_button/components/action_button.dart';
 import 'package:kununua_app/utils/globals.dart' as globals;
 
 class MainScreen extends StatefulWidget {
@@ -158,10 +160,17 @@ class _MainScreenState extends State<MainScreen> {
                 currentScreenCallback(Screens.cart);
               },
               backgroundColor: kPrimaryColor,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50)),
               child: const Icon(Icons.shopping_cart),
             )
-          : FloatingActionButton(
-              onPressed: () {
+          : ExpandableFab(
+              backgroundColor: kPrimaryColor,
+              icon: const Icon(Icons.format_list_bulleted_outlined),
+              borderRadius: BorderRadius.circular(15),
+              children: [
+                ActionButton(
+                  onPressed: () {
                 showModalBottomSheet<void>(
                   context: context,
                   builder: (BuildContext context) {
@@ -236,8 +245,17 @@ class _MainScreenState extends State<MainScreen> {
                   },
                 );
               },
-              backgroundColor: kPrimaryColor,
-              child: const Icon(Icons.insights_rounded),
+                  backgroundColor: kPrimaryColor,
+                  icon: const Icon(Icons.insights_rounded),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                ActionButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.add),
+                  backgroundColor: kPrimaryColor,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+              ],
             ),
       bottomNavigationBar: KununuaNavBar(
         screen: _currentScreen,
