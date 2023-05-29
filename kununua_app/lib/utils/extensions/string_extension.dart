@@ -4,6 +4,8 @@ extension StringExtension on String {
     }
 
   String title() {
-      return split(" ").map((str) => str.capitalize()).join(" ");
+    return split(" ")
+        .map((str) => str.trim().isNotEmpty ? str.capitalize() : '')
+        .join(" ");
   }
 }
