@@ -1,10 +1,9 @@
 import graphene, jwt
 from django.utils.translation import gettext_lazy as _
-from .types import ProductType, CategoryType, ProductEntryType, ProductFilterType, FilterType
+from .types import ProductType, CategoryType, ProductEntryType, ProductFilterType, FilterType, ListType
 from authentication.models import KununuaUser
 from location.types import CountryType
-from .models import Product, Category, Cart, ProductEntry, Rating, Price
-from .utils.image_coder import encode_image
+from .models import Product, Category, Cart, ProductEntry, Rating, Price, List
 from django.db.models import Q, Max
 
 
@@ -71,6 +70,24 @@ class CartQuery(object):
     cart = Cart.objects.get(user=user)
     
     return ProductEntry.objects.filter(cart=cart)
+
+class ListsQuery(object):
+    
+    get_lists = graphene.List(ListType, user_token=graphene.String())
+    
+    def resolve_get_lists(self, info, user_token):
+      
+      try:
+        user = jwt.decode(user_token, 'my_secret', algorithms=['HS256'])
+      except jwt.InvalidSignatureError:
+        raise ValueError(_("Invalid token"))
+      
+      try:
+        user = KununuaUser.objects.get(username=user['username'])
+      except KununuaUser.DoesNotExist:
+        raise ValueError(_("User does not exist"))
+      
+      return List.objects.filter(user=user)
   
 class FilterQuery(object):
   

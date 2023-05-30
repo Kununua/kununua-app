@@ -209,7 +209,6 @@ String getPacks = """
   }
 """;
 
-
 String getProductsByName = """
     query getProductsByName(\$name: String!){
       getProductsByName(name: \$name){
@@ -332,4 +331,60 @@ String upgradeCart = """
       }
     }
 
+""";
+
+/* ------------------------------- LISTS ------------------------------- */
+
+String getLists = """
+  query getLists(\$userToken: String!){
+    getLists(userToken: \$userToken){
+      date
+      productentrySet{
+        quantity
+        productPrice{
+          price
+          supermarket{
+            name
+            country{
+              currency{
+                symbol
+              }
+            }
+          }
+          product{
+            name
+            image
+          }
+        }
+      }
+    }
+  }
+""";
+
+String createList = """
+  mutation createList(\$userToken: String!){
+    createList(userToken: \$userToken){
+      list{
+        date
+        productentrySet{
+          quantity
+          productPrice{
+            price
+            supermarket{
+              name
+              country{
+                currency{
+                  symbol
+                }
+              }
+            }
+            product{
+              name
+              image
+            }
+          }
+        }
+      }
+    }
+  }
 """;
