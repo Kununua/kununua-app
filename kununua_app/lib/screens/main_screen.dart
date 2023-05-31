@@ -5,6 +5,7 @@ import 'package:kununua_app/pages/main_page/main_page.dart';
 import 'package:kununua_app/pages/not_implemented_page.dart';
 import 'package:kununua_app/pages/profile_page/profile_page.dart';
 import 'package:kununua_app/pages/search_page/search_page.dart';
+import 'package:kununua_app/pages/list_page/list_page.dart';
 import 'package:kununua_app/screens/product_grid_screen/components/product_grid_filters.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/widgets/button.dart';
@@ -33,9 +34,10 @@ class _MainScreenState extends State<MainScreen> {
   Map<String, List<String>> _searchFilters = {};
   Map<String, List<String>> _searchFiltersSetted = {};
   Map<String, List<String>> _searchOriginalFilters = {};
-  List<Map<String, dynamic>> _searchProductsList = [];
+  List<dynamic> _searchProductsList = [];
   int _searchTotalResults = 0;
-  void updateSearchProductsList(List<Map<String, dynamic>> productsList,
+  void updateSearchProductsList(
+      List<dynamic> productsList,
       Map<String, List<String>> filtersSetted) {
     setState(() {
       _searchProductsList = productsList;
@@ -45,7 +47,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void updateSearchFilters(
-      List<Map<String, dynamic>> productsList,
+      List<dynamic> productsList,
       Map<String, List<String>> filters,
       Map<String, List<String>> filtersSetted,
       Map<String, List<String>> originalFilters) {
@@ -101,6 +103,8 @@ class _MainScreenState extends State<MainScreen> {
             totalResults: _searchTotalResults);
       case Screens.cart:
         return const CartPage();
+      case Screens.list:
+        return const ListPage();
       case Screens.profile:
         return const ProfilePage();
     }
@@ -109,13 +113,15 @@ class _MainScreenState extends State<MainScreen> {
   PreferredSizeWidget? _loadAppBar(Screens screen) {
     switch (screen) {
       case Screens.home:
-        return const MainPageAppBar(text: kHomeText);
+        return const MainPageAppBar(text: kHomeText, letterSpacing: 2.5);
       case Screens.stats:
         return const MainPageAppBar(text: kStatsText);
       case Screens.search:
         return MainPageAppBar(text: kSearchText, actions: [Container()]);
       case Screens.cart:
         return const MainPageAppBar(text: kCartText);
+      case Screens.list:
+        return const MainPageAppBar(text: kListText);
       case Screens.profile:
         return const MainPageAppBar(text: kProfileText);
     }

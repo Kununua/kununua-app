@@ -11,7 +11,7 @@ class MainPageCategoryRow extends StatelessWidget {
 
   Future<List<Map<String, dynamic>>> _getCategories() async{
 
-    List<Map<String, dynamic>> categories = [];
+    List<Map<String, dynamic>> categoriesList = [];
 
     final MutationOptions getAllCategoriesOptions = MutationOptions(
       document: gql(getCategories),
@@ -19,7 +19,7 @@ class MainPageCategoryRow extends StatelessWidget {
 
     final categoriesResult = await globals.client.value.mutate(getAllCategoriesOptions);
 
-    var categoriesList = HelperFunctions.deserializeListData(categoriesResult);
+    categoriesList = HelperFunctions.deserializeListData(categoriesResult);
     
     return categoriesList;
   }

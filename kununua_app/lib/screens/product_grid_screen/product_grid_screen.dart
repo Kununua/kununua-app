@@ -23,7 +23,7 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
   Map<String, List<String>> _filters = {};
   Map<String, List<String>> _filtersSetted = {};
   Map<String, List<String>> _originalFilters = {};
-  List<Map<String, dynamic>> _productsList = [];
+  List<dynamic> _productsList = [];
   bool _hasBeenUpdated = false;
 
   @override
@@ -57,7 +57,8 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     getProductsByCategoryFuture = _getProductsByCategory();
   }
 
-  void updateProductsList(List<Map<String, dynamic>> productsList,
+  void updateProductsList(
+      List<dynamic> productsList,
       Map<String, List<String>> filtersSetted) {
     setState(() {
       _productsList = productsList;
@@ -73,10 +74,9 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     );
 
     final productsResult = await globals.client.value.mutate(getProducts);
-    var productsList = HelperFunctions.deserializeListData(productsResult,
-        otherOperationName: 'products');
-    var filtersList = HelperFunctions.deserializeListData(productsResult,
-        otherOperationName: 'filters');
+    var resultList = HelperFunctions.deserializeData(productsResult);
+    var productsList = resultList['products'];
+    var filtersList = resultList['filters'];
 
     for (var filter in filtersList) {
       List<String> options = [];

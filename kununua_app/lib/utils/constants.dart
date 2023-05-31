@@ -7,10 +7,11 @@ const kSecondaryColor = Color(0xFF265DAB);
 
 // Text
 
-const kHomeText = 'K U N U N U A';
+const kHomeText = 'KUNUNUA';
 const kStatsText = 'Estadísticas';
 const kSearchText = 'Buscar';
 const kCartText = 'Carrito';
+const kListText = 'Mis listas';
 const kProfileText = 'Perfil';
 
 // Add to cart button

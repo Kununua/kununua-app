@@ -10,7 +10,7 @@ import 'package:kununua_app/widgets/kununua_grid.dart';
 import 'dart:async';
 
 class SearchPage extends StatefulWidget {
-  final List<Map<String, dynamic>> productsList;
+  final List<dynamic> productsList;
   final Function updateFilters;
   final int totalResults;
   const SearchPage(
@@ -88,10 +88,9 @@ class _SearchPageState extends State<SearchPage> {
 
       final productsResult = await globals.client.value.query(getProducts);
 
-      var productsList = HelperFunctions.deserializeListData(productsResult,
-          otherOperationName: 'products');
-      var filtersList = HelperFunctions.deserializeListData(productsResult,
-          otherOperationName: 'filters');
+      var resultList = HelperFunctions.deserializeData(productsResult);
+      var productsList = resultList['products'];
+      var filtersList = resultList['filters'];
 
       for (var filter in filtersList) {
         List<String> options = [];

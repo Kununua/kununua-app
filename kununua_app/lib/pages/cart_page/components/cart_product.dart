@@ -1,6 +1,9 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:kununua_app/screens/main_screen.dart';
+import 'package:kununua_app/screens/product_details_screen/product_details_screen.dart';
+import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/utils/extensions/string_extension.dart';
 import 'package:kununua_app/utils/requests.dart';
 import 'package:kununua_app/utils/globals.dart' as globals;
@@ -64,7 +67,7 @@ class _CartProductState extends State<CartProduct> {
   Widget build(BuildContext context) {
     return Stack(children: [
       Container(
-        margin: const EdgeInsets.only(left: 10),
+        margin: const EdgeInsets.only(left: 10, right: 10),
         height: 125,
         decoration: BoxDecoration(
           border: Border(
@@ -80,11 +83,24 @@ class _CartProductState extends State<CartProduct> {
         ),
         child: Row(
           children: [
-            Image(
-                image: widget.product['product']['image'],
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover),
+            OpenContainer(
+                transitionType: ContainerTransitionType.fade,
+                transitionDuration: const Duration(milliseconds: 500),
+                closedColor: kBackgroundColor,
+                closedElevation: 0,
+                clipBehavior: Clip.none,
+                closedBuilder: (context, openDetails) {
+                  return Image(
+                      image: widget.product['product']['image'],
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover);
+                },
+                openBuilder: (context, action) {
+                  return ProductDetails(
+                      productId: int.parse(widget.product['product']['id']));
+                },
+                onClosed: (_) {}),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(10),

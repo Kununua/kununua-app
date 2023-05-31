@@ -352,6 +352,7 @@ String getLists = """
             }
           }
           product{
+            id
             name
             image
           }
@@ -379,6 +380,7 @@ String createList = """
               }
             }
             product{
+              id
               name
               image
             }
