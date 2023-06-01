@@ -10,7 +10,7 @@ from django.db.models import Q, Max
 class ProductsQuery(object):
   
   get_product_by_id = graphene.Field(ProductType, id=graphene.Int())
-  get_products_by_category = graphene.Field(ProductFilterType, category=graphene.String())
+  get_products_by_category = graphene.Field(ProductFilterType, category=graphene.String(), page_number=graphene.Int(required=False), limit=graphene.Int(required=False))
   get_products_with_offer = graphene.List(ProductType)
   get_packs = graphene.List(ProductType)
 
@@ -20,14 +20,23 @@ class ProductsQuery(object):
   
     return product
   
-  def resolve_get_products_by_category(self, info, category):
+  def resolve_get_products_by_category(self, info, category, page_number=None, limit=None):
+    
+    if not page_number:
+      page_number = 1
+      
+    if not limit:
+      limit = 10
+    
+    min_pagination_index = limit * (page_number - 1)
+    max_pagination_index = limit * page_number
     
     try:
       category = Category.objects.get(name=category)
     except Category.DoesNotExist:
       raise ValueError(_("Category does not exist"))
     
-    products = Product.objects.filter(category=category).exclude(name__iexact='')[:50]
+    products = Product.objects.filter(category=category).exclude(name__iexact='')[min_pagination_index:max_pagination_index]
     
     # TODO: Añadir paginación, retraso por codificacion de imagenes, orden, etc.
     
@@ -91,12 +100,20 @@ class ListsQuery(object):
   
 class FilterQuery(object):
   
-  filter_products = graphene.List(ProductType, supermarkets=graphene.List(graphene.String, required=False), categories=graphene.List(graphene.String, required=False), brands=graphene.List(graphene.String, required=False), min_rating=graphene.Float(required=False), max_rating=graphene.Float(required=False), min_price=graphene.Float(required=False), max_price=graphene.Float(required=False), name=graphene.String(required=False))
-  get_products_by_name = graphene.Field(ProductFilterType, name=graphene.String())
+  filter_products = graphene.List(ProductType, supermarkets=graphene.List(graphene.String, required=False), categories=graphene.List(graphene.String, required=False), brands=graphene.List(graphene.String, required=False), min_rating=graphene.Float(required=False), max_rating=graphene.Float(required=False), min_price=graphene.Float(required=False), max_price=graphene.Float(required=False), name=graphene.String(required=False), page_number=graphene.Int(required=False), limit=graphene.Int(required=False))
+  get_products_by_name = graphene.Field(ProductFilterType, name=graphene.String(), page_number=graphene.Int(required=False), limit=graphene.Int(required=False))
   
-  def resolve_filter_products(self, info, supermarkets, categories, brands, min_rating, max_rating, min_price, max_price, name):
+  def resolve_filter_products(self, info, supermarkets=None, categories=None, brands=None, min_rating=None, max_rating=None, min_price=None, max_price=None, name=None, page_number=None, limit=None):
     
-    limit = 20
+    if not page_number:
+      page_number = 1
+      
+    if not limit:
+      limit = 10
+    
+    min_pagination_index = limit * (page_number - 1)
+    max_pagination_index = limit * page_number
+    
     q = Q()
 
     if name and name.strip() != '':
@@ -141,9 +158,19 @@ class FilterQuery(object):
   
       return result
     
-    return products[:limit]  
+    return products[min_pagination_index:max_pagination_index]  
   
-  def resolve_get_products_by_name(self, info, name):
+  def resolve_get_products_by_name(self, info, name, page_number=None, limit=None):
+    
+    if not page_number:
+      page_number = 1
+      
+    if not limit:
+      limit = 10
+    
+    min_pagination_index = limit * (page_number - 1)
+    max_pagination_index = limit * page_number
+    
     q = Q()
     if name and name.strip() != '':
       q &= Q(name__icontains=name.strip())
@@ -153,7 +180,7 @@ class FilterQuery(object):
     else:
       raise ValueError(_("Name is required"))
     
-    products = products[:20]
+    products = products[min_pagination_index:max_pagination_index]
     filters = _get_filters(products)
     
     return ProductFilterType(products = products, filters = filters)

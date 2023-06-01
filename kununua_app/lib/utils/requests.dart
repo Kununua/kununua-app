@@ -111,8 +111,8 @@ String getProductById = """
     """;
 
 String getProductsByCategory = """
-    query getProductsByCategory(\$categoryName: String!){
-      getProductsByCategory(category: \$categoryName){
+    query getProductsByCategory(\$categoryName: String!, \$pageNumber: Int, \$limit: Int){
+      getProductsByCategory(category: \$categoryName, pageNumber: \$pageNumber, limit: \$limit){
         products {
           id
           name
@@ -210,8 +210,8 @@ String getPacks = """
 """;
 
 String getProductsByName = """
-    query getProductsByName(\$name: String!){
-      getProductsByName(name: \$name){
+    query getProductsByName(\$name: String!, \$pageNumber: Int, \$limit: Int){
+      getProductsByName(name: \$name, pageNumber: \$pageNumber, limit: \$limit){
         products {
           id
           name
