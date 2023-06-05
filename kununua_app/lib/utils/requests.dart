@@ -338,6 +338,8 @@ String upgradeCart = """
 String getLists = """
   query getLists(\$userToken: String!){
     getLists(userToken: \$userToken){
+      id
+      name
       date
       productentrySet{
         quantity
@@ -363,9 +365,11 @@ String getLists = """
 """;
 
 String createList = """
-  mutation createList(\$userToken: String!){
-    createList(userToken: \$userToken){
+  mutation createList(\$userToken: String!, \$listName: String!){
+    createList(userToken: \$userToken, listName: \$listName){
       list{
+        id
+        name
         date
         productentrySet{
           quantity
@@ -387,6 +391,14 @@ String createList = """
           }
         }
       }
+    }
+  }
+""";
+
+String deleteList = """
+  mutation deleteList(\$userToken: String!, \$listId: Int!){
+    deleteList(userToken: \$userToken, listId: \$listId){
+      isDeleted
     }
   }
 """;

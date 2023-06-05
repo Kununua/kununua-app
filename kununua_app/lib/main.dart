@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:intl/intl.dart';
-import 'package:kununua_app/pages/welcome_page.dart';
 import 'package:kununua_app/screens/new_login_screen/login_screen.dart';
 import 'package:kununua_app/screens/main_screen.dart';
 import 'package:kununua_app/utils/constants.dart';
-import 'package:kununua_app/screens/product_details_screen/product_details_screen.dart';
 import 'package:kununua_app/utils/globals.dart' as globals;
 import 'package:kununua_app/utils/requests.dart';
 import 'package:shared_preferences/shared_preferences.dart';

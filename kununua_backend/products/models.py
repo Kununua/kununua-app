@@ -54,7 +54,7 @@ class Product(models.Model):
 class Price(models.Model):
     
     price = models.DecimalField(_("price"), max_digits=10, decimal_places=2)
-    weight = models.CharField(_("weight"), max_length=24, null=True)
+    weight = models.CharField(_("weight"), max_length=24, blank=True)
     amount = models.PositiveIntegerField(_("amount"), null=True)
     url = models.URLField(_("url"), null=True, max_length=1024)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -78,6 +78,7 @@ class Rating(models.Model):
         return f"Rating[product: {self.product}, user: {self.user}, rating: {self.rating}]"
     
 class List(models.Model):
+    name = models.CharField(_("name"), max_length=64)
     user = models.ForeignKey(KununuaUser, on_delete=models.CASCADE)
     date = models.DateTimeField(_("date"), auto_now_add=True)
     

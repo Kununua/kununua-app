@@ -163,22 +163,27 @@ class UpgradeCartMutation(graphene.Mutation):
 class CreateListMutation(graphene.Mutation):
   class Input:
     user_token = graphene.String(required=True)
+    list_name = graphene.String(required=True)
   
   list = graphene.Field(ListType)
   
   @staticmethod
   def mutate(root, info, **kwargs):
     user_token = kwargs.get('user_token', '')
+    list_name = kwargs.get('list_name', '').strip()
     
     try:
       user = jwt.decode(user_token, 'my_secret', algorithms=['HS256'])
     except jwt.InvalidSignatureError:
       raise ValueError(_("Invalid token"))
     
+    if not list_name:
+      raise ValueError(_("The list name cannot be empty"))
+    
     existing_entry = ProductEntry.objects.filter(cart__user__username=user['username'], is_list_product=False)
     
     if len(existing_entry) > 0:
-      new_list = List.objects.create(user=KununuaUser.objects.get(username=user['username']))
+      new_list = List.objects.create(user=KununuaUser.objects.get(username=user['username']), name=list_name)
       for entry in existing_entry:
         entry.list = new_list
         entry.is_list_product = True
@@ -187,6 +192,38 @@ class CreateListMutation(graphene.Mutation):
       return CreateListMutation(list=new_list)
     else:
       raise ValueError(_("There are no products in the cart"))
+    
+class DeleteListMutation(graphene.Mutation):
+  class Input:
+    user_token = graphene.String(required=True)
+    list_id = graphene.Int(required=True)
+    
+  is_deleted = graphene.Field(graphene.Boolean)
+  
+  @staticmethod
+  def mutate(root, info, **kwargs):
+    user_token = kwargs.get('user_token', '')
+    list_id = kwargs.get('list_id', None)
+    
+    try:
+      user = jwt.decode(user_token, 'my_secret', algorithms=['HS256'])
+    except jwt.InvalidSignatureError:
+      raise ValueError(_("Invalid token"))
+    
+    if list_id is None:
+      raise ValueError(_("Invalid list"))
+    
+    try:
+      selected_list = List.objects.get(pk=list_id)
+    except List.DoesNotExist:
+      raise ValueError(_("Invalid list"))
+    
+    if selected_list.user.username != user['username']:
+      raise ValueError(_("Invalid list"))
+    
+    selected_list.delete()
+    
+    return DeleteListMutation(is_deleted=True)
 
 class ProductsMutation(graphene.ObjectType):
   add_image_to_product = AddImageToProductMutation.Field()
@@ -194,3 +231,4 @@ class ProductsMutation(graphene.ObjectType):
   edit_cart_entry = EditCartEntryMutation.Field()
   upgrade_cart = UpgradeCartMutation.Field()
   create_list = CreateListMutation.Field()
+  delete_list = DeleteListMutation.Field()

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:kununua_app/pages/list_page/components/list_extended_view.dart';
 import 'package:kununua_app/pages/list_page/components/list_preview.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:kununua_app/utils/helper_functions.dart';
@@ -17,6 +16,7 @@ class ListPage extends StatelessWidget {
       variables: <String, dynamic>{
         'userToken': globals.prefs!.getString('jwtToken'),
       },
+      fetchPolicy: FetchPolicy.noCache,
     );
 
     final listResult = await globals.client.value.query(getListsQuery);
@@ -30,17 +30,6 @@ class ListPage extends StatelessWidget {
     return lists;
   }
 
-  List<Widget> _buildLists(List<Map<String, dynamic>> lists) {
-    List<Widget> listPreviews = [];
-
-    for (Map<String, dynamic> list in lists) {
-      listPreviews.add(ListPreview(
-          date: list['date'].toString(), products: list['productentrySet']));
-    }
-
-    return listPreviews;
-  }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -52,8 +41,18 @@ class ListPage extends StatelessWidget {
                 child: Text('No tienes ninguna lista creada'),
               );
             } else {
-              return ListView(
-                children: _buildLists(lists.data!),
+              return ListView.builder(
+                  itemCount: (lists.data ?? []).length,
+                  itemBuilder: (context, index) {
+                    return ListPreview(
+                        id: int.parse(lists.data![index]['id']),
+                        title: lists.data![index]['name'],
+                        date: lists.data![index]['date'].toString(),
+                        products: lists.data![index]['productentrySet'],
+                        removeItem: () {
+                          lists.data!.removeAt(index);
+                        });
+                  }
               );
             }
           } else {
