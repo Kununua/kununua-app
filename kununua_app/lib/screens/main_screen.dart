@@ -29,6 +29,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
   late Screens _currentScreen;
   late int? maxSupermarkets;
   String listName = '';
@@ -298,74 +299,84 @@ class _MainScreenState extends State<MainScreen> {
                             color: Colors.white,
                           ),
                           child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.max,
-                              children: <Widget>[
-                                Container(
-                                  margin: const EdgeInsets.only(bottom: 20.0),
-                                  child: const Text(
-                                      "Por favor, escriba un nombre para la lista que está a punto de crear",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                      )),
-                                ),
-                                TextFormField(
-                                  validator: (value) {
-                                    if (value == null ||
-                                        value.isEmpty ||
-                                        value.trim().isEmpty) {
-                                      return 'Por favor ingrese un valor';
-                                    } else if (value.length > 64) {
-                                      return 'El nombre debe tener menos de 64 caracteres';
-                                    }
-                                    return null;
-                                  },
-                                  keyboardType: TextInputType.name,
-                                  decoration: const InputDecoration(
-                                    labelText: "Nombre de la lista",
-                                    labelStyle: TextStyle(
-                                        overflow: TextOverflow.ellipsis),
+                            child: Form(
+                              key: _formkey,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.max,
+                                children: <Widget>[
+                                  Container(
+                                    margin: const EdgeInsets.only(bottom: 20.0),
+                                    child: const Text(
+                                        "Por favor, escriba un nombre para la lista que está a punto de crear",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        )),
                                   ),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      listName = value;
-                                    });
-                                  },
-                                  maxLines: 1,
-                                  minLines: 1,
-                                  autocorrect: true,
-                                ),
-                                Button(
-                                  paddingContainer:
-                                      const EdgeInsets.fromLTRB(75, 25, 75, 10),
-                                  text: "CREAR LISTA",
-                                  action: () {
-                                    _createList(listName).then((edited) {
-                                      Navigator.of(context).pop();
-                                      if (edited) {
-                                        Navigator.of(context).pushReplacement(
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const MainScreen(
-                                                    firstScreen: Screens.cart,
-                                                  )),
-                                        );
-                                      } else {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                                "Ha ocurrido un error. Vuelva a intentarlo más tarde."),
-                                          ),
-                                        );
+                                  TextFormField(
+                                    validator: (value) {
+                                      if (value == null ||
+                                          value.isEmpty ||
+                                          value.trim().isEmpty) {
+                                        return 'Por favor ingrese un valor';
+                                      } else if (value.length > 64) {
+                                        return 'El nombre debe tener menos de 64 caracteres';
                                       }
-                                    });
-                                  },
-                                  color: kPrimaryColor,
-                                )
-                              ],
+                                      return null;
+                                    },
+                                    keyboardType: TextInputType.name,
+                                    decoration: const InputDecoration(
+                                      labelText: "Nombre de la lista",
+                                      labelStyle: TextStyle(
+                                          overflow: TextOverflow.ellipsis),
+                                    ),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        listName = value;
+                                      });
+                                    },
+                                    maxLines: 1,
+                                    minLines: 1,
+                                    autocorrect: true,
+                                  ),
+                                  Button(
+                                    paddingContainer: const EdgeInsets.fromLTRB(
+                                        75, 25, 75, 10),
+                                    text: "CREAR LISTA",
+                                    action: () {
+                                      final isvalid =
+                                          _formkey.currentState!.validate();
+                                      if (isvalid) {
+                                        _formkey.currentState!.save();
+                                        _createList(listName).then((edited) {
+                                          Navigator.of(context).pop();
+                                          if (edited) {
+                                            Navigator.of(context)
+                                                .pushReplacement(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const MainScreen(
+                                                        firstScreen:
+                                                            Screens.cart,
+                                                      )),
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    "Ha ocurrido un error. Vuelva a intentarlo más tarde."),
+                                              ),
+                                            );
+                                          }
+                                        });
+                                      }
+                                    },
+                                    color: kPrimaryColor,
+                                  )
+                                ],
+                              ),
                             ),
                           ),
                         );

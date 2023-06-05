@@ -16,6 +16,7 @@ class ListPage extends StatelessWidget {
       variables: <String, dynamic>{
         'userToken': globals.prefs!.getString('jwtToken'),
       },
+      fetchPolicy: FetchPolicy.noCache,
     );
 
     final listResult = await globals.client.value.query(getListsQuery);
