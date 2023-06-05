@@ -114,6 +114,7 @@ class _SearchPageState extends State<SearchPage> {
     _debounce = Timer(const Duration(milliseconds: 1000), () async {
       if (query.trim().isEmpty) {
         _productsList = [];
+        pageNumber = 1;
         _filters = {
           'Supermercados': [],
           'Precio': [],
