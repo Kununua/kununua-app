@@ -7,6 +7,7 @@ enum NavBarIcons{
   stats,
   search,
   cart,
+  list,
   profile
 }
 
@@ -34,6 +35,7 @@ class NavBarIcon extends StatelessWidget {
       if (icon == NavBarIcons.stats) return Ionicons.stats_chart;
       if (icon == NavBarIcons.search) return Ionicons.search;
       if (icon == NavBarIcons.cart) return Ionicons.cart;
+      if (icon == NavBarIcons.list) return Ionicons.list;
       if (icon == NavBarIcons.profile) return Ionicons.person;
       return null;
     }else{
@@ -41,6 +43,7 @@ class NavBarIcon extends StatelessWidget {
       if (icon == NavBarIcons.stats) return Ionicons.stats_chart_outline;
       if (icon == NavBarIcons.search) return Ionicons.search_outline;
       if (icon == NavBarIcons.cart) return Ionicons.cart_outline;
+      if (icon == NavBarIcons.list) return Ionicons.list_outline;
       if (icon == NavBarIcons.profile) return Ionicons.person_outline;
       return null;
     }

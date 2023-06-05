@@ -1,7 +1,7 @@
 import graphene, jwt
 from django.utils.translation import gettext_lazy as _
-from .models import Price, Product, ProductEntry, Cart, Supermarket
-from .types import ProductType, CartType, ProductEntryType
+from .models import Price, Product, ProductEntry, Cart, Supermarket, List, KununuaUser
+from .types import ProductType, ListType, ProductEntryType
 from products.utils.cart_improvements_functions import improve_cart, improve_cart_optimization, translate_cart_improvement_result, translate_cart_optimization_improvement_result
 
 class AddImageToProductMutation(graphene.Mutation):
@@ -159,10 +159,76 @@ class UpgradeCartMutation(graphene.Mutation):
       translate_cart_optimization_improvement_result(user_cart_items, improved_cart_prices)
     
     return UpgradeCartMutation(entry=ProductEntry.objects.filter(cart=Cart.objects.get(user__username=user['username']), is_list_product=False))
-      
+
+class CreateListMutation(graphene.Mutation):
+  class Input:
+    user_token = graphene.String(required=True)
+    list_name = graphene.String(required=True)
+  
+  list = graphene.Field(ListType)
+  
+  @staticmethod
+  def mutate(root, info, **kwargs):
+    user_token = kwargs.get('user_token', '')
+    list_name = kwargs.get('list_name', '').strip()
+    
+    try:
+      user = jwt.decode(user_token, 'my_secret', algorithms=['HS256'])
+    except jwt.InvalidSignatureError:
+      raise ValueError(_("Invalid token"))
+    
+    if not list_name:
+      raise ValueError(_("The list name cannot be empty"))
+    
+    existing_entry = ProductEntry.objects.filter(cart__user__username=user['username'], is_list_product=False)
+    
+    if len(existing_entry) > 0:
+      new_list = List.objects.create(user=KununuaUser.objects.get(username=user['username']), name=list_name)
+      for entry in existing_entry:
+        entry.list = new_list
+        entry.is_list_product = True
+        entry.cart = None
+        entry.save()
+      return CreateListMutation(list=new_list)
+    else:
+      raise ValueError(_("There are no products in the cart"))
+    
+class DeleteListMutation(graphene.Mutation):
+  class Input:
+    user_token = graphene.String(required=True)
+    list_id = graphene.Int(required=True)
+    
+  is_deleted = graphene.Field(graphene.Boolean)
+  
+  @staticmethod
+  def mutate(root, info, **kwargs):
+    user_token = kwargs.get('user_token', '')
+    list_id = kwargs.get('list_id', None)
+    
+    try:
+      user = jwt.decode(user_token, 'my_secret', algorithms=['HS256'])
+    except jwt.InvalidSignatureError:
+      raise ValueError(_("Invalid token"))
+    
+    if list_id is None:
+      raise ValueError(_("Invalid list"))
+    
+    try:
+      selected_list = List.objects.get(pk=list_id)
+    except List.DoesNotExist:
+      raise ValueError(_("Invalid list"))
+    
+    if selected_list.user.username != user['username']:
+      raise ValueError(_("Invalid list"))
+    
+    selected_list.delete()
+    
+    return DeleteListMutation(is_deleted=True)
 
 class ProductsMutation(graphene.ObjectType):
   add_image_to_product = AddImageToProductMutation.Field()
   add_entry_to_cart = AddEntryToCartMutation.Field()
   edit_cart_entry = EditCartEntryMutation.Field()
   upgrade_cart = UpgradeCartMutation.Field()
+  create_list = CreateListMutation.Field()
+  delete_list = DeleteListMutation.Field()

@@ -5,11 +5,13 @@ class MainPageAppBar extends StatefulWidget implements PreferredSizeWidget {
 
   final String text;
   final List<Widget> actions;
+  final double letterSpacing;
 
   const MainPageAppBar({
     super.key,
     required this.text,
     this.actions = const [],
+    this.letterSpacing = 0,
   });
 
   @override
@@ -25,8 +27,9 @@ class _MainPageAppBarState extends State<MainPageAppBar> {
 
     return AppBar(
         title: Text(widget.text.toUpperCase()),
-        titleTextStyle: const TextStyle(
+      titleTextStyle: TextStyle(
           color: Colors.white,
+        letterSpacing: widget.letterSpacing,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),

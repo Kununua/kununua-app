@@ -20,11 +20,14 @@ class ProductGridScreen extends StatefulWidget {
 
 class _ProductGridScreenState extends State<ProductGridScreen> {
   late final Future getProductsByCategoryFuture;
+  final controller = ScrollController();
   Map<String, List<String>> _filters = {};
   Map<String, List<String>> _filtersSetted = {};
   Map<String, List<String>> _originalFilters = {};
-  List<Map<String, dynamic>> _productsList = [];
+  List<dynamic> _productsList = [];
   bool _hasBeenUpdated = false;
+  int pageNumber = 1;
+  int limit = 10;
 
   @override
   void initState() {
@@ -54,10 +57,18 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     _hasBeenUpdated = false;
     super.initState();
 
-    getProductsByCategoryFuture = _getProductsByCategory();
+    getProductsByCategoryFuture = _getProductsByCategory(pageNumber, limit);
+
+    controller.addListener(() {
+      if(controller.position.maxScrollExtent == controller.offset) {
+        pageNumber = pageNumber + 1;
+        _getProductsByCategory(pageNumber, limit);
+      }
+    });
   }
 
-  void updateProductsList(List<Map<String, dynamic>> productsList,
+  void updateProductsList(
+      List<dynamic> productsList,
       Map<String, List<String>> filtersSetted) {
     setState(() {
       _productsList = productsList;
@@ -66,17 +77,19 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     });
   }
 
-  Future<List<Map<String, dynamic>>> _getProductsByCategory() async {
+  Future<void> _getProductsByCategory(int pageNumberParam, int limitParam) async {
     final MutationOptions getProducts = MutationOptions(
       document: gql(getProductsByCategory),
-      variables: <String, dynamic>{'categoryName': widget.category},
+      variables: <String, dynamic>{'categoryName': widget.category,
+                                   'pageNumber': pageNumberParam,
+                                   'limit': limitParam
+                                  },
     );
 
     final productsResult = await globals.client.value.mutate(getProducts);
-    var productsList = HelperFunctions.deserializeListData(productsResult,
-        otherOperationName: 'products');
-    var filtersList = HelperFunctions.deserializeListData(productsResult,
-        otherOperationName: 'filters');
+    var resultList = HelperFunctions.deserializeData(productsResult);
+    var productsList = resultList['products'];
+    var filtersList = resultList['filters'];
 
     for (var filter in filtersList) {
       List<String> options = [];
@@ -89,11 +102,9 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     setState(() {
       if (!_hasBeenUpdated) {
         _filters = _filters;
-        _productsList = productsList;
+        _productsList = [..._productsList, ...productsList];
       }
     });
-
-    return productsList;
   }
 
   @override
@@ -116,11 +127,12 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
             if (_productsList.isNotEmpty) {
               return KununuaGrid(
                   scrollable: true,
+                  scrollController: controller,
                   gridMargin: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                   mainAxisSpacing: 10,
                   crossAxisCount: 2,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: _productsList
+                  children: [..._productsList
                       .map<Widget>((product) => ProductGridCell(
                             id: int.parse(product['id']),
                             image: product['image'],
@@ -134,7 +146,7 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                                 product['priceSet'][0]['supermarket']['country']
                                     ['currency']['code'],
                           ))
-                      .toList());
+                      .toList(), ...[const CircularProgressIndicator()]]);
             } else {
               return const Center(
                 child: CircularProgressIndicator(),

@@ -111,8 +111,8 @@ String getProductById = """
     """;
 
 String getProductsByCategory = """
-    query getProductsByCategory(\$categoryName: String!){
-      getProductsByCategory(category: \$categoryName){
+    query getProductsByCategory(\$categoryName: String!, \$pageNumber: Int, \$limit: Int){
+      getProductsByCategory(category: \$categoryName, pageNumber: \$pageNumber, limit: \$limit){
         products {
           id
           name
@@ -209,10 +209,9 @@ String getPacks = """
   }
 """;
 
-
 String getProductsByName = """
-    query getProductsByName(\$name: String!){
-      getProductsByName(name: \$name){
+    query getProductsByName(\$name: String!, \$pageNumber: Int, \$limit: Int){
+      getProductsByName(name: \$name, pageNumber: \$pageNumber, limit: \$limit){
         products {
           id
           name
@@ -332,4 +331,74 @@ String upgradeCart = """
       }
     }
 
+""";
+
+/* ------------------------------- LISTS ------------------------------- */
+
+String getLists = """
+  query getLists(\$userToken: String!){
+    getLists(userToken: \$userToken){
+      id
+      name
+      date
+      productentrySet{
+        quantity
+        productPrice{
+          price
+          supermarket{
+            name
+            country{
+              currency{
+                symbol
+              }
+            }
+          }
+          product{
+            id
+            name
+            image
+          }
+        }
+      }
+    }
+  }
+""";
+
+String createList = """
+  mutation createList(\$userToken: String!, \$listName: String!){
+    createList(userToken: \$userToken, listName: \$listName){
+      list{
+        id
+        name
+        date
+        productentrySet{
+          quantity
+          productPrice{
+            price
+            supermarket{
+              name
+              country{
+                currency{
+                  symbol
+                }
+              }
+            }
+            product{
+              id
+              name
+              image
+            }
+          }
+        }
+      }
+    }
+  }
+""";
+
+String deleteList = """
+  mutation deleteList(\$userToken: String!, \$listId: Int!){
+    deleteList(userToken: \$userToken, listId: \$listId){
+      isDeleted
+    }
+  }
 """;

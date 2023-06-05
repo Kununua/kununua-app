@@ -8,6 +8,7 @@ enum Screens{
   stats,
   search,
   cart,
+  list,
   profile
 }
 
@@ -66,6 +67,12 @@ class _KununuaNavBarState extends State<KununuaNavBar> {
           //   icon: NavBarIcons.cart,
           //   screen: widget.screen,
           // ),
+          NavBarIcon(
+            onPressed: () => {
+              widget.currentScreenCallback(Screens.list)},
+            icon: NavBarIcons.list,
+            screen: widget.screen,
+          ),
           NavBarIcon(
             onPressed: () => {
               widget.currentScreenCallback(Screens.profile)

@@ -7,13 +7,10 @@ const List<String> imageKeys = ['image', 'profilePicture'];
 
 class HelperFunctions {
   static List<Map<String, dynamic>> deserializeListData(
-      QueryResult<Object?> queryResult,
-      {String? otherOperationName}) {
+      QueryResult<Object?> queryResult) {
     String operationName = queryResult.data!.keys.elementAt(1);
 
-    final data = otherOperationName != null
-        ? queryResult.data![operationName]![otherOperationName]
-        : queryResult.data![operationName];
+    final data = queryResult.data![operationName];
 
     List<Map<String, dynamic>> result = [];
 
@@ -44,6 +41,23 @@ class HelperFunctions {
         var value = data[key];
         if (value is Map<String, dynamic>) {
           serializedData[key] = _recursiveDeserialization(value);
+        } else if (value is List<Object?> || value is List<dynamic>) {
+          List<dynamic> list = [];
+          for (final dataEntry in value) {
+            if (dataEntry != null) {
+              try {
+                list.add(_recursiveDeserialization(
+                    dataEntry as Map<String, dynamic>));
+              } catch (e) {
+                if (!e.toString().contains(
+                    'type \'String\' is not a subtype of type \'Map<String, dynamic>\'')) {
+                  rethrow;
+                }
+                list.add(dataEntry.toString());
+              }
+            }
+          }
+          serializedData[key] = list;
         } else {
           serializedData[key] = value;
         }
@@ -54,6 +68,9 @@ class HelperFunctions {
   }
 
   static ImageProvider _getImage(image) {
+    if (image is ImageProvider) {
+      return image;
+    }
     return NetworkImage(FLUTTER_APP_MEDIA_BASE_URL + image);
   }
 }
