@@ -40,9 +40,7 @@ class DetailsWidget extends StatelessWidget {
                         rating: 4.5
                       ),
                       PriceRow(
-                        supermarket: product['priceSet'][0]['supermarket']['name'], 
-                        price: "${product['priceSet'][0]['price']} ${product['priceSet'][0]['supermarket']['country']['currency']['symbol']}",
-                        offerPrice: product['priceSet'][0]['amount'] != null ? "${product['priceSet'][0]['price']} ${product['priceSet'][0]['supermarket']['country']['currency']['symbol']}" : null,
+                        productPriceSet: product['priceSet'],
                       ),
                       FlagsRow(
                         isVegetarian: product['isVegetarian'] ?? false,

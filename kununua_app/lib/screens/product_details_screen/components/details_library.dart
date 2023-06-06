@@ -11,105 +11,118 @@ import 'package:kununua_app/utils/globals.dart' as globals;
 import 'package:kununua_app/widgets/kununua_nav_bar/kununua_nav_bar.dart';
 
 class ProductNameRow extends StatelessWidget {
-  
   final String productName;
-  
+
   const ProductNameRow({
     super.key,
-    required this.productName,  
+    required this.productName,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            child: Text(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: Text(
         productName.title(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          );
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Colors.black,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
   }
 }
 
 class PriceRow extends StatelessWidget {
-
-  final String supermarket;
-  final String price;
-  final String? offerPrice;
+  final List<dynamic> productPriceSet;
 
   const PriceRow({
     super.key,
-    required this.supermarket,
-    required this.price,
-    this.offerPrice,
+    required this.productPriceSet,
   });
+
+  List<Widget> getSingleProductCards() {
+    List<Widget> result = [];
+
+    for (dynamic price in productPriceSet) {
+      result.add(Container(
+          width: 150,
+          height: 200,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                offset: Offset(0, 17),
+                blurRadius: 10,
+                spreadRadius: -13,
+                color: Colors.black,
+              ),
+            ],
+          ),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                const SizedBox(
+                    width: 150,
+                    height: 100,
+                    child: Image(
+                      image: AssetImage("assets/images/transparent.png"),
+                      fit: BoxFit.contain,
+                    )),
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text(
+                          price['price'] +
+                              price['supermarket']['country']['currency']
+                                  ['symbol'],
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ]),
+                ),
+                // Text("($unitPrice)",
+                //     style: const TextStyle(
+                //       fontSize: 9,
+                //     )),
+                Text((price['supermarket']['name'] as String).title(),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    )),
+                Text(price['weight'],
+                    style: const TextStyle(
+                      fontSize: 9,
+                    ))
+              ])));
+    }
+
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  const Icon(
-                    Ionicons.location,
-                    size: 18,
-                    color: kPrimaryColor,
-                  ),
-                  Text(
-              " ${supermarket.title()}",
-                    style: const TextStyle(
-                      color: kPrimaryColor,
-                      fontSize: 18,
-                    ),
-                  ),
-                ],
-              ),
-              offerPrice == null ?
-                Text(
-                  price,
-                  style: const TextStyle(
-                    color: kPrimaryColor,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-                :
-                Row(
-                  children: [
-                    Text(
-                      "$price  ",
-                      style: const TextStyle(
-                        color: Color.fromARGB(255, 103, 102, 102),
-                        fontSize: 18,
-                        fontWeight: FontWeight.normal,
-                        decoration: TextDecoration.lineThrough,
-                      ),
-                    ),
-                    Text(
-                      "$offerPrice",
-                      style: const TextStyle(
-                        color: kPrimaryColor,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-            ],
-          );
-                      
+    return KununuaGrid(
+      crossAxisCount: 2,
+      gridMargin: const EdgeInsets.only(top: 20, bottom: 20),
+      children: getSingleProductCards(),
+    );
   }
 }
 
 class FlagsRow extends StatelessWidget {
-
   final bool isVegetarian;
   final bool isGlutenFree;
   final bool isFreezed;
@@ -168,52 +181,49 @@ class FlagsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return KununuaGrid(
-            crossAxisCount: 4,
-            gridMargin: const EdgeInsets.only(top: 20, bottom: 20),
-            children: _getFlags(),
-          );
+      crossAxisCount: 4,
+      gridMargin: const EdgeInsets.only(top: 20, bottom: 20),
+      children: _getFlags(),
+    );
   }
 }
 
 class RatingRow extends StatelessWidget {
-
   final double rating;
 
   const RatingRow({
     super.key,
-    required this.rating,  
+    required this.rating,
   });
 
   @override
   Widget build(BuildContext context) {
-
     if (rating < 0 || rating > 5) {
       throw Exception("Rating must be between 0 and 5");
     }
 
     return Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            child: RatingBar.builder(
-                    initialRating: rating,
-                    minRating: 1,
-                    direction: Axis.horizontal,
-                    allowHalfRating: true,
-                    ignoreGestures: true,
-                    itemCount: 5,
-                    itemSize: 30,
-                    itemPadding: const EdgeInsets.symmetric(horizontal: 2.0),
-                    itemBuilder: (context, _) => const Icon(
-                      Icons.star,
-                      color: Colors.amber,
-                    ),
-                    onRatingUpdate: (rating) {},
-                  ),
-            );
+      margin: const EdgeInsets.only(bottom: 10),
+      child: RatingBar.builder(
+        initialRating: rating,
+        minRating: 1,
+        direction: Axis.horizontal,
+        allowHalfRating: true,
+        ignoreGestures: true,
+        itemCount: 5,
+        itemSize: 30,
+        itemPadding: const EdgeInsets.symmetric(horizontal: 2.0),
+        itemBuilder: (context, _) => const Icon(
+          Icons.star,
+          color: Colors.amber,
+        ),
+        onRatingUpdate: (rating) {},
+      ),
+    );
   }
 }
 
 class AddToCart extends StatefulWidget {
-
   final int priceId;
 
   const AddToCart({
@@ -226,11 +236,9 @@ class AddToCart extends StatefulWidget {
 }
 
 class _AddToCartState extends State<AddToCart> {
-
   int amount = 1;
 
   Future<bool> addProductToCart() async {
-
     final MutationOptions addEntryToCartOptions = MutationOptions(
       document: gql(addToCart),
       variables: <String, dynamic>{
@@ -240,10 +248,10 @@ class _AddToCartState extends State<AddToCart> {
       },
     );
 
-    final productResult = await globals.client.value.mutate(addEntryToCartOptions);
+    final productResult =
+        await globals.client.value.mutate(addEntryToCartOptions);
 
     return !productResult.hasException;
-
   }
 
   @override
@@ -254,9 +262,9 @@ class _AddToCartState extends State<AddToCart> {
         width: MediaQuery.of(context).size.width - 40,
         height: kAddToCartButtonHeight,
         child: ElevatedButton(
-          onPressed: (){
-            addProductToCart().then((added){
-              if(added){
+          onPressed: () {
+            addProductToCart().then((added) {
+              if (added) {
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(
                     builder: (context) => const MainScreen(
@@ -265,16 +273,16 @@ class _AddToCartState extends State<AddToCart> {
                   ),
                   (route) => false,
                 );
-              }else{
+              } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text("No se ha podido añadir el producto al carrito"),
+                    content:
+                        Text("No se ha podido añadir el producto al carrito"),
                   ),
                 );
               }
-              }
-            );
-          }, 
+            });
+          },
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(kPrimaryColor),
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -286,67 +294,66 @@ class _AddToCartState extends State<AddToCart> {
           child: SizedBox(
             width: double.infinity,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Flexible(
-                  flex: 2,
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Text(
-                      "AÑADIR AL CARRITO",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton(
-                        onPressed: (){
-                          setState(() {
-                            if (amount > 1) {
-                              amount--;
-                            }
-                          });
-                        }, 
-                        icon: const Icon(
-                          Ionicons.remove,
-                          color: Colors.white,
-                          size: 30,
-                        ),
-                      ),
-                      Text(
-                        "$amount",
-                        style: const TextStyle(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Flexible(
+                    flex: 2,
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Text(
+                        "AÑADIR AL CARRITO",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      IconButton(
-                        onPressed: (){
-                          setState(() {
-                            amount++;
-                          });
-                        }, 
-                        icon: const Icon(
-                          Ionicons.add,
-                          color: Colors.white,
-                          size: 30,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ]
-            ),
+                  Container(
+                    alignment: Alignment.centerRight,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              if (amount > 1) {
+                                amount--;
+                              }
+                            });
+                          },
+                          icon: const Icon(
+                            Ionicons.remove,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                        ),
+                        Text(
+                          "$amount",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              amount++;
+                            });
+                          },
+                          icon: const Icon(
+                            Ionicons.add,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ]),
           ),
         ),
       ),
