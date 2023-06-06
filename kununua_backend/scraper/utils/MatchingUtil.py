@@ -125,7 +125,7 @@ class MatchingUtil(object):
         supermarkets = API.get_supermarkets(condition="supermarkets.country = countries.id")
         
         for supermarket in supermarkets:
-            pg_supermarket, _ = Supermarket.objects.get_or_create(name=supermarket[1], zipcode=supermarket[2], main_url=supermarket[3], country=Country.objects.get(code=supermarket[8]))
+            pg_supermarket, _ = Supermarket.objects.get_or_create(name=supermarket[1], zipcode=supermarket[2], main_url=supermarket[3], country=Country.objects.get(code=supermarket[8]), image="supermarkets/images/default.png")
             self.supermarkets.append(pg_supermarket)
             self.supermarkets_mapping[supermarket[0]] = pg_supermarket.pk
             

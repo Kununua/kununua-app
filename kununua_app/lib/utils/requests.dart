@@ -93,6 +93,7 @@ String getProductById = """
           supermarket{
             name
             mainUrl
+            image
             country{
               spanishName
               englishName

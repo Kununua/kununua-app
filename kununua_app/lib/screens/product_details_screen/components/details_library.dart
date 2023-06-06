@@ -66,11 +66,11 @@ class PriceRow extends StatelessWidget {
           child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const SizedBox(
+                SizedBox(
                     width: 150,
                     height: 100,
                     child: Image(
-                      image: AssetImage("assets/images/transparent.png"),
+                      image: price['supermarket']['image'],
                       fit: BoxFit.contain,
                     )),
                 Padding(
