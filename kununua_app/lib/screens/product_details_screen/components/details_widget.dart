@@ -6,7 +6,7 @@ import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/screens/product_details_screen/components/draggable_home.dart';
 import 'package:kununua_app/screens/product_details_screen/components/details_library.dart';
 
-class DetailsWidget extends StatelessWidget {
+class DetailsWidget extends StatefulWidget {
   
   final Map<String, dynamic> product;
   
@@ -14,6 +14,20 @@ class DetailsWidget extends StatelessWidget {
     super.key,
     required this.product,
   });
+
+  @override
+  State<DetailsWidget> createState() => _DetailsWidgetState();
+}
+
+class _DetailsWidgetState extends State<DetailsWidget> {
+
+  int selectedPriceId = 0;
+
+  void updateSelectedPriceId(int selectedPriceIdParam) {
+    setState(() {
+      selectedPriceId = selectedPriceIdParam;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +40,7 @@ class DetailsWidget extends StatelessWidget {
               curvedBodyRadius: 40,
               // fullyStretchable: true,
               alwaysShowLeadingAndAction: true,
-              headerWidget: DetailsHeader(productImage: product['image'],),
+              headerWidget: DetailsHeader(productImage: widget.product['image'],),
               // expandedBody: const CameraPreview(),
               body: [
                 Padding(
@@ -34,29 +48,31 @@ class DetailsWidget extends StatelessWidget {
                   child: Column(
                     children: [
                       ProductNameRow(
-                        productName: product['name']
+                        productName: widget.product['name']
                       ),
                       const RatingRow(
                         rating: 4.5
                       ),
                       PriceRow(
-                        productPriceSet: product['priceSet'],
+                        productPriceSet: widget.product['priceSet'],
+                        selectedPriceId: selectedPriceId,
+                        priceIdUpdater: updateSelectedPriceId,
                       ),
                       FlagsRow(
-                        isVegetarian: product['isVegetarian'] ?? false,
-                        isGlutenFree: product['isGlutenFree'] ?? false,
-                        isEco: product['isEco'] ?? false,
-                        isFreezed: product['isFreezed'] ?? false,
-                        isFromCountry: product['isFromCountry'] ?? false,
-                        isWithoutLactose: product['isWithoutLactose'] ?? false,
-                        isWithoutSugar: product['isWithoutSugar'] ?? false,
+                        isVegetarian: widget.product['isVegetarian'] ?? false,
+                        isGlutenFree: widget.product['isGlutenFree'] ?? false,
+                        isEco: widget.product['isEco'] ?? false,
+                        isFreezed: widget.product['isFreezed'] ?? false,
+                        isFromCountry: widget.product['isFromCountry'] ?? false,
+                        isWithoutLactose: widget.product['isWithoutLactose'] ?? false,
+                        isWithoutSugar: widget.product['isWithoutSugar'] ?? false,
                       ),
                     ]
                   ),
                 ),
               ],
               bottomNavigationBar: AddToCart(
-                  priceId: int.parse(product['priceSet'][0]['id']),
+                  priceId: selectedPriceId,
                 ),
             );
   }

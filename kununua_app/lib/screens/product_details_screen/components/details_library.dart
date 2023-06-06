@@ -37,76 +37,86 @@ class ProductNameRow extends StatelessWidget {
 
 class PriceRow extends StatelessWidget {
   final List<dynamic> productPriceSet;
+  final int selectedPriceId;
+  final Function priceIdUpdater;
 
   const PriceRow({
     super.key,
     required this.productPriceSet,
+    required this.selectedPriceId,
+    required this.priceIdUpdater,
   });
 
   List<Widget> getSingleProductCards() {
     List<Widget> result = [];
 
     for (dynamic price in productPriceSet) {
-      result.add(Container(
-          width: 150,
-          height: 200,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: const [
-              BoxShadow(
-                offset: Offset(0, 17),
-                blurRadius: 10,
-                spreadRadius: -13,
-                color: Colors.black,
-              ),
-            ],
-          ),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                SizedBox(
-                    width: 150,
-                    height: 100,
-                    child: Image(
-                      image: price['supermarket']['image'],
-                      fit: BoxFit.contain,
-                    )),
-                Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Text(
-                          price['price'] +
-                              price['supermarket']['country']['currency']
-                                  ['symbol'],
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ]),
+      result.add(GestureDetector(
+        onTap: () {
+          priceIdUpdater(int.parse(price['id']));
+        },
+        child: Container(
+            width: 150,
+            height: 200,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [
+                BoxShadow(
+                  offset: Offset(0, 17),
+                  blurRadius: 10,
+                  spreadRadius: -13,
+                  color: Colors.black,
                 ),
-                // Text("($unitPrice)",
-                //     style: const TextStyle(
-                //       fontSize: 9,
-                //     )),
-                Text((price['supermarket']['name'] as String).title(),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    )),
-                Text(price['weight'],
-                    style: const TextStyle(
-                      fontSize: 9,
-                    ))
-              ])));
+              ],
+              border: selectedPriceId == int.parse(price['id']) ? Border.all(color: kPrimaryColor, width: 2) : null,
+            ),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  SizedBox(
+                      width: 150,
+                      height: 100,
+                      child: Image(
+                        image: price['supermarket']['image'],
+                        fit: BoxFit.contain,
+                      )),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(
+                            price['price'] +
+                                price['supermarket']['country']['currency']
+                                    ['symbol'],
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ]),
+                  ),
+                  // Text("($unitPrice)",
+                  //     style: const TextStyle(
+                  //       fontSize: 9,
+                  //     )),
+                  Text((price['supermarket']['name'] as String).title(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      )),
+                  Text(price['weight'],
+                      style: const TextStyle(
+                        fontSize: 9,
+                      ))
+                ])),
+      ));
     }
 
     return result;
@@ -262,7 +272,7 @@ class _AddToCartState extends State<AddToCart> {
         width: MediaQuery.of(context).size.width - 40,
         height: kAddToCartButtonHeight,
         child: ElevatedButton(
-          onPressed: () {
+          onPressed: widget.priceId == 0 ? null : () {
             addProductToCart().then((added) {
               if (added) {
                 Navigator.of(context).pushAndRemoveUntil(
@@ -284,7 +294,7 @@ class _AddToCartState extends State<AddToCart> {
             });
           },
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(kPrimaryColor),
+            backgroundColor: widget.priceId != 0 ? MaterialStateProperty.all<Color>(kPrimaryColor) : MaterialStateProperty.all<Color>(const Color.fromARGB(255, 161, 179, 188)),
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18.0),
