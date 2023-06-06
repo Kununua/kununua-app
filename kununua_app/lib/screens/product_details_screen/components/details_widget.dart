@@ -51,7 +51,7 @@ class _DetailsWidgetState extends State<DetailsWidget> {
                         productName: widget.product['name']
                       ),
                       RatingRow(
-                        rating: 4.5
+                        rating: widget.product['averageRating'],
                       ),
                       PriceRow(
                         productPriceSet: widget.product['priceSet'],

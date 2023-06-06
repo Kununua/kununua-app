@@ -201,7 +201,7 @@ class FlagsRow extends StatelessWidget {
 }
 
 class RatingRow extends StatelessWidget {
-  final double rating;
+  final double? rating;
   final bool allowEdit;
   final bool halfRating;
   void Function(double)? onChange;
@@ -216,14 +216,17 @@ class RatingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (rating < 0 || rating > 5) {
-      throw Exception("Rating must be between 0 and 5");
+    
+    if (rating != null) {
+      if (rating! < 0 || rating! > 5) {
+        throw Exception("Rating must be between 0 and 5");
+      }
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      child: RatingBar.builder(
-        initialRating: rating,
+      child: rating != null ? RatingBar.builder(
+        initialRating: rating!,
         minRating: 1,
         direction: Axis.horizontal,
         allowHalfRating: halfRating,
@@ -236,7 +239,9 @@ class RatingRow extends StatelessWidget {
           color: Colors.amber,
         ),
         onRatingUpdate: onChange ?? (double value) {},
-      ),
+      )
+      :
+      const Text("Este producto no tiene comentarios")
     );
   }
 }
@@ -481,11 +486,11 @@ class _OpinionsRowState extends State<OpinionsRow> {
             child: const Text(
               "OPINAR",
               style: TextStyle(
-                  color: kPrimaryColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.underline,
-                  ),
+                color: kPrimaryColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+              ),
             ),
           ),
         ),

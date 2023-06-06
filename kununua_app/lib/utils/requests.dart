@@ -84,6 +84,7 @@ String getProductById = """
         isEco
         isWithoutSugar
         isWithoutLactose
+        averageRating
         priceSet{
           id
           price
