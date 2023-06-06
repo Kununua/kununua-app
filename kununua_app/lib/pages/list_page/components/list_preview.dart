@@ -24,7 +24,7 @@ class ListPreview extends StatelessWidget {
 
   final int id;
   final String title;
-  final List<Object?> products;
+  final List<dynamic> products;
   final String date;
   final Function removeItem;
 

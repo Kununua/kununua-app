@@ -33,17 +33,28 @@ class CartPage extends StatelessWidget {
 
   List<Widget> _buildCartProducts(List<Map<String, dynamic>> products) {
 
-    List<Widget> cartProducts = [];
+    Map<String, dynamic> cartProducts = {};
 
     for (Map<String, dynamic> product in products) {
-      cartProducts.add(CartProduct(
-        isLocked: product['locked'],
-        quantity: product['quantity'],
-        product: product['productPrice']
-      ));
+
+      if (!cartProducts.containsKey(product['productPrice']['id'])){
+
+        cartProducts.putIfAbsent(product['productPrice']['id'], () => {
+          'locked': product['locked'],
+          'quantity': product['quantity'],
+          'productPrice': product['productPrice']
+        });
+
+      }else{
+        cartProducts[product['productPrice']['id']]['quantity'] += product['quantity'];
+      }
     }
 
-    return cartProducts;
+    return cartProducts.map((id, productData) => MapEntry(id, CartProduct(
+          isLocked: productData['locked'],
+          quantity: productData['quantity'],
+          product: productData['productPrice']
+        )) ).values.toList();
   }
 
   @override

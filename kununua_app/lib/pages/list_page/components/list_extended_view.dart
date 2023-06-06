@@ -7,18 +7,29 @@ class ListExtendedView extends StatelessWidget {
       {super.key, required this.title, required this.products});
 
   final String title;
-  final List<Object?> products;
+  final List<dynamic> products;
 
   List<Widget> _buildLists() {
-    List<Widget> listProducts = [];
+    Map<String, dynamic> listProducts = {};
 
-    for (Object? list in products) {
-      list = list as Map<String, dynamic>;
-      listProducts.add(ListProduct(
-          product: list['productPrice'], quantity: list['quantity']));
+    for (Map<String, dynamic> product in products) {
+
+      if (!listProducts.containsKey(product['productPrice']['id'])){
+
+        listProducts.putIfAbsent(product['productPrice']['id'], () => {
+          'quantity': product['quantity'],
+          'productPrice': product['productPrice']
+        });
+
+      }else{
+        listProducts[product['productPrice']['id']]['quantity'] += product['quantity'];
+      }
     }
 
-    return listProducts;
+    return listProducts.map((id, productData) => MapEntry(id, ListProduct(
+          quantity: productData['quantity'],
+          product: productData['productPrice']
+        )) ).values.toList();
   }
 
   @override

@@ -345,6 +345,7 @@ String getLists = """
       productentrySet{
         quantity
         productPrice{
+          id
           price
           supermarket{
             name
