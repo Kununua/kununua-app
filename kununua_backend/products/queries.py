@@ -1,6 +1,6 @@
 import graphene, jwt
 from django.utils.translation import gettext_lazy as _
-from .types import ProductType, CategoryType, ProductEntryType, ProductFilterType, FilterType, ListType
+from .types import ProductType, CategoryType, ProductEntryType, ProductFilterType, FilterType, ListType, RatingType
 from authentication.models import KununuaUser
 from location.types import CountryType
 from .models import Product, Category, Cart, ProductEntry, Rating, Price, List
@@ -37,8 +37,6 @@ class ProductsQuery(object):
       raise ValueError(_("Category does not exist"))
     
     products = Product.objects.filter(category=category).exclude(name__iexact='')[min_pagination_index:max_pagination_index]
-    
-    # TODO: Añadir paginación, retraso por codificacion de imagenes, orden, etc.
     
     filters = _get_filters(products)
     

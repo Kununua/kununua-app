@@ -50,7 +50,7 @@ class _DetailsWidgetState extends State<DetailsWidget> {
                       ProductNameRow(
                         productName: widget.product['name']
                       ),
-                      const RatingRow(
+                      RatingRow(
                         rating: 4.5
                       ),
                       PriceRow(
@@ -66,6 +66,9 @@ class _DetailsWidgetState extends State<DetailsWidget> {
                         isFromCountry: widget.product['isFromCountry'] ?? false,
                         isWithoutLactose: widget.product['isWithoutLactose'] ?? false,
                         isWithoutSugar: widget.product['isWithoutSugar'] ?? false,
+                      ),
+                      OpinionsRow(
+                        productId: widget.product['id'],
                       ),
                     ]
                   ),

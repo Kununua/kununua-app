@@ -404,3 +404,21 @@ String deleteList = """
     }
   }
 """;
+
+/* ------------------------------- PRODUCTS VALORATION ------------------------------- */
+
+String addOpinionRequest = """
+  mutation addReview(\$userToken: String!, \$productId: Int!, \$rating: Float!){
+    addProductRatingMutation(userToken: \$userToken, productId: \$productId, rating: \$rating){
+      productRated{
+        rating
+        user{
+          username
+        }
+        product{
+          name
+        }
+      }
+    }
+  }
+""";

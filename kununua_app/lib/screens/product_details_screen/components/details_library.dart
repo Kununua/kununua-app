@@ -70,7 +70,9 @@ class PriceRow extends StatelessWidget {
                   color: Colors.black,
                 ),
               ],
-              border: selectedPriceId == int.parse(price['id']) ? Border.all(color: kPrimaryColor, width: 2) : null,
+              border: selectedPriceId == int.parse(price['id'])
+                  ? Border.all(color: kPrimaryColor, width: 2)
+                  : null,
             ),
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -200,10 +202,16 @@ class FlagsRow extends StatelessWidget {
 
 class RatingRow extends StatelessWidget {
   final double rating;
+  final bool allowEdit;
+  final bool halfRating;
+  void Function(double)? onChange;
 
-  const RatingRow({
+  RatingRow({
     super.key,
     required this.rating,
+    this.allowEdit = false,
+    this.halfRating = true,
+    this.onChange,
   });
 
   @override
@@ -218,8 +226,8 @@ class RatingRow extends StatelessWidget {
         initialRating: rating,
         minRating: 1,
         direction: Axis.horizontal,
-        allowHalfRating: true,
-        ignoreGestures: true,
+        allowHalfRating: halfRating,
+        ignoreGestures: !allowEdit,
         itemCount: 5,
         itemSize: 30,
         itemPadding: const EdgeInsets.symmetric(horizontal: 2.0),
@@ -227,7 +235,7 @@ class RatingRow extends StatelessWidget {
           Icons.star,
           color: Colors.amber,
         ),
-        onRatingUpdate: (rating) {},
+        onRatingUpdate: onChange ?? (double value) {},
       ),
     );
   }
@@ -272,29 +280,34 @@ class _AddToCartState extends State<AddToCart> {
         width: MediaQuery.of(context).size.width - 40,
         height: kAddToCartButtonHeight,
         child: ElevatedButton(
-          onPressed: widget.priceId == 0 ? null : () {
-            addProductToCart().then((added) {
-              if (added) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (context) => const MainScreen(
-                      firstScreen: Screens.cart,
-                    ),
-                  ),
-                  (route) => false,
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text("No se ha podido añadir el producto al carrito"),
-                  ),
-                );
-              }
-            });
-          },
+          onPressed: widget.priceId == 0
+              ? null
+              : () {
+                  addProductToCart().then((added) {
+                    if (added) {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const MainScreen(
+                            firstScreen: Screens.cart,
+                          ),
+                        ),
+                        (route) => false,
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              "No se ha podido añadir el producto al carrito"),
+                        ),
+                      );
+                    }
+                  });
+                },
           style: ButtonStyle(
-            backgroundColor: widget.priceId != 0 ? MaterialStateProperty.all<Color>(kPrimaryColor) : MaterialStateProperty.all<Color>(const Color.fromARGB(255, 161, 179, 188)),
+            backgroundColor: widget.priceId != 0
+                ? MaterialStateProperty.all<Color>(kPrimaryColor)
+                : MaterialStateProperty.all<Color>(
+                    const Color.fromARGB(255, 161, 179, 188)),
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18.0),
@@ -367,6 +380,116 @@ class _AddToCartState extends State<AddToCart> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class OpinionsRow extends StatefulWidget {
+  final String productId;
+
+  const OpinionsRow({
+    super.key,
+    required this.productId,
+  });
+
+  @override
+  State<OpinionsRow> createState() => _OpinionsRowState();
+}
+
+class _OpinionsRowState extends State<OpinionsRow> {
+  double ratingValue = 0;
+
+  Future<void> addOpinion(BuildContext context) async {
+    final MutationOptions addOpinionOptions = MutationOptions(
+      document: gql(addOpinionRequest),
+      variables: <String, dynamic>{
+        'userToken': globals.prefs!.getString('jwtToken'),
+        'productId': int.parse(widget.productId),
+        'rating': ratingValue,
+      },
+    );
+
+    final productResult = await globals.client.value.mutate(addOpinionOptions);
+
+    if (context.mounted) {
+      if (productResult.hasException) {
+        if (productResult.exception
+            .toString()
+            .contains("You have already rated this product")) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Ya has valorado este producto"),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("No se ha podido añadir la opinión"),
+            ),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Opinión añadida correctamente"),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Text("¿Qué opinas sobre este producto?",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            )),
+        Container(
+          margin: const EdgeInsets.only(top: 10),
+          child: RatingRow(
+            rating: 0,
+            halfRating: false,
+            allowEdit: true,
+            onChange: (rating) {
+              setState(() {
+                ratingValue = rating;
+              });
+            },
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            if (ratingValue != 0) {
+              addOpinion(context);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                      "Debes puntuar el producto para publicar la valoración"),
+                ),
+              );
+            }
+          },
+          child: Container(
+            margin: const EdgeInsets.only(top: 10, bottom: 50),
+            child: const Text(
+              "OPINAR",
+              style: TextStyle(
+                  color: kPrimaryColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                  ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,7 +1,7 @@
 import graphene, jwt
 from django.utils.translation import gettext_lazy as _
-from .models import Price, Product, ProductEntry, Cart, Supermarket, List, KununuaUser
-from .types import ProductType, ListType, ProductEntryType
+from .models import Price, Product, ProductEntry, Cart, Rating, Supermarket, List, KununuaUser
+from .types import ProductType, ListType, ProductEntryType, RatingType
 from products.utils.cart_improvements_functions import improve_cart, improve_cart_optimization, translate_cart_improvement_result, translate_cart_optimization_improvement_result
 
 class AddImageToProductMutation(graphene.Mutation):
@@ -224,6 +224,48 @@ class DeleteListMutation(graphene.Mutation):
     selected_list.delete()
     
     return DeleteListMutation(is_deleted=True)
+  
+class AddProductRatingMutation(graphene.Mutation):
+  class Input:
+    user_token = graphene.String(required=True)
+    product_id = graphene.Int(required=True)
+    rating = graphene.Float(required=True)
+    
+  product_rated = graphene.Field(RatingType)
+  
+  @staticmethod
+  def mutate(root, info, **kwargs):
+    user_token = kwargs.get('user_token', '')
+    product_id = kwargs.get('product_id', None)
+    rating = kwargs.get('rating', None)
+    
+    if not rating or not product_id or not user_token:
+      raise ValueError(_("All params are required"))
+    
+    if rating < 1 or rating > 5:
+      raise ValueError(_("Invalid rating"))
+    
+    try:
+      user = jwt.decode(user_token, 'my_secret', algorithms=['HS256'])
+    except jwt.InvalidSignatureError:
+      raise ValueError(_("Invalid token"))
+    
+    try:
+      product = Product.objects.get(pk=product_id)
+    except Product.DoesNotExist:
+      raise ValueError(_("Invalid product"))
+    
+    try:
+      user = KununuaUser.objects.get(username=user['username'])
+    except KununuaUser.DoesNotExist:
+      raise ValueError(_("Invalid user"))
+    
+    if Rating.objects.filter(user__pk=user.pk, product__pk=product.pk).exists():
+      raise ValueError(_("You have already rated this product"))
+    
+    created_rating = Rating.objects.create(user=user, product=product, rating=rating)
+    
+    return created_rating
 
 class ProductsMutation(graphene.ObjectType):
   add_image_to_product = AddImageToProductMutation.Field()
@@ -232,3 +274,4 @@ class ProductsMutation(graphene.ObjectType):
   upgrade_cart = UpgradeCartMutation.Field()
   create_list = CreateListMutation.Field()
   delete_list = DeleteListMutation.Field()
+  add_product_rating_mutation = AddProductRatingMutation.Field()
