@@ -94,7 +94,7 @@ String getProductById = """
           supermarket{
             name
             mainUrl
-            image
+            logo
             country{
               spanishName
               englishName
@@ -122,6 +122,36 @@ String getProductsByCategory = """
           priceSet {
             price
             supermarket {
+              country {
+                currency {
+                  code
+                  symbol
+                }
+              }
+            }
+          }
+        }
+        filters {
+          key
+          options
+        }
+      }
+    }
+""";
+
+String getProductsBySupermarket = """
+    query getProductsBySupermarket(\$supermarketId: Int!, \$pageNumber: Int, \$limit: Int){
+      getProductsBySupermarket(supermarketId: \$supermarketId, pageNumber: \$pageNumber, limit: \$limit){
+        products {
+          id
+          name
+          image
+          priceSet {
+            price
+            amount
+            weight
+            supermarket {
+              name
               country {
                 currency {
                   code
@@ -220,6 +250,8 @@ String getProductsByName = """
           image
           priceSet {
             price
+            amount
+            weight
             supermarket {
               country {
                 currency {
@@ -422,4 +454,30 @@ String addOpinionRequest = """
       }
     }
   }
+""";
+
+/* ------------------------------- SUPERMARKETS ------------------------------- */
+
+String getSupermarkets = """
+
+query getSupermarkets(){
+    getSupermarkets(){
+      id
+      name
+      mainUrl
+      banner
+      country {
+        spanishName
+        englishName
+        code
+        phoneCode
+        currency {
+          name
+          code
+          symbol
+        }
+      }  
+    }
+  }
+
 """;

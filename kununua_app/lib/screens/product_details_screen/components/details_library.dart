@@ -47,11 +47,12 @@ class PriceRow extends StatelessWidget {
     required this.priceIdUpdater,
   });
 
-  List<Widget> getSingleProductCards() {
-    List<Widget> result = [];
+  Map<String, List<Widget>> getProductCards() {
+    List<Widget> singlePrices = [];
+    List<Widget> packPrices = [];
 
     for (dynamic price in productPriceSet) {
-      result.add(GestureDetector(
+      Widget cellToAdd = GestureDetector(
         onTap: () {
           priceIdUpdater(int.parse(price['id']));
         },
@@ -81,7 +82,7 @@ class PriceRow extends StatelessWidget {
                       width: 150,
                       height: 100,
                       child: Image(
-                        image: price['supermarket']['image'],
+                        image: price['supermarket']['logo'],
                         fit: BoxFit.contain,
                       )),
                   Padding(
@@ -89,22 +90,31 @@ class PriceRow extends StatelessWidget {
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Text(
-                            price['price'] +
-                                price['supermarket']['country']['currency']
-                                    ['symbol'],
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          price['amount'] != null &&
+                                  int.parse(price['amount'].toString()) == 1
+                              ? Text(
+                                  price['price'] +
+                                      price['supermarket']['country']
+                                          ['currency']['symbol'],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green,
+                                  ),
+                                )
+                              : Text(
+                                  price['price'] +
+                                      price['supermarket']['country']
+                                          ['currency']['symbol'],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ]),
                   ),
-                  // Text("($unitPrice)",
-                  //     style: const TextStyle(
-                  //       fontSize: 9,
-                  //     )),
                   Text((price['supermarket']['name'] as String).title(),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -113,23 +123,44 @@ class PriceRow extends StatelessWidget {
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       )),
-                  Text(price['weight'],
+                  Text((price['amount'] != null && price['amount'] > 1) ? "${price['amount']} uds" : price['weight'],
                       style: const TextStyle(
                         fontSize: 9,
                       ))
                 ])),
-      ));
-    }
+      );
 
-    return result;
+      if (price['amount'] == null || price['amount'] == 1) {
+        singlePrices.add(cellToAdd);
+      } else {
+        packPrices.add(cellToAdd);
+      }
+    }
+    return {"singles": singlePrices, "packs": packPrices};
   }
 
   @override
   Widget build(BuildContext context) {
-    return KununuaGrid(
-      crossAxisCount: 2,
-      gridMargin: const EdgeInsets.only(top: 20, bottom: 20),
-      children: getSingleProductCards(),
+    final Map<String, List<Widget>> productCards = getProductCards();
+
+    return Column(
+      children: [
+        KununuaGrid(
+          crossAxisCount: 2,
+          gridMargin: const EdgeInsets.only(top: 20, bottom: 20),
+          children: productCards['singles']!,
+        ),
+        const Text("Packs",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            )),
+        KununuaGrid(
+          crossAxisCount: 2,
+          gridMargin: const EdgeInsets.only(top: 20, bottom: 20),
+          children: productCards['packs']!,
+        ),
+      ],
     );
   }
 }
@@ -216,7 +247,6 @@ class RatingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     if (rating != null) {
       if (rating! < 0 || rating! > 5) {
         throw Exception("Rating must be between 0 and 5");
@@ -224,25 +254,24 @@ class RatingRow extends StatelessWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: rating != null ? RatingBar.builder(
-        initialRating: rating!,
-        minRating: 1,
-        direction: Axis.horizontal,
-        allowHalfRating: halfRating,
-        ignoreGestures: !allowEdit,
-        itemCount: 5,
-        itemSize: 30,
-        itemPadding: const EdgeInsets.symmetric(horizontal: 2.0),
-        itemBuilder: (context, _) => const Icon(
-          Icons.star,
-          color: Colors.amber,
-        ),
-        onRatingUpdate: onChange ?? (double value) {},
-      )
-      :
-      const Text("Este producto no tiene comentarios")
-    );
+        margin: const EdgeInsets.only(bottom: 10),
+        child: rating != null
+            ? RatingBar.builder(
+                initialRating: rating!,
+                minRating: 1,
+                direction: Axis.horizontal,
+                allowHalfRating: halfRating,
+                ignoreGestures: !allowEdit,
+                itemCount: 5,
+                itemSize: 30,
+                itemPadding: const EdgeInsets.symmetric(horizontal: 2.0),
+                itemBuilder: (context, _) => const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                onRatingUpdate: onChange ?? (double value) {},
+              )
+            : const Text("Este producto no tiene opiniones"));
   }
 }
 

@@ -125,7 +125,7 @@ class MatchingUtil(object):
         supermarkets = API.get_supermarkets(condition="supermarkets.country = countries.id")
         
         for supermarket in supermarkets:
-            pg_supermarket, _ = Supermarket.objects.get_or_create(name=supermarket[1], zipcode=supermarket[2], main_url=supermarket[3], country=Country.objects.get(code=supermarket[8]), image="supermarkets/images/default.png")
+            pg_supermarket, _ = Supermarket.objects.get_or_create(name=supermarket[1], zipcode=supermarket[2], main_url=supermarket[3], country=Country.objects.get(code=supermarket[8]), logo="supermarkets/logos/default.png", banner="supermarkets/banners/default.png")
             self.supermarkets.append(pg_supermarket)
             self.supermarkets_mapping[supermarket[0]] = pg_supermarket.pk
             
@@ -216,7 +216,7 @@ class MatchingUtil(object):
             for product in supermarket_products:
                 
                 if product.is_pack:
-                    product_of_pack_id = self._search_product_of_pack_id(product, supermarket_products)
+                    product_of_pack_id = self._search_product_of_pack(product, supermarket_products)
                     
                     if product_of_pack_id is not None:
                         
@@ -237,11 +237,11 @@ class MatchingUtil(object):
             
             products_to_return += products_to_add
             packs_to_return += packs_to_add
-            
+
         self.products_scraped = products_to_return
         self.packs_scraped = packs_to_return
         
-    def _search_product_of_pack_id(self, product, supermarket_products):
+    def _search_product_of_pack(self, product, supermarket_products):
         
         match = None
         highest_similarity = 0
@@ -255,7 +255,7 @@ class MatchingUtil(object):
             except Exception:
                 print(f"Error en la comparación de productos con el producto {product} y el producto a comparar {product_to_compare}")
 
-        return match.pseudo_id if match is not None else None
+        return match
     
     # -----------------------------------------------------------------
     # ---------------------------- PHASE 4 ----------------------------
@@ -659,7 +659,7 @@ class MatchingUtil(object):
                 
                 
                 for other_product in match:
-                    for pack in filter(lambda p: p.product_scraped == other_product, self.packs_scraped):
+                    for pack in filter(lambda p: p.product_scraped.pseudo_id == other_product.pseudo_id, self.packs_scraped):
                         
                         pack_price, _ = Price.objects.get_or_create(
                             price = pack.price,

@@ -1,9 +1,9 @@
 import graphene, jwt
 from django.utils.translation import gettext_lazy as _
-from .types import ProductType, CategoryType, ProductEntryType, ProductFilterType, FilterType, ListType, RatingType
+from .types import ProductType, CategoryType, ProductEntryType, ProductFilterType, FilterType, ListType, SupermarketType
 from authentication.models import KununuaUser
 from location.types import CountryType
-from .models import Product, Category, Cart, ProductEntry, Rating, Price, List
+from .models import Product, Category, Cart, ProductEntry, Rating, Price, List, Supermarket
 from django.db.models import Q, Max
 
 
@@ -11,6 +11,7 @@ class ProductsQuery(object):
   
   get_product_by_id = graphene.Field(ProductType, id=graphene.Int())
   get_products_by_category = graphene.Field(ProductFilterType, category=graphene.String(), page_number=graphene.Int(required=False), limit=graphene.Int(required=False))
+  get_products_by_supermarket = graphene.Field(ProductFilterType, supermarket_id=graphene.Int(), page_number=graphene.Int(required=False), limit=graphene.Int(required=False))
   get_products_with_offer = graphene.List(ProductType)
   get_packs = graphene.List(ProductType)
 
@@ -42,6 +43,28 @@ class ProductsQuery(object):
     
     return ProductFilterType(products=products, filters=filters)
   
+  def resolve_get_products_by_supermarket(self, info, supermarket_id, page_number=None, limit=None):
+    
+    if not page_number:
+      page_number = 1
+      
+    if not limit:
+      limit = 10
+    
+    min_pagination_index = limit * (page_number - 1)
+    max_pagination_index = limit * page_number
+    
+    try:
+      supermarket = Supermarket.objects.get(pk=supermarket_id)
+    except Category.DoesNotExist:
+      raise ValueError(_("Category does not exist"))
+    
+    products = Product.objects.filter(price__supermarket=supermarket).exclude(name__iexact='').distinct()[min_pagination_index:max_pagination_index]
+    
+    filters = _get_filters(products)
+    
+    return ProductFilterType(products=products, filters=filters)
+
   def resolve_get_products_with_offer(self, info):
     
     products = Product.objects.filter(price__amount=1).exclude(image="products/images/nodisponible.png").distinct()[:20]
@@ -230,3 +253,10 @@ def _get_filters(products):
   filter5 = FilterType(key='Puntuación', options=[round(min_rating), round(max_rating), round(min_rating), round(max_rating)])
   
   return [filter1, filter2, filter3, filter4, filter5]
+
+class SupermarketsQuery(object):
+  
+  get_supermarkets = graphene.List(SupermarketType)
+  
+  def resolve_get_supermarkets(self, info):
+    return Supermarket.objects.all()

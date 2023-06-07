@@ -101,8 +101,8 @@ class _SearchPageState extends State<SearchPage> {
       'Marcas': [],
       'Nombres': [queryParam],
     };
-    widget.updateFilters(
-        [...widget.productsList, ...productsList], _filters, _filtersSetted, _filtersOriginal);
+    widget.updateFilters([...widget.productsList, ...productsList], _filters,
+        _filtersSetted, _filtersOriginal);
 
     setState(() {
       _query = queryParam;
@@ -212,21 +212,25 @@ class _SearchPageState extends State<SearchPage> {
                   crossAxisCount: 2,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                      ...widget.productsList
-                          .map<Widget>((product) => ProductGridCell(
-                                id: int.parse(product['id']),
-                                image: product['image'],
-                                title: product['name'],
-                                price: product['priceSet'][0]['price'],
-                                offerPrice: '',
-                                unitPrice: '',
-                                weightUnit: product['weightUnit'] ?? '',
-                                currency: product['priceSet'][0]['supermarket']
-                                        ['country']['currency']['symbol'] ??
-                                    product['priceSet'][0]['supermarket']
-                                        ['country']['currency']['code'],
-                              ))
-                          .toList(),
+                      ...widget.productsList.map<Widget>((product) {
+                        Map<String, dynamic> priceToShow =
+                            product['priceSet'][0];
+
+                        String productCurrency = priceToShow['supermarket']
+                                ['country']['currency']['symbol'] ??
+                            priceToShow['supermarket']['country']['currency']
+                                ['code'];
+
+                        return ProductGridCell(
+                          id: int.parse(product['id']),
+                          image: product['image'],
+                          title: product['name'],
+                          price: priceToShow['price'],
+                          offerPrice: '',
+                          weight: "${priceToShow['weight']}",
+                          currency: productCurrency,
+                        );
+                      }).toList(),
                       ...[const CircularProgressIndicator()]
                     ])
               : (inputController.text.isNotEmpty)

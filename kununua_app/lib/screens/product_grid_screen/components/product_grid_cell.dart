@@ -10,8 +10,7 @@ class ProductGridCell extends StatelessWidget {
   final String title;
   final String price;
   final String offerPrice;
-  final String unitPrice;
-  final String weightUnit;
+  final String weight;
   final String currency;
 
   const ProductGridCell(
@@ -20,9 +19,8 @@ class ProductGridCell extends StatelessWidget {
       required this.image,
       required this.title,
       required this.price,
+      required this.weight,
       this.offerPrice = "",
-      required this.unitPrice,
-      required this.weightUnit,
       required this.currency});
 
   @override
@@ -96,7 +94,7 @@ class ProductGridCell extends StatelessWidget {
                 ]
               ),
             ),
-            Text("($unitPrice)",
+            Text("($weight)",
                 style: const TextStyle(
                   fontSize: 9,
                 )),
@@ -108,10 +106,7 @@ class ProductGridCell extends StatelessWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 )),
-            Text(weightUnit,
-                style: const TextStyle(
-                  fontSize: 9,
-                ))
+
           ]));
       },
       openBuilder: (context, action) {
