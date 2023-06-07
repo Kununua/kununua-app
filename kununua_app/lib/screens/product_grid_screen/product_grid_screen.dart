@@ -72,7 +72,11 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     controller.addListener(() {
       if (controller.position.maxScrollExtent == controller.offset) {
         pageNumber = pageNumber + 1;
-        _getProductsByCategory(pageNumber, limit);
+        if(widget.isSupermarket){
+          _getProductsBySupermarket(pageNumber, limit);
+        }else{
+          _getProductsByCategory(pageNumber, limit);
+        }
       }
     });
   }
