@@ -89,16 +89,28 @@ class PriceRow extends StatelessWidget {
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Text(
-                            price['price'] +
-                                price['supermarket']['country']['currency']
-                                    ['symbol'],
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          price['amount'] != null && int.parse(price['amount'].toString()) == 1
+                              ? Text(
+                                  price['price'] +
+                                      price['supermarket']['country']
+                                          ['currency']['symbol'],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green,
+                                  ),
+                                )
+                              : Text(
+                                  price['price'] +
+                                      price['supermarket']['country']
+                                          ['currency']['symbol'],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ]),
                   ),
                   // Text("($unitPrice)",
@@ -216,7 +228,6 @@ class RatingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     if (rating != null) {
       if (rating! < 0 || rating! > 5) {
         throw Exception("Rating must be between 0 and 5");
@@ -224,25 +235,24 @@ class RatingRow extends StatelessWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: rating != null ? RatingBar.builder(
-        initialRating: rating!,
-        minRating: 1,
-        direction: Axis.horizontal,
-        allowHalfRating: halfRating,
-        ignoreGestures: !allowEdit,
-        itemCount: 5,
-        itemSize: 30,
-        itemPadding: const EdgeInsets.symmetric(horizontal: 2.0),
-        itemBuilder: (context, _) => const Icon(
-          Icons.star,
-          color: Colors.amber,
-        ),
-        onRatingUpdate: onChange ?? (double value) {},
-      )
-      :
-      const Text("Este producto no tiene comentarios")
-    );
+        margin: const EdgeInsets.only(bottom: 10),
+        child: rating != null
+            ? RatingBar.builder(
+                initialRating: rating!,
+                minRating: 1,
+                direction: Axis.horizontal,
+                allowHalfRating: halfRating,
+                ignoreGestures: !allowEdit,
+                itemCount: 5,
+                itemSize: 30,
+                itemPadding: const EdgeInsets.symmetric(horizontal: 2.0),
+                itemBuilder: (context, _) => const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                onRatingUpdate: onChange ?? (double value) {},
+              )
+            : const Text("Este producto no tiene comentarios"));
   }
 }
 
