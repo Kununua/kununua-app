@@ -47,11 +47,12 @@ class PriceRow extends StatelessWidget {
     required this.priceIdUpdater,
   });
 
-  List<Widget> getSingleProductCards() {
-    List<Widget> result = [];
+  Map<String, List<Widget>> getProductCards() {
+    List<Widget> singlePrices = [];
+    List<Widget> packPrices = [];
 
     for (dynamic price in productPriceSet) {
-      result.add(GestureDetector(
+      Widget cellToAdd = GestureDetector(
         onTap: () {
           priceIdUpdater(int.parse(price['id']));
         },
@@ -89,7 +90,8 @@ class PriceRow extends StatelessWidget {
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          price['amount'] != null && int.parse(price['amount'].toString()) == 1
+                          price['amount'] != null &&
+                                  int.parse(price['amount'].toString()) == 1
                               ? Text(
                                   price['price'] +
                                       price['supermarket']['country']
@@ -113,10 +115,6 @@ class PriceRow extends StatelessWidget {
                                 ),
                         ]),
                   ),
-                  // Text("($unitPrice)",
-                  //     style: const TextStyle(
-                  //       fontSize: 9,
-                  //     )),
                   Text((price['supermarket']['name'] as String).title(),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -125,23 +123,44 @@ class PriceRow extends StatelessWidget {
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       )),
-                  Text(price['weight'],
+                  Text((price['amount'] != null && price['amount'] > 1) ? "${price['amount']} uds" : price['weight'],
                       style: const TextStyle(
                         fontSize: 9,
                       ))
                 ])),
-      ));
-    }
+      );
 
-    return result;
+      if (price['amount'] == null || price['amount'] == 1) {
+        singlePrices.add(cellToAdd);
+      } else {
+        packPrices.add(cellToAdd);
+      }
+    }
+    return {"singles": singlePrices, "packs": packPrices};
   }
 
   @override
   Widget build(BuildContext context) {
-    return KununuaGrid(
-      crossAxisCount: 2,
-      gridMargin: const EdgeInsets.only(top: 20, bottom: 20),
-      children: getSingleProductCards(),
+    final Map<String, List<Widget>> productCards = getProductCards();
+
+    return Column(
+      children: [
+        KununuaGrid(
+          crossAxisCount: 2,
+          gridMargin: const EdgeInsets.only(top: 20, bottom: 20),
+          children: productCards['singles']!,
+        ),
+        const Text("Packs",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            )),
+        KununuaGrid(
+          crossAxisCount: 2,
+          gridMargin: const EdgeInsets.only(top: 20, bottom: 20),
+          children: productCards['packs']!,
+        ),
+      ],
     );
   }
 }
@@ -252,7 +271,7 @@ class RatingRow extends StatelessWidget {
                 ),
                 onRatingUpdate: onChange ?? (double value) {},
               )
-            : const Text("Este producto no tiene comentarios"));
+            : const Text("Este producto no tiene opiniones"));
   }
 }
 
