@@ -8,7 +8,8 @@ class Supermarket(models.Model):
     name = models.CharField(_("name"), max_length=64)
     zipcode = models.CharField(_("zipcode"), max_length=10)
     main_url = models.URLField(_("main_url"))
-    image = models.ImageField(_("image"), upload_to="supermarkets/images/", max_length=1024)
+    logo = models.ImageField(_("logo"), upload_to="supermarkets/logos/", max_length=1024)
+    banner = models.ImageField(_("banner"), upload_to="supermarkets/banners/", max_length=1024)
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     
     class Meta:

@@ -59,7 +59,7 @@ class ProductsQuery(object):
     except Category.DoesNotExist:
       raise ValueError(_("Category does not exist"))
     
-    products = Product.objects.filter(price__supermarket=supermarket).exclude(name__iexact='')[min_pagination_index:max_pagination_index]
+    products = Product.objects.filter(price__supermarket=supermarket).exclude(name__iexact='').distinct()[min_pagination_index:max_pagination_index]
     
     filters = _get_filters(products)
     

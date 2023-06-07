@@ -21,8 +21,6 @@ class MainCarousel extends StatelessWidget {
         await globals.client.value.query(getSupermarketsQuery);
 
     if (productsResult.hasException) {
-      print(productsResult.exception.toString());
-
       return [];
     }
 
@@ -68,7 +66,7 @@ class MainCarousel extends StatelessWidget {
                                 border: Border.all(
                                     color: kPrimaryColor, width: 2.0),
                                 image: DecorationImage(
-                                  image: supermarket['image'],
+                                  image: supermarket['banner'],
                                   fit: BoxFit.fill,
                                 )),
                           );

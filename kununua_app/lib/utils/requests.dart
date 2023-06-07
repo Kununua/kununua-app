@@ -94,7 +94,7 @@ String getProductById = """
           supermarket{
             name
             mainUrl
-            image
+            logo
             country{
               spanishName
               englishName
@@ -465,7 +465,7 @@ query getSupermarkets(){
       id
       name
       mainUrl
-      image
+      banner
       country {
         spanishName
         englishName

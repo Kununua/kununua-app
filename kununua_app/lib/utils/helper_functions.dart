@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:kununua_app/keys.dart';
 
-const List<String> imageKeys = ['image', 'profilePicture'];
+const List<String> imageKeys = ['image', 'profilePicture', 'logo', 'banner'];
 
 class HelperFunctions {
   static List<Map<String, dynamic>> deserializeListData(
