@@ -123,7 +123,10 @@ class PriceRow extends StatelessWidget {
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       )),
-                  Text((price['amount'] != null && price['amount'] > 1) ? "${price['amount']} uds" : price['weight'],
+                  Text(
+                      (price['amount'] != null && price['amount'] > 1)
+                          ? "${price['amount']} uds"
+                          : price['weight'],
                       style: const TextStyle(
                         fontSize: 9,
                       ))
@@ -150,11 +153,13 @@ class PriceRow extends StatelessWidget {
           gridMargin: const EdgeInsets.only(top: 20, bottom: 20),
           children: productCards['singles']!,
         ),
-        const Text("Packs",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            )),
+        productCards['packs']!.isNotEmpty
+            ? const Text("Packs",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ))
+            : Container(),
         KununuaGrid(
           crossAxisCount: 2,
           gridMargin: const EdgeInsets.only(top: 20, bottom: 20),
