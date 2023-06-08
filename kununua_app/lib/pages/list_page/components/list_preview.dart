@@ -30,38 +30,43 @@ class ListPreview extends StatelessWidget {
 
   Future<bool> promptUser(
       BuildContext context, DismissDirection direction) async {
-    return await showCupertinoDialog<bool>(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: const Text(
-              "Eliminar lista",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
+      return await showCupertinoDialog<bool>(
+            context: context,
+            builder: (context) => KununuaConfirm(
+              onConfirm: () {
+                Navigator.of(context).pop(true);
+              },
+              onCancel: () {
+                Navigator.of(context).pop(false);
+              },
+              text:
+                  "¿Estás seguro de que quieres eliminar la lista $title ? Esta acción es irreversible.",
+              title: "Eliminar lista",
+              confirmationText: 'Eliminar',
+              isDestructive: true,
             ),
-            content: Text(
-              "¿Estás seguro de que quieres eliminar la lista $title ? Esta acción es irreversible.",
+          ) ??
+          false;
+    } else {
+      return await showDialog<bool>(
+            context: context,
+            builder: (context) => KununuaConfirm(
+              onConfirm: () {
+                Navigator.of(context).pop(true);
+              },
+              onCancel: () {
+                Navigator.of(context).pop(false);
+              },
+              text:
+                  "¿Estás seguro de que quieres eliminar la lista $title ? Esta acción es irreversible.",
+              title: "Eliminar lista",
+              confirmationText: 'Eliminar',
+              isDestructive: true,
             ),
-            actions: <Widget>[
-              CupertinoDialogAction(
-                child: const Text("Eliminar",
-                    style: TextStyle(
-                        color: Colors.red, fontWeight: FontWeight.bold)),
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-              ),
-              CupertinoDialogAction(
-                child: const Text('Cancelar'),
-                onPressed: () {
-                  return Navigator.of(context).pop(false);
-                },
-              )
-            ],
-          ),
-        ) ??
-        false;
+          ) ??
+          false;
+    }
   }
 
   Future<bool> deleteListMutation() async {

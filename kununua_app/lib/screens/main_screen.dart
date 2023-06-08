@@ -149,7 +149,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<bool> _createList(String listName) async {
-    debugPrint(listName);
     final MutationOptions createListMutation = MutationOptions(
       document: gql(createList),
       variables: <String, dynamic>{
@@ -358,7 +357,7 @@ class _MainScreenState extends State<MainScreen> {
                                                   builder: (context) =>
                                                       const MainScreen(
                                                         firstScreen:
-                                                            Screens.cart,
+                                                            Screens.list,
                                                       )),
                                             );
                                           } else {
