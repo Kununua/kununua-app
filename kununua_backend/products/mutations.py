@@ -93,13 +93,13 @@ class EditCartEntryMutation(graphene.Mutation):
     else:
       raise ValueError(_("Invalid product"))
     
-    if amount and amount < 0:
+    if amount is not None and amount < 0:
       raise ValueError(_("The amount must be greater than 0"))
     
     existing_entry = ProductEntry.objects.filter(product_price=selected_price, cart__user__username=user['username'])
     
     if len(existing_entry) == 1:
-      if amount:
+      if amount is not None:
         if amount == 0:
           existing_entry[0].delete()
           return EditCartEntryMutation(entry=None)

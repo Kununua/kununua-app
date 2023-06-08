@@ -302,6 +302,7 @@ String getProductsInCart = """
         productPrice{
           id
           price
+          amount
           product{
             id
             name

@@ -42,7 +42,7 @@ class CartPage extends StatelessWidget {
         cartProducts.putIfAbsent(product['productPrice']['id'], () => {
           'locked': product['locked'],
           'quantity': product['quantity'],
-          'productPrice': product['productPrice']
+                  'productPrice': product['productPrice'],
         });
 
       }else{
@@ -53,7 +53,8 @@ class CartPage extends StatelessWidget {
     return cartProducts.map((id, productData) => MapEntry(id, CartProduct(
           isLocked: productData['locked'],
           quantity: productData['quantity'],
-          product: productData['productPrice']
+              product: productData['productPrice'],
+              bottomBorder: true,
         )) ).values.toList();
   }
 

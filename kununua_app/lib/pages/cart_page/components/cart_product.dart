@@ -90,11 +90,25 @@ class _CartProductState extends State<CartProduct> {
                 closedElevation: 0,
                 clipBehavior: Clip.none,
                 closedBuilder: (context, openDetails) {
-                  return Image(
-                      image: widget.product['product']['image'],
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover);
+                  if (widget.product['amount'] != null &&
+                      widget.product['amount'] > 1) {
+                    return ClipRect(
+                        child: Banner(
+                            message: "PACK",
+                            location: BannerLocation.topStart,
+                            color: Colors.indigo,
+                            child: Image(
+                                image: widget.product['product']['image'],
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover)));
+                  } else {
+                    return Image(
+                        image: widget.product['product']['image'],
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover);
+                  }
                 },
                 openBuilder: (context, action) {
                   return ProductDetails(
@@ -103,17 +117,20 @@ class _CartProductState extends State<CartProduct> {
                 onClosed: (_) {}),
             Expanded(
               child: Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.only(left: 10, top: 10, bottom: 10),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      (widget.product['product']["name"] as String).title(),
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.55,
+                      child: Text(
+                        (widget.product['product']["name"] as String).title(),
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     Text(
@@ -245,7 +262,7 @@ class _CartProductState extends State<CartProduct> {
         ),
       ),
       Positioned(
-          right: 42.5,
+          right: 20,
           top: 25,
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
