@@ -24,7 +24,6 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  Map<String, List<String>> _filters = {};
   Map<String, List<String>> _filtersSetted = {};
   Map<String, List<String>> _filtersOriginal = {};
   List<Map<String, List<dynamic>>> _productsList = [];
@@ -44,13 +43,6 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   void initState() {
-    _filters = {
-      'Supermercados': [],
-      'Precio': [],
-      'Puntuación': [],
-      'Categorías': [],
-      'Marcas': [],
-    };
     super.initState();
 
     controller.addListener(() {
@@ -74,18 +66,8 @@ class _SearchPageState extends State<SearchPage> {
     );
 
     final productsResult = await globals.client.value.query(getProducts);
+    var productsList = HelperFunctions.deserializeListData(productsResult);
 
-    var resultList = HelperFunctions.deserializeData(productsResult);
-    var productsList = resultList['products'];
-    var filtersList = resultList['filters'];
-
-    for (var filter in filtersList) {
-      List<String> options = [];
-      for (var option in List.from(filter['options'])) {
-        options.add(option);
-      }
-      _filters[filter['key']] = options;
-    }
     _filtersSetted = {
       'Supermercados': [],
       'Precio': [],
@@ -101,7 +83,7 @@ class _SearchPageState extends State<SearchPage> {
       'Marcas': [],
       'Nombres': [queryParam],
     };
-    widget.updateFilters([...widget.productsList, ...productsList], _filters,
+    widget.updateFilters([...widget.productsList, ...productsList],
         _filtersSetted, _filtersOriginal);
 
     setState(() {
@@ -115,13 +97,6 @@ class _SearchPageState extends State<SearchPage> {
       if (query.trim().isEmpty) {
         _productsList = [];
         pageNumber = 1;
-        _filters = {
-          'Supermercados': [],
-          'Precio': [],
-          'Puntuación': [],
-          'Categorías': [],
-          'Marcas': [],
-        };
         _filtersSetted = {
           'Supermercados': [],
           'Precio': [],
@@ -138,7 +113,7 @@ class _SearchPageState extends State<SearchPage> {
           'Nombres': [],
         };
         widget.updateFilters(
-            _productsList, _filters, _filtersSetted, _filtersOriginal);
+            _productsList, _filtersSetted, _filtersOriginal);
         return;
       }
 

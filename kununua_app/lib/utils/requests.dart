@@ -115,25 +115,19 @@ String getProductById = """
 String getProductsByCategory = """
     query getProductsByCategory(\$categoryName: String!, \$pageNumber: Int, \$limit: Int){
       getProductsByCategory(category: \$categoryName, pageNumber: \$pageNumber, limit: \$limit){
-        products {
-          id
-          name
-          image
-          priceSet {
-            price
-            supermarket {
-              country {
-                currency {
-                  code
-                  symbol
-                }
+        id
+        name
+        image
+        priceSet {
+          price
+          supermarket {
+            country {
+              currency {
+                code
+                symbol
               }
             }
           }
-        }
-        filters {
-          key
-          options
         }
       }
     }
@@ -142,28 +136,22 @@ String getProductsByCategory = """
 String getProductsBySupermarket = """
     query getProductsBySupermarket(\$supermarketId: Int!, \$pageNumber: Int, \$limit: Int){
       getProductsBySupermarket(supermarketId: \$supermarketId, pageNumber: \$pageNumber, limit: \$limit){
-        products {
-          id
-          name
-          image
-          priceSet {
-            price
-            amount
-            weight
-            supermarket {
-              name
-              country {
-                currency {
-                  code
-                  symbol
-                }
+        id
+        name
+        image
+        priceSet {
+          price
+          amount
+          weight
+          supermarket {
+            name
+            country {
+              currency {
+                code
+                symbol
               }
             }
           }
-        }
-        filters {
-          key
-          options
         }
       }
     }
@@ -244,27 +232,21 @@ String getPacks = """
 String getProductsByName = """
     query getProductsByName(\$name: String!, \$pageNumber: Int, \$limit: Int){
       getProductsByName(name: \$name, pageNumber: \$pageNumber, limit: \$limit){
-        products {
-          id
-          name
-          image
-          priceSet {
-            price
-            amount
-            weight
-            supermarket {
-              country {
-                currency {
-                  code
-                  symbol
-                }
+        id
+        name
+        image
+        priceSet {
+          price
+          amount
+          weight
+          supermarket {
+            country {
+              currency {
+                code
+                symbol
               }
             }
           }
-        }
-        filters {
-          key
-          options
         }
       }
     }
@@ -377,7 +359,9 @@ String getLists = """
       name
       date
       productentrySet{
+        id
         quantity
+        isCrossed
         productPrice{
           id
           price
@@ -408,7 +392,9 @@ String createList = """
         name
         date
         productentrySet{
+          id
           quantity
+          isCrossed
           productPrice{
             price
             supermarket{
@@ -435,6 +421,14 @@ String deleteList = """
   mutation deleteList(\$userToken: String!, \$listId: Int!){
     deleteList(userToken: \$userToken, listId: \$listId){
       isDeleted
+    }
+  }
+""";
+
+String crossCartEntry = """
+  mutation crossCartEntry(\$userToken: String!, \$cartEntryId: Int!, \$isCrossed: Boolean!){
+    crossCartEntry(userToken: \$userToken, cartEntryId: \$cartEntryId, isCrossed: \$isCrossed){
+      isCrossed
     }
   }
 """;
@@ -481,4 +475,15 @@ query getSupermarkets(){
     }
   }
 
+""";
+
+/* ------------------------------- FILTERS ------------------------------- */
+
+String getFilters = """
+    query getFilters(){
+      getFilters(){
+        key
+        options
+      }
+    }
 """;

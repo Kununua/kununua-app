@@ -33,7 +33,6 @@ class _MainScreenState extends State<MainScreen> {
   late Screens _currentScreen;
   late int? maxSupermarkets;
   String listName = '';
-  Map<String, List<String>> _searchFilters = {};
   Map<String, List<String>> _searchFiltersSetted = {};
   Map<String, List<String>> _searchOriginalFilters = {};
   List<dynamic> _searchProductsList = [];
@@ -49,13 +48,11 @@ class _MainScreenState extends State<MainScreen> {
 
   void updateSearchFilters(
       List<dynamic> productsList,
-      Map<String, List<String>> filters,
       Map<String, List<String>> filtersSetted,
       Map<String, List<String>> originalFilters) {
     setState(() {
       _searchProductsList = productsList;
       _searchFiltersSetted = filtersSetted;
-      _searchFilters = filters;
       _searchOriginalFilters = originalFilters;
       _searchTotalResults = productsList.length;
     });
@@ -66,13 +63,6 @@ class _MainScreenState extends State<MainScreen> {
     _currentScreen = widget.firstScreen;
     super.initState();
     maxSupermarkets = null;
-    _searchFilters = {
-      'Supermercados': [],
-      'Precio': [],
-      'Puntuación': [],
-      'Categorías': [],
-      'Marcas': [],
-    };
     _searchFiltersSetted = {
       'Supermercados': [],
       'Precio': [],
@@ -168,7 +158,6 @@ class _MainScreenState extends State<MainScreen> {
       appBar: _loadAppBar(_currentScreen),
       endDrawer: _currentScreen == Screens.search
           ? ProductGridFilters(
-              filters: _searchFilters,
               updateProductsList: updateSearchProductsList,
               originalFilters: _searchOriginalFilters,
               settedFilters: _searchFiltersSetted,

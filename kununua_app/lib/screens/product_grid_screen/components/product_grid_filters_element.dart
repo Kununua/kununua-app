@@ -27,6 +27,12 @@ class _ProductGridFiltersElementState extends State<ProductGridFiltersElement> {
   }
 
   @override
+  void didUpdateWidget(covariant ProductGridFiltersElement oldWidget) {
+    _isChecked = widget.isChecked;
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.only(left: 15),

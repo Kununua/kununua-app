@@ -29,7 +29,6 @@ class ProductGridScreen extends StatefulWidget {
 class _ProductGridScreenState extends State<ProductGridScreen> {
   late final Future getProductsFuture;
   final controller = ScrollController();
-  Map<String, List<String>> _filters = {};
   Map<String, List<String>> _filtersSetted = {};
   Map<String, List<String>> _originalFilters = {};
   List<dynamic> _productsList = [];
@@ -39,13 +38,6 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
 
   @override
   void initState() {
-    _filters = {
-      'Supermercados': [],
-      'Precio': [],
-      'Puntuación': [],
-      'Categorías': [],
-      'Marcas': []
-    };
     _filtersSetted = {
       'Supermercados': [],
       'Precio': [],
@@ -53,7 +45,15 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
       'Categorías': [],
       'Marcas': []
     };
-    _originalFilters = {
+    _originalFilters = widget.isSupermarket
+        ? {
+            'Supermercados': [widget.supermarketName],
+      'Precio': [],
+      'Puntuación': [],
+      'Categorías': [],
+      'Marcas': []
+          }
+        : {
       'Supermercados': [],
       'Precio': [],
       'Puntuación': [],
@@ -102,21 +102,10 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     );
 
     final productsResult = await globals.client.value.mutate(getProducts);
-    var resultList = HelperFunctions.deserializeData(productsResult);
-    var productsList = resultList['products'];
-    var filtersList = resultList['filters'];
-
-    for (var filter in filtersList) {
-      List<String> options = [];
-      for (var option in List.from(filter['options'])) {
-        options.add(option);
-      }
-      _filters[filter['key']] = options;
-    }
+    var productsList = HelperFunctions.deserializeListData(productsResult);
 
     setState(() {
       if (!_hasBeenUpdated) {
-        _filters = _filters;
         _productsList = [..._productsList, ...productsList];
       }
     });
@@ -136,25 +125,13 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     final productsResult = await globals.client.value.query(getProducts);
 
     if (productsResult.hasException) {
-      print(productsResult.exception.toString());
+      debugPrint(productsResult.exception.toString());
     }
 
-    var resultList = HelperFunctions.deserializeData(productsResult);
-
-    var productsList = resultList['products'];
-    var filtersList = resultList['filters'];
-
-    for (var filter in filtersList) {
-      List<String> options = [];
-      for (var option in List.from(filter['options'])) {
-        options.add(option);
-      }
-      _filters[filter['key']] = options;
-    }
+    var productsList = HelperFunctions.deserializeListData(productsResult);
 
     setState(() {
       if (!_hasBeenUpdated) {
-        _filters = _filters;
         _productsList = [..._productsList, ...productsList];
       }
     });
@@ -164,7 +141,6 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       endDrawer: ProductGridFilters(
-        filters: _filters,
         updateProductsList: updateProductsList,
         settedFilters: _filtersSetted,
         originalFilters: _originalFilters,

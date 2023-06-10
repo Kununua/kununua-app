@@ -3,15 +3,16 @@ from django.utils.translation import gettext_lazy as _
 from .types import ProductType, CategoryType, ProductEntryType, ProductFilterType, FilterType, ListType, SupermarketType
 from authentication.models import KununuaUser
 from location.types import CountryType
-from .models import Product, Category, Cart, ProductEntry, Rating, Price, List, Supermarket
+from .models import Product, Category, Cart, ProductEntry, Rating, Price, List, Supermarket, Brand, Category
 from django.db.models import Q, Max
 
+MAX_PRICE = 250
 
 class ProductsQuery(object):
   
   get_product_by_id = graphene.Field(ProductType, id=graphene.Int())
-  get_products_by_category = graphene.Field(ProductFilterType, category=graphene.String(), page_number=graphene.Int(required=False), limit=graphene.Int(required=False))
-  get_products_by_supermarket = graphene.Field(ProductFilterType, supermarket_id=graphene.Int(), page_number=graphene.Int(required=False), limit=graphene.Int(required=False))
+  get_products_by_category = graphene.List(ProductType, category=graphene.String(), page_number=graphene.Int(required=False), limit=graphene.Int(required=False))
+  get_products_by_supermarket = graphene.List(ProductType, supermarket_id=graphene.Int(), page_number=graphene.Int(required=False), limit=graphene.Int(required=False))
   get_products_with_offer = graphene.List(ProductType)
   get_packs = graphene.List(ProductType)
 
@@ -39,9 +40,7 @@ class ProductsQuery(object):
     
     products = Product.objects.filter(category=category).exclude(name__iexact='')[min_pagination_index:max_pagination_index]
     
-    filters = _get_filters(products)
-    
-    return ProductFilterType(products=products, filters=filters)
+    return products
   
   def resolve_get_products_by_supermarket(self, info, supermarket_id, page_number=None, limit=None):
     
@@ -61,9 +60,7 @@ class ProductsQuery(object):
     
     products = Product.objects.filter(price__supermarket=supermarket).exclude(name__iexact='').distinct()[min_pagination_index:max_pagination_index]
     
-    filters = _get_filters(products)
-    
-    return ProductFilterType(products=products, filters=filters)
+    return products
 
   def resolve_get_products_with_offer(self, info):
     
@@ -122,7 +119,8 @@ class ListsQuery(object):
 class FilterQuery(object):
   
   filter_products = graphene.List(ProductType, supermarkets=graphene.List(graphene.String, required=False), categories=graphene.List(graphene.String, required=False), brands=graphene.List(graphene.String, required=False), min_rating=graphene.Float(required=False), max_rating=graphene.Float(required=False), min_price=graphene.Float(required=False), max_price=graphene.Float(required=False), name=graphene.String(required=False), page_number=graphene.Int(required=False), limit=graphene.Int(required=False))
-  get_products_by_name = graphene.Field(ProductFilterType, name=graphene.String(), page_number=graphene.Int(required=False), limit=graphene.Int(required=False))
+  get_products_by_name = graphene.List(ProductType, name=graphene.String(), page_number=graphene.Int(required=False), limit=graphene.Int(required=False))
+  get_filters = graphene.List(FilterType)
   
   def resolve_filter_products(self, info, supermarkets=None, categories=None, brands=None, min_rating=None, max_rating=None, min_price=None, max_price=None, name=None, page_number=None, limit=None):
     
@@ -154,7 +152,7 @@ class FilterQuery(object):
       q &= Q(price__price__gte=min_price)
     
     if max_price:
-      q &= Q(price__price__lte=max_price)
+      q &= Q(price__price__lte=max_price) if max_price < MAX_PRICE else Q(price__price__gte=max_price)
     
     products = Product.objects.filter(q).distinct()
 
@@ -202,10 +200,17 @@ class FilterQuery(object):
       raise ValueError(_("Name is required"))
     
     products = products[min_pagination_index:max_pagination_index]
-    filters = _get_filters(products)
     
-    return ProductFilterType(products = products, filters = filters)
-          
+    return products
+  
+  def resolve_get_filters(self, info):
+    filter1 = FilterType(key='Supermercados', options=Supermarket.objects.all().values_list('name', flat=True))
+    filter2 = FilterType(key='Marcas', options=Brand.objects.all().values_list('name', flat=True))
+    filter3 = FilterType(key='Categorías', options=Category.objects.all().values_list('name', flat=True))
+    filter4 = FilterType(key='Precio', options=[0, MAX_PRICE, 0, MAX_PRICE])
+    filter5 = FilterType(key='Puntuación', options=[0, 5, 0, 5])
+    
+    return [filter1, filter2, filter3, filter4, filter5]
   
 def _has_category(category, categories):
   if str(category.name).lower().strip() in categories:
@@ -216,43 +221,43 @@ def _has_category(category, categories):
     
   return False
 
-def _get_filters(products):
-  supermarkets = []
-  brands = []
-  categories = []
-  min_price = 0
-  max_price = 0
-  min_rating = 0
-  max_rating = 0
+# def _get_filters(products):
+#   supermarkets = []
+#   brands = []
+#   categories = []
+#   min_price = 0
+#   max_price = 0
+#   min_rating = 0
+#   max_rating = 0
   
   
-  for product in products:
-    if product.brand and product.brand.name not in brands:
-      brands.append(product.brand.name)
-    if product.category.name not in categories:
-      categories.append(product.category.name)
-    for price in Price.objects.filter(product=product):
-      if price.supermarket.name not in supermarkets:
-        supermarkets.append(price.supermarket.name)
-      if price.price < min_price or min_price == 0:
-        min_price = price.price
-      if price.price > max_price:
-        max_price = price.price
-    if not (min_rating == 0 and max_rating == Rating.objects.all().aggregate(Max('rating'))['rating__max']):
-      avg = product.get_average_rating()
-      avg = avg if avg else 0
-      if avg < min_rating or min_rating == 0:
-        min_rating = avg
-      if avg > max_rating:
-        max_rating = avg
+#   for product in products:
+#     if product.brand and product.brand.name not in brands:
+#       brands.append(product.brand.name)
+#     if product.category.name not in categories:
+#       categories.append(product.category.name)
+#     for price in Price.objects.filter(product=product):
+#       if price.supermarket.name not in supermarkets:
+#         supermarkets.append(price.supermarket.name)
+#       if price.price < min_price or min_price == 0:
+#         min_price = price.price
+#       if price.price > max_price:
+#         max_price = price.price
+#     if not (min_rating == 0 and max_rating == Rating.objects.all().aggregate(Max('rating'))['rating__max']):
+#       avg = product.get_average_rating()
+#       avg = avg if avg else 0
+#       if avg < min_rating or min_rating == 0:
+#         min_rating = avg
+#       if avg > max_rating:
+#         max_rating = avg
   
-  filter1 = FilterType(key='Supermercados', options=supermarkets)
-  filter2 = FilterType(key='Marcas', options=brands)
-  filter3 = FilterType(key='Categorías', options=categories)
-  filter4 = FilterType(key='Precio', options=[round(min_price), round(max_price), round(min_price), round(max_price)])
-  filter5 = FilterType(key='Puntuación', options=[round(min_rating), round(max_rating), round(min_rating), round(max_rating)])
+#   filter1 = FilterType(key='Supermercados', options=supermarkets)
+#   filter2 = FilterType(key='Marcas', options=brands)
+#   filter3 = FilterType(key='Categorías', options=categories)
+#   filter4 = FilterType(key='Precio', options=[round(min_price), round(max_price), round(min_price), round(max_price)])
+#   filter5 = FilterType(key='Puntuación', options=[round(min_rating), round(max_rating), round(min_rating), round(max_rating)])
   
-  return [filter1, filter2, filter3, filter4, filter5]
+#   return [filter1, filter2, filter3, filter4, filter5]
 
 class SupermarketsQuery(object):
   

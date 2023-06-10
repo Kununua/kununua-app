@@ -276,7 +276,7 @@ class RatingRow extends StatelessWidget {
                 ),
                 onRatingUpdate: onChange ?? (double value) {},
               )
-            : const Text("Este producto no tiene opiniones"));
+            : const Text("Este producto no tiene valoraciones"));
   }
 }
 

@@ -100,6 +100,7 @@ class ProductEntry(models.Model):
     list = models.ForeignKey(List, on_delete=models.CASCADE, null=True)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, null=True)
     is_list_product = models.BooleanField(_("is_list_product"), default=False)
+    is_crossed = models.BooleanField(_("is_crossed"), default=False)
     
     def __str__(self):
         return f"ProductEntry[quantity: {self.quantity}, product: {self.product_price}, list: {self.list}, cart: {self.cart}, is_list_product: {self.is_list_product}]"
