@@ -17,8 +17,10 @@ class ListExtendedView extends StatelessWidget {
       if (!listProducts.containsKey(product['productPrice']['id'])){
 
         listProducts.putIfAbsent(product['productPrice']['id'], () => {
+                  'id': product['id'],
           'quantity': product['quantity'],
-          'productPrice': product['productPrice']
+                  'productPrice': product['productPrice'],
+                  'isCrossed': product['isCrossed'],
         });
 
       }else{
@@ -28,7 +30,9 @@ class ListExtendedView extends StatelessWidget {
 
     return listProducts.map((id, productData) => MapEntry(id, ListProduct(
           quantity: productData['quantity'],
-          product: productData['productPrice']
+              product: productData['productPrice'],
+              isCrossed: productData['isCrossed'],
+              id: int.parse(productData['id']),
         )) ).values.toList();
   }
 

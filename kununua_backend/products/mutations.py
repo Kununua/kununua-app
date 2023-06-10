@@ -267,6 +267,47 @@ class AddProductRatingMutation(graphene.Mutation):
     
     return created_rating
 
+class CrossCartEntryMutation(graphene.Mutation):
+  class Input:
+    user_token = graphene.String(required=True)
+    cart_entry_id = graphene.Int(required=True)
+    is_crossed = graphene.Boolean(required=True)
+    
+  is_crossed = graphene.Field(graphene.Boolean)
+  
+  @staticmethod
+  def mutate(root, info, **kwargs):
+    user_token = kwargs.get('user_token', '')
+    cart_entry_id = kwargs.get('cart_entry_id', None)
+    is_crossed = kwargs.get('is_crossed', None)
+    
+    if cart_entry_id is None or not user_token or is_crossed is None:
+      raise ValueError(_("All params are required"))
+    
+    try:
+      user = jwt.decode(user_token, 'my_secret', algorithms=['HS256'])
+    except jwt.InvalidSignatureError:
+      raise ValueError(_("Invalid token"))
+    
+    try:
+      cart_entry = ProductEntry.objects.get(pk=cart_entry_id)
+    except ProductEntry.DoesNotExist:
+      raise ValueError(_("Invalid cart entry"))
+    
+    if not cart_entry.is_list_product:
+      raise ValueError(_("Invalid cart entry"))
+    
+    if cart_entry.list.user.username != user['username']:
+      raise ValueError(_("Invalid cart entry"))
+    
+    if cart_entry.is_crossed != is_crossed: 
+      cart_entry.is_crossed = is_crossed
+      cart_entry.save()
+    
+    return CrossCartEntryMutation(is_crossed=cart_entry.is_crossed)
+    
+    
+
 class ProductsMutation(graphene.ObjectType):
   add_image_to_product = AddImageToProductMutation.Field()
   add_entry_to_cart = AddEntryToCartMutation.Field()
@@ -275,3 +316,4 @@ class ProductsMutation(graphene.ObjectType):
   create_list = CreateListMutation.Field()
   delete_list = DeleteListMutation.Field()
   add_product_rating_mutation = AddProductRatingMutation.Field()
+  cross_cart_entry = CrossCartEntryMutation.Field()

@@ -9,21 +9,9 @@ import 'package:kununua_app/utils/requests.dart';
 import 'package:kununua_app/widgets/button.dart';
 import 'package:kununua_app/utils/globals.dart' as globals;
 
-class ProductGridFilters extends StatelessWidget {
-  final Map<String, List<String>> filters;
-  final Function updateProductsList;
-  final Map<String, List<String>> settedFilters;
-  final Map<String, List<String>> originalFilters;
-
+class ProductGridFilters extends StatefulWidget {
   const ProductGridFilters(
       {super.key,
-      this.filters = const {
-        'Supermercados': [],
-        'Precio': [],
-        'Puntuación': [],
-        'Categorías': [],
-        'Marcas': []
-      },
       required this.updateProductsList,
       this.settedFilters = const {
         'Supermercados': [],
@@ -40,17 +28,108 @@ class ProductGridFilters extends StatelessWidget {
         'Marcas': [],
         'Nombres': [],
       }});
+  final Function updateProductsList;
+  final Map<String, List<String>> settedFilters;
+  final Map<String, List<String>> originalFilters;
+
+  @override
+  State<ProductGridFilters> createState() => _ProductGridFiltersState();
+}
+
+class _ProductGridFiltersState extends State<ProductGridFilters> {
+  TextEditingController editingController = TextEditingController();
+  Map<String, List<String>> dataFiltered = {};
+  Map<String, List<String>> _filters = {};
+
+  final Map<String, List<String>> _filtersEmpty = const {
+    'Supermercados': [],
+    'Precio': [],
+    'Puntuación': [],
+    'Categorías': [],
+    'Marcas': []
+  };
+
+  @override
+  void initState() {
+    dataFiltered = const {
+      'Supermercados': [],
+      'Precio': [],
+      'Puntuación': [],
+      'Categorías': [],
+      'Marcas': []
+    };
+    _filters = const {
+      'Supermercados': [],
+      'Precio': [],
+      'Puntuación': [],
+      'Categorías': [],
+      'Marcas': []
+    };
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    editingController.dispose();
+    super.dispose();
+  }
 
   void updateNamedSettedFilters(key, name, value) {
-    if (settedFilters[key]!.contains(name)) {
+    if (widget.settedFilters[key]!.contains(name)) {
       if (!value) {
-        settedFilters[key]!.remove(name);
+        widget.settedFilters[key]!.remove(name);
       }
     } else {
       if (value) {
-        settedFilters[key]!.add(name);
+        widget.settedFilters[key]!.add(name);
       }
     }
+  }
+
+  void filterSearchResults(String query, String key) {
+    if (query.trim().isEmpty) {
+      setState(() {
+        dataFiltered[key] = _filters[key]!;
+      });
+      return;
+    }
+    setState(() {
+      dataFiltered[key] = _filters[key]!
+          .where(
+              (item) => item.toLowerCase().contains(query.toLowerCase().trim()))
+          .toList();
+    });
+  }
+
+  Future<Map<String, List<String>>> loadFilters() async {
+    QueryOptions getFiltersOptions = QueryOptions(
+      document: gql(getFilters),
+    );
+    var filtersResult = await globals.client.value.query(getFiltersOptions);
+    var filtersData = HelperFunctions.deserializeListData(filtersResult);
+    Map<String, List<String>> filtersMap = {
+      'Supermercados': [],
+      'Precio': [],
+      'Puntuación': [],
+      'Categorías': [],
+      'Marcas': []
+    };
+    if (filtersData.isNotEmpty) {
+      for (var filter in filtersData) {
+        List<String> options = [];
+        for (var option in List.from(filter['options'])) {
+          options.add(option);
+        }
+        filtersMap[filter['key']] = options;
+      }
+    }
+
+    setState(() {
+      _filters = filtersMap;
+      dataFiltered = filtersMap;
+    });
+
+    return filtersMap;
   }
 
   void updateRangedSettedFilters(key, start, end, min, max) {
@@ -60,8 +139,8 @@ class ProductGridFilters extends StatelessWidget {
       min.toString(),
       max.toString()
     ];
-    if (settedFilters[key]! != range) {
-      settedFilters[key] = range;
+    if (widget.settedFilters[key]! != range) {
+      widget.settedFilters[key] = range;
     }
   }
 
@@ -77,40 +156,40 @@ class ProductGridFilters extends StatelessWidget {
     String? name;
     void applyFilters() async {
       List<Map<String, dynamic>> productsList = [];
-      supermarkets = [...originalFilters['Supermercados']!];
-      supermarkets!.addAll(settedFilters['Supermercados']!);
+      supermarkets = [...widget.originalFilters['Supermercados']!];
+      supermarkets!.addAll(widget.settedFilters['Supermercados']!);
       if (supermarkets!.isEmpty) {
         supermarkets = null;
       }
-      categories = [...originalFilters['Categorías']!];
-      categories!.addAll(settedFilters['Categorías']!);
+      categories = [...widget.originalFilters['Categorías']!];
+      categories!.addAll(widget.settedFilters['Categorías']!);
       if (categories!.isEmpty) {
         categories = null;
       }
-      brands = [...originalFilters['Marcas']!];
-      brands!.addAll(settedFilters['Marcas']!);
+      brands = [...widget.originalFilters['Marcas']!];
+      brands!.addAll(widget.settedFilters['Marcas']!);
       if (brands!.isEmpty) {
         brands = null;
       }
 
-      if (settedFilters['Precio']!.isNotEmpty) {
-        minPrice = double.parse(settedFilters['Precio']![0]);
-        maxPrice = double.parse(settedFilters['Precio']![1]);
-      } else if (originalFilters['Precio']!.isNotEmpty) {
-        minPrice = double.parse(originalFilters['Precio']![0]);
-        maxPrice = double.parse(originalFilters['Precio']![1]);
+      if (widget.settedFilters['Precio']!.isNotEmpty) {
+        minPrice = double.parse(widget.settedFilters['Precio']![0]);
+        maxPrice = double.parse(widget.settedFilters['Precio']![1]);
+      } else if (widget.originalFilters['Precio']!.isNotEmpty) {
+        minPrice = double.parse(widget.originalFilters['Precio']![0]);
+        maxPrice = double.parse(widget.originalFilters['Precio']![1]);
       }
 
-      if (settedFilters['Puntuación']!.isNotEmpty) {
-        minRating = double.parse(settedFilters['Puntuación']![0]);
-        maxRating = double.parse(settedFilters['Puntuación']![1]);
-      } else if (originalFilters['Puntuación']!.isNotEmpty) {
-        minRating = double.parse(originalFilters['Puntuación']![0]);
-        maxRating = double.parse(originalFilters['Puntuación']![1]);
+      if (widget.settedFilters['Puntuación']!.isNotEmpty) {
+        minRating = double.parse(widget.settedFilters['Puntuación']![0]);
+        maxRating = double.parse(widget.settedFilters['Puntuación']![1]);
+      } else if (widget.originalFilters['Puntuación']!.isNotEmpty) {
+        minRating = double.parse(widget.originalFilters['Puntuación']![0]);
+        maxRating = double.parse(widget.originalFilters['Puntuación']![1]);
       }
 
-      if (originalFilters['Nombres']!.isNotEmpty) {
-        name = originalFilters['Nombres']!.first;
+      if (widget.originalFilters['Nombres']!.isNotEmpty) {
+        name = widget.originalFilters['Nombres']!.first;
       }
 
       final MutationOptions getProducts = MutationOptions(
@@ -128,138 +207,335 @@ class ProductGridFilters extends StatelessWidget {
       );
 
       final productsResult = await globals.client.value.mutate(getProducts);
-      
+
       productsList = HelperFunctions.deserializeListData(productsResult);
 
-      updateProductsList(productsList, settedFilters);
+      widget.updateProductsList(productsList, widget.settedFilters);
     }
 
     return Drawer(
-        child: ListView.builder(
-            itemCount: filters.length + 1,
-            itemBuilder: (BuildContext context, int index) {
-              if (index == 0) {
-                String key = filters.keys.elementAt(index);
-                return Column(children: [
-                  Padding(
-                      padding:
-                          const EdgeInsets.only(left: 15, bottom: 10, top: 10),
-                      child: Center(
-                          child: Text(
-                        "Filtra por".toUpperCase(),
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ))),
-                  ExpansionTile(
-                    title: ProductGridFiltersTitle(name: key),
-                    children: [
-                      filters[key]!.isEmpty
-                          ? const Padding(
-                              padding: EdgeInsets.only(bottom: 15),
-                              child: Text("No hay parámetros para filtrar",
-                                  style:
-                                      TextStyle(fontStyle: FontStyle.italic)))
-                          : key == "Precio" || key == "Puntuación"
-                              ? ProductGridFiltersRange(
-                                  start: double.parse(
-                                      settedFilters[key]!.isEmpty
-                                          ? filters[key]![0]
-                                          : settedFilters[key]![0]),
-                                  end: double.parse(settedFilters[key]!.isEmpty
-                                      ? filters[key]![1]
-                                      : settedFilters[key]![1]),
-                                  min: double.parse(settedFilters[key]!.isEmpty
-                                      ? filters[key]![2]
-                                      : settedFilters[key]![2]),
-                                  max: double.parse(settedFilters[key]!.isEmpty
-                                      ? filters[key]![3]
-                                      : settedFilters[key]![3]),
-                                  keyName: key,
-                                  updateRangedSettedFilters:
-                                      updateRangedSettedFilters)
-                              : ListView.builder(
-                                  itemCount: filters[key]!.length,
-                                  shrinkWrap: true,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return ProductGridFiltersElement(
-                                        name: filters[key]![index],
-                                        isChecked: settedFilters[key]!
-                                                .contains(filters[key]![index])
-                                            ? true
-                                            : false,
-                                        keyName: key,
-                                        updateNamedSettedFilters:
-                                            updateNamedSettedFilters);
-                                  })
-                    ],
-                  )
-                ]);
+        child: FutureBuilder(
+            future: loadFilters(),
+            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+              if (snapshot.hasData) {
+                return ListView.builder(
+                    itemCount: snapshot.data.length + 1,
+                    itemBuilder: (BuildContext context, int index) {
+                      if (index == 0) {
+                        String key = snapshot.data.keys.elementAt(index);
+                        return Column(children: [
+                          Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 15, bottom: 10, top: 10),
+                              child: Center(
+                                  child: Text(
+                                "Filtra por".toUpperCase(),
+                                style: const TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                              ))),
+                          ExpansionTile(
+                            title: ProductGridFiltersTitle(name: key),
+                            children: [
+                              _filters[key]!.length < 30
+                                  ? Container()
+                                  : Padding(
+                                      padding: const EdgeInsets.all(15),
+                                      child: SizedBox(
+                                        height: 50,
+                                        width: double.infinity,
+                                        child: TextField(
+                                          controller: editingController,
+                                          onChanged: (value) {
+                                            filterSearchResults(value, key);
+                                          },
+                                          decoration: const InputDecoration(
+                                              hintText: "Filtra por nombre",
+                                              prefixIcon: Icon(Icons.search),
+                                              border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(
+                                                              25.0)))),
+                                        ),
+                                      ),
+                                    ),
+                              snapshot.data[key]!.isEmpty
+                                  ? const Padding(
+                                      padding: EdgeInsets.only(bottom: 15),
+                                      child: Text("No hay parámetros para filtrar",
+                                          style: TextStyle(
+                                              fontStyle: FontStyle.italic)))
+                                  : key == "Precio" || key == "Puntuación"
+                                      ? ProductGridFiltersRange(
+                                          start: double.parse(widget
+                                                  .settedFilters[key]!.isEmpty
+                                              ? snapshot.data[key]![0]
+                                              : widget.settedFilters[key]![0]),
+                                          end: double.parse(widget.settedFilters[key]!.isEmpty
+                                              ? snapshot.data[key]![1]
+                                              : widget.settedFilters[key]![1]),
+                                          min: double.parse(widget.settedFilters[key]!.isEmpty
+                                              ? snapshot.data[key]![2]
+                                              : widget.settedFilters[key]![2]),
+                                          max: double.parse(
+                                              widget.settedFilters[key]!.isEmpty
+                                                  ? snapshot.data[key]![3]
+                                                  : widget.settedFilters[key]![3]),
+                                          keyName: key,
+                                          updateRangedSettedFilters: updateRangedSettedFilters)
+                                      : widget.originalFilters[key]!.isEmpty
+                                          ? snapshot.data[key]!.length > 30
+                                              ? ListView.builder(
+                                                  itemCount: dataFiltered[key]!.length,
+                                                  shrinkWrap: true,
+                                                  itemBuilder: (BuildContext context, int index) {
+                                                    return ProductGridFiltersElement(
+                                                        name: dataFiltered[
+                                                            key]![index],
+                                                        isChecked: widget
+                                                                .settedFilters[
+                                                                    key]!
+                                                                .contains(
+                                                                    snapshot.data[
+                                                                            key]![
+                                                                        index])
+                                                            ? true
+                                                            : false,
+                                                        keyName: key,
+                                                        updateNamedSettedFilters:
+                                                            updateNamedSettedFilters);
+                                                  })
+                                              : ListView.builder(
+                                                  itemCount: snapshot.data[key]!.length,
+                                                  shrinkWrap: true,
+                                                  itemBuilder: (BuildContext context, int index) {
+                                                    return ProductGridFiltersElement(
+                                                        name: snapshot
+                                                            .data[key]![index],
+                                                        isChecked: widget
+                                                                .settedFilters[
+                                                                    key]!
+                                                                .contains(
+                                                                    snapshot.data[
+                                                                            key]![
+                                                                        index])
+                                                            ? true
+                                                            : false,
+                                                        keyName: key,
+                                                        updateNamedSettedFilters:
+                                                            updateNamedSettedFilters);
+                                                  })
+                                          : ListView.builder(
+                                              itemCount: widget.originalFilters[key]!.length,
+                                              shrinkWrap: true,
+                                              itemBuilder: (BuildContext context, int index) {
+                                                return ProductGridFiltersElement(
+                                                    name:
+                                                        widget.originalFilters[
+                                                            key]![index],
+                                                    isChecked: widget
+                                                            .settedFilters[key]!
+                                                            .contains(widget
+                                                                    .originalFilters[
+                                                                key]![index])
+                                                        ? true
+                                                        : false,
+                                                    keyName: key,
+                                                    updateNamedSettedFilters:
+                                                        updateNamedSettedFilters);
+                                              })
+                            ],
+                          )
+                        ]);
+                      }
+                      if (index == snapshot.data.length) {
+                        bool hasFilters = false;
+                        snapshot.data.forEach((key, value) {
+                          if (value.isNotEmpty) {
+                            hasFilters = true;
+                            return;
+                          }
+                        });
+                        return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Button(
+                                text: "Filtrar productos",
+                                action: hasFilters ? applyFilters : null,
+                                color: kPrimaryColor,
+                                paddingContainer:
+                                    const EdgeInsets.only(top: 10),
+                                paddingButton:
+                                    const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                //icon: const Icon(Icons.filter_alt)
+                              )
+                            ]);
+                      }
+                      String key = snapshot.data.keys.elementAt(index);
+                      return ExpansionTile(
+                        title: ProductGridFiltersTitle(name: key),
+                        children: [
+                          _filters[key]!.length < 30
+                              ? Container()
+                              : Padding(
+                                  padding: const EdgeInsets.all(15),
+                                  child: SizedBox(
+                                    height: 50,
+                                    width: double.infinity,
+                                    child: TextField(
+                                      controller: editingController,
+                                      onChanged: (value) {
+                                        filterSearchResults(value, key);
+                                      },
+                                      decoration: const InputDecoration(
+                                          hintText: "Filtra por nombre",
+                                          prefixIcon: Icon(Icons.search),
+                                          border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(25.0)))),
+                                    ),
+                                  ),
+                                ),
+                          snapshot.data[key]!.isEmpty
+                              ? const Padding(
+                                  padding: EdgeInsets.only(bottom: 15),
+                                  child: Text("No hay parámetros para filtrar",
+                                      style: TextStyle(
+                                          fontStyle: FontStyle.italic)))
+                              : key == "Precio" || key == "Puntuación"
+                                  ? ProductGridFiltersRange(
+                                      start: double.parse(
+                                          widget.settedFilters[key]!.isEmpty
+                                              ? snapshot.data[key]![0]
+                                              : widget.settedFilters[key]![0]),
+                                      end: double.parse(
+                                          widget.settedFilters[key]!.isEmpty
+                                              ? snapshot.data[key]![1]
+                                              : widget.settedFilters[key]![1]),
+                                      min: double.parse(
+                                          widget.settedFilters[key]!.isEmpty
+                                              ? snapshot.data[key]![2]
+                                              : widget.settedFilters[key]![2]),
+                                      max: double.parse(
+                                          widget.settedFilters[key]!.isEmpty
+                                              ? snapshot.data[key]![3]
+                                              : widget.settedFilters[key]![3]),
+                                      keyName: key,
+                                      updateRangedSettedFilters:
+                                          updateRangedSettedFilters)
+                                  : widget.originalFilters[key]!.isEmpty
+                                      ? snapshot.data[key]!.length > 30
+                                          ? ListView.builder(
+                                              itemCount: dataFiltered[key]!.length,
+                                              shrinkWrap: true,
+                                              itemBuilder: (BuildContext context, int index) {
+                                                return ProductGridFiltersElement(
+                                                    name: dataFiltered[key]![
+                                                        index],
+                                                    isChecked: widget
+                                                            .settedFilters[key]!
+                                                            .contains(snapshot
+                                                                    .data[key]![
+                                                                index])
+                                                        ? true
+                                                        : false,
+                                                    keyName: key,
+                                                    updateNamedSettedFilters:
+                                                        updateNamedSettedFilters);
+                                              })
+                                          : ListView.builder(
+                                              itemCount: snapshot.data[key]!.length,
+                                              shrinkWrap: true,
+                                              itemBuilder: (BuildContext context, int index) {
+                                                return ProductGridFiltersElement(
+                                                    name: snapshot
+                                                        .data[key]![index],
+                                                    isChecked: widget
+                                                            .settedFilters[key]!
+                                                            .contains(snapshot
+                                                                    .data[key]![
+                                                                index])
+                                                        ? true
+                                                        : false,
+                                                    keyName: key,
+                                                    updateNamedSettedFilters:
+                                                        updateNamedSettedFilters);
+                                              })
+                                      : ListView.builder(
+                                          itemCount: widget.originalFilters[key]!.length,
+                                          shrinkWrap: true,
+                                          itemBuilder: (BuildContext context, int index) {
+                                            return ProductGridFiltersElement(
+                                                name: widget.originalFilters[
+                                                    key]![index],
+                                                isChecked: widget
+                                                        .settedFilters[key]!
+                                                        .contains(widget
+                                                                .originalFilters[
+                                                            key]![index])
+                                                    ? true
+                                                    : false,
+                                                keyName: key,
+                                                updateNamedSettedFilters:
+                                                    updateNamedSettedFilters);
+                                          })
+                        ],
+                      );
+                    });
               }
-              if (index == filters.length) {
-                bool hasFilters = false;
-                filters.forEach((key, value) {
-                  if (value.isNotEmpty) {
-                    hasFilters = true;
-                    return;
-                  }
-                });
-                return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Button(
-                        text: "Filtrar productos",
-                        action: hasFilters ? applyFilters : null,
-                        color: kPrimaryColor,
-                        paddingContainer: const EdgeInsets.only(top: 10),
-                        paddingButton:
-                            const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                        //icon: const Icon(Icons.filter_alt)
-                      )
-                    ]);
-              }
-              String key = filters.keys.elementAt(index);
-              return ExpansionTile(
-                title: ProductGridFiltersTitle(name: key),
-                children: [
-                  filters[key]!.isEmpty
-                      ? const Padding(
-                          padding: EdgeInsets.only(bottom: 15),
-                          child: Text("No hay parámetros para filtrar",
-                              style: TextStyle(fontStyle: FontStyle.italic)))
-                      : key == "Precio" || key == "Puntuación"
-                          ? ProductGridFiltersRange(
-                              start: double.parse(settedFilters[key]!.isEmpty
-                                  ? filters[key]![0]
-                                  : settedFilters[key]![0]),
-                              end: double.parse(settedFilters[key]!.isEmpty
-                                  ? filters[key]![1]
-                                  : settedFilters[key]![1]),
-                              min: double.parse(settedFilters[key]!.isEmpty
-                                  ? filters[key]![2]
-                                  : settedFilters[key]![2]),
-                              max: double.parse(settedFilters[key]!.isEmpty
-                                  ? filters[key]![3]
-                                  : settedFilters[key]![3]),
-                              keyName: key,
-                              updateRangedSettedFilters:
-                                  updateRangedSettedFilters)
-                          : ListView.builder(
-                              itemCount: filters[key]!.length,
-                              shrinkWrap: true,
-                              itemBuilder: (BuildContext context, int index) {
-                                return ProductGridFiltersElement(
-                                    name: filters[key]![index],
-                                    isChecked: settedFilters[key]!
-                                            .contains(filters[key]![index])
-                                        ? true
-                                        : false,
-                                    keyName: key,
-                                    updateNamedSettedFilters:
-                                        updateNamedSettedFilters);
-                              })
-                ],
-              );
+              return ListView.builder(
+                  itemCount: _filtersEmpty.length + 1,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == 0) {
+                      String key = _filtersEmpty.keys.elementAt(index);
+                      return Column(children: [
+                        Padding(
+                            padding: const EdgeInsets.only(
+                                left: 15, bottom: 10, top: 10),
+                            child: Center(
+                                child: Text(
+                              "Filtra por".toUpperCase(),
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ))),
+                        ExpansionTile(
+                          title: ProductGridFiltersTitle(name: key),
+                          children: const [
+                            Padding(
+                                padding: EdgeInsets.only(bottom: 15),
+                                child: Text("No hay parámetros para filtrar",
+                                    style:
+                                        TextStyle(fontStyle: FontStyle.italic)))
+                          ],
+                        )
+                      ]);
+                    }
+                    if (index == _filtersEmpty.length) {
+                      return const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Button(
+                              text: "Filtrar productos",
+                              action: null,
+                              color: kPrimaryColor,
+                              paddingContainer: EdgeInsets.only(top: 10),
+                              paddingButton:
+                                  EdgeInsets.fromLTRB(20, 10, 20, 10),
+                              //icon: const Icon(Icons.filter_alt)
+                            )
+                          ]);
+                    }
+                    String key = _filtersEmpty.keys.elementAt(index);
+                    return ExpansionTile(
+                      title: ProductGridFiltersTitle(name: key),
+                      children: const [
+                        Padding(
+                            padding: EdgeInsets.only(bottom: 15),
+                            child: Text("No hay parámetros para filtrar",
+                                style: TextStyle(fontStyle: FontStyle.italic)))
+                      ],
+                    );
+                  });
             }));
   }
 }
