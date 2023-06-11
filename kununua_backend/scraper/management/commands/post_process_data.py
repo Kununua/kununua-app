@@ -13,7 +13,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         
-        API = ScraperSQLiteAPI()
+        API = ScraperSQLiteAPI("scrapers_api.db")
         
         matcher = MatchingUtil(API.get_products_scraped())
         

@@ -5,7 +5,6 @@ from scraper.models import ProductScraped
 from location.models import Currency
 import pandas as pd
 
-DB_PATH = os.path.join("data", "db", "scrapers_api_ean.db")
 PRODUCT_TABLE_NAME = "productsScraped"
 PACK_TABLE_NAME = "packsScraped"
 CURRENCY_TABLE_NAME = "currencies"
@@ -15,24 +14,32 @@ MERCADONA_CATEGORIES_CACHE = "mercCache"
 
 class ScraperSQLiteAPI(SQLiteAPI):
     
-    def __init__(self):
-        if not isinstance(DB_PATH, str):
+    def __init__(self, name=None):
+
+        if not name:
+            raise ValueError(_("Database name is required"))
+        
+        db_path = os.path.join("data", "db", name)        
+
+        if not isinstance(db_path, str):
             raise ValueError(_("Database name must be a string"))
-        dir_path = DB_PATH[:DB_PATH.rfind(os.path.sep)]
+        
+        dir_path = db_path[:db_path.rfind(os.path.sep)]
         if not os.path.exists(dir_path):
             os.makedirs(dir_path, exist_ok=True)
-        super().__init__(DB_PATH)
+        super().__init__(db_path)
         self.create_table(CURRENCY_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, code TEXT NOT NULL, symbol TEXT")
         self.create_table(COUNTRY_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, spanish_name TEXT NOT NULL, english_name TEXT NOT NULL, code TEXT NOT NULL, phone_code TEXT, currency INTEGER NULL, FOREIGN KEY(currency) REFERENCES currencies(id)")
         self.create_table(SUPERMARKET_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, zipcode TEXT NOT NULL, main_url TEXT NOT NULL, country INTEGER NOT NULL, FOREIGN KEY(country) REFERENCES countries(id)")
         self.create_table(PRODUCT_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, ean TEXT, price REAL NOT NULL, unit_price TEXT, weight TEXT, brand TEXT, amount INTEGER, image TEXT NOT NULL, offer_price REAL, is_vegetarian INTEGER NOT NULL, is_gluten_free INTEGER NOT NULL, is_freezed INTEGER NOT NULL, is_from_country INTEGER NOT NULL, is_eco INTEGER NOT NULL, is_without_sugar INTEGER NOT NULL, is_without_lactose INTEGER NOT NULL, url TEXT, is_pack INTEGER NOT NULL, category TEXT NOT NULL, supermarket INTEGER NOT NULL, FOREIGN KEY(supermarket) REFERENCES supermarkets(id)")
         self.create_table(PACK_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, amount INTEGER NOT NULL, price REAL NOT NULL, weight TEXT, image TEXT NOT NULL, url TEXT, product_scraped INTEGER NOT NULL, FOREIGN KEY(product_scraped) REFERENCES productsScraped(id)")
-        self.create_table(MERCADONA_CATEGORIES_CACHE, "id INTEGER PRIMARY KEY AUTOINCREMENT, counter INTEGER NOT NULL")
+        if name == "mercadona_cache.db":
+            self.create_table(MERCADONA_CATEGORIES_CACHE, "id INTEGER PRIMARY KEY AUTOINCREMENT, counter INTEGER NOT NULL")
 
         if self.select_data(COUNTRY_TABLE_NAME, "COUNT(*)", None)[0][0] == 0:
             self._populate_initial_data()
 
-        if self.select_data(MERCADONA_CATEGORIES_CACHE, "COUNT(*)", None)[0][0] == 0:
+        if name == "mercadona_cache.db" and self.select_data(MERCADONA_CATEGORIES_CACHE, "COUNT(*)", None)[0][0] == 0:
             self._populate_mercadona_categories_cache()
         
     def _populate_initial_data(self):

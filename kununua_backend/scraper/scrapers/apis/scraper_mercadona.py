@@ -47,18 +47,11 @@ def get_product_details(product_id):
         print(f"Error: {response}")
         return {}
     
-def map_product_to_model(product, category):
+def map_product_to_model(product, category, extract_all_ean, cache_api):
       
         if product["published"]:
 
-            product_details = get_product_details(product["id"])
-
             name = product["display_name"]
-            try:
-                ean = product_details["ean"]
-            except:
-                print(product_details)
-                ean = None
             price = float(product["price_instructions"]["unit_price"])
             
             if product["price_instructions"]["previous_unit_price"]:
@@ -75,18 +68,43 @@ def map_product_to_model(product, category):
                 amount = None
             image = product["thumbnail"]
             is_pack = product["price_instructions"]["is_pack"]
-            product_url = product["share_url"]
+            product_url = str(product["share_url"])
+
+            if extract_all_ean:
+
+                product_details = get_product_details(product["id"])
+                try:
+                    ean = product_details["ean"]
+                except:
+                    print(product_details)
+                    ean = None
+            else:
+                try:
+                    ean = cache_api.select_data("productsScraped", "ean", f"url='{product_url}'")[0][0]
+                except:
+                    product_details = get_product_details(product["id"])
+                    try:
+                        ean = product_details["ean"]
+                    except:
+                        print(product_details)
+                        raise Exception("Error getting EAN")
 
             return ProductScraped(name=name, ean=ean, price=price, offer_price=offer_price, weight=weight, image=image, is_pack=is_pack, amount=amount, url=product_url, supermarket=supermarket, category=category)
         else:
             return None
 
-def scraper(sqlite_api):
+def scraper(sqlite_api, cache_api=None, extract_all_ean=False):
+
+    if not extract_all_ean and cache_api == None:
+        raise Exception("Cache API is required if not extracting all EAN")
+
 
     # ----------------- SAVE SUPERMARKET IF NECESARY -----------------
 
-    current_category_counter = int(sqlite_api.select_data("mercCache", "counter", None)[0][0])
-    print(f"Current category counter: {current_category_counter}")
+    if extract_all_ean:
+        current_category_counter = int(sqlite_api.select_data("mercCache", "counter", None)[0][0])
+    else:
+        current_category_counter = 0
 
     if not supermarket_in_db(supermarket, sqlite_api):
         sql_supermarket = {"name": supermarket.name, "zipcode": supermarket.zipcode, "main_url": supermarket.main_url, "country": supermarket.country.code}
@@ -104,9 +122,12 @@ def scraper(sqlite_api):
           for sub_category in category["categories"]:
               categories_to_extract.append(sub_category)
 
-    # ----------------- PRODUCTS EXTRACTION ----------------- (implementar cache para extraccion de ean)
+    # ----------------- PRODUCTS EXTRACTION -----------------
 
-    for i in range(current_category_counter, len(categories_to_extract)):
+    if not extract_all_ean:
+        products = []
+
+    for i in tqdm(range(current_category_counter, len(categories_to_extract))):
         
         category = categories_to_extract[i]
           
@@ -114,17 +135,22 @@ def scraper(sqlite_api):
 
         print(f"Category: {category['name']} - Products: {len(products_response)}")
 
-        products = []
+        if extract_all_ean:
+            products = []
 
         for product in products_response:
 
-            product_parsed = map_product_to_model(product, category["name"])
+            product_parsed = map_product_to_model(product, category["name"], extract_all_ean, cache_api)
 
             if product_parsed.ean == None:
                 raise Exception(f"Product without EAN: {product_parsed.name}")
 
             if product_parsed:
                 products.append(product_parsed)
-        
+
+        if extract_all_ean:
+            sqlite_api.add_products_scraped(products)
+            sqlite_api.update_data("mercCache", "counter="+str(i + 1), "id=1")
+
+    if not extract_all_ean:
         sqlite_api.add_products_scraped(products)
-        sqlite_api.update_data("mercCache", "counter="+str(i + 1), "id=1")

@@ -4,8 +4,8 @@ from scraper.scrapers.spain import scraper_el_jamon
 from scraper.scrapers.spain import scraper_mercadona
 from scraper.scrapers.spain import scraper_carrefour
 from scraper.scrapers.apis import scraper_mercadona as scraper_mercadona_api
+from scraper.scrapers.apis import scraper_carrefour as scraper_carrefour_api
 from scraper.utils.ScraperSQLiteAPI import ScraperSQLiteAPI
-import pandas as pd
 import time
 
 class Command(BaseCommand):
@@ -14,9 +14,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         
-        API = ScraperSQLiteAPI()
+        API = ScraperSQLiteAPI(name="scrapers_api.db")
+        CACHE_API = ScraperSQLiteAPI(name="mercadona_cache.db")
         
         start = time.time()
-        scraper_mercadona_api.scraper(API)
+        scraper_carrefour_api.scraper(API)
+        # scraper_mercadona_api.scraper(API, CACHE_API)
         end = time.time()
         print(f"Time: {end - start}")
