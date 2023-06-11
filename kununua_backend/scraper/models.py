@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 class ProductScraped(object):
     
-    def __init__(self, pseudo_id = None, name=None, price=None, unit_price=None, weight=None, brand=None, 
+    def __init__(self, pseudo_id = None, name=None, ean=None, price=None, unit_price=None, weight=None, brand=None, 
                  amount=None, image=None, offer_price=None, 
                  is_vegetarian=False, is_gluten_free=False, 
                  is_freezed=False, is_from_country=False, is_eco=False, 
@@ -54,6 +54,7 @@ class ProductScraped(object):
         
         self.pseudo_id = pseudo_id
         self.name = name
+        self.ean = ean
         self.price = price
         self.unit_price = unit_price
         self.weight = weight
@@ -74,7 +75,7 @@ class ProductScraped(object):
         self.supermarket = supermarket
         
     def __str__(self):
-        return f"ProductScraped[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, weight: {self.weight}, offer_price: {self.offer_price}, supermarket: {self.supermarket.name}, amount={self.amount}]"
+        return f"ProductScraped[name: {self.name}, ean: {self.ean} price: {self.price}, unit_price: {self.unit_price}, weight: {self.weight}, offer_price: {self.offer_price}, supermarket: {self.supermarket.name}, amount={self.amount}]"
     
 class PackScraped(object):
     
