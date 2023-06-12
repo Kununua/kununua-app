@@ -678,7 +678,7 @@ class MatchingUtil(object):
                 product, _ = Product.objects.get_or_create(
                     name=key_product.name, 
                     brand=key_product.brand, 
-                    image=key_product.image if key_product.supermarket.name != "Carrefour" and key_product.image != NO_IMAGE_CARREFOUR else "products/images/nodisponible.png", 
+                    image=key_product.image, 
                     is_vegetarian=self._get_flag(match, "is_vegetarian"),
                     is_gluten_free=self._get_flag(match, "is_gluten_free"),
                     is_eco=self._get_flag(match, "is_eco"),
