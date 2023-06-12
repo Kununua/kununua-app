@@ -8,6 +8,7 @@ from scraper.utils.SimilarityCalculator import SimilarityCalculator
 from data.similarities_threshold import THRESHOLDS, NAME_SIMILARITY_THRESHOLD
 from scraper.utils.ScraperSQLiteAPI import ScraperSQLiteAPI
 from scraper.utils.ClassificatorSQLiteAPI import ClassificatorSQLiteAPI
+from unidecode import unidecode
 
 DISTANCE_UNITS = ["km", "m", "dm", "cm", "mm"]
 VOLUME_UNITS = ["kl", "l", "dl", "cl", "ml"]
@@ -192,10 +193,25 @@ class MatchingUtil(object):
         
         for product in self.products_scraped:
             if product.brand:
-                brand, new = Brand.objects.get_or_create(name__iexact=product.brand.lower().title(), defaults={'name': product.brand.lower().title()})
+                brands_list = Brand.objects.all().values_list('id', 'name')
+                brands_list = [(id, self._unidecode_brand(brand_name)) for id, brand_name in brands_list]
+                is_done = False
+                for id, brand_name in brands_list:
+                    if brand_name == self._unidecode_brand(product.brand):
+                        pg_brand = Brand.objects.get(pk=id)
+                        if self._parse_brand(product.brand) != pg_brand.name and self._unidecode_brand(product.brand) == pg_brand.name:
+                            pg_brand.name = self._parse_brand(product.brand)
+                            pg_brand.save()
+                        product.brand = pg_brand
+                        result.append(product)
+                        is_done = True
+                        break
+                if is_done:
+                    break
+                brand, new = Brand.objects.get_or_create(name__iexact=self._parse_brand(product.brand), defaults={'name': self._parse_brand(product.brand)})
                 if new:
                     with open('data/datasets/clean/brands.csv', 'a') as f:
-                        f.write(f"\n{product.brand.lower().title()}")
+                        f.write(f"\n{self._unidecode_brand(brand.name)}")
                 
                 product.brand = brand
                 
@@ -206,11 +222,27 @@ class MatchingUtil(object):
                 
                 for brand in brands:
                     
-                    if brand.lower() in product.name.lower():
+                    if brand.lower() in unidecode(product.name.lower()):
+                        brands_list = Brand.objects.all().values_list('id', 'name')
+                        brands_list = [(id, self._unidecode_brand(brand_name)) for id, brand_name in brands_list]
+                        is_done = False
+                        for id, brand_name in brands_list:
+                            if brand_name == brand:
+                                pg_brand = Brand.objects.get(pk=id)
+                                brand_parsed = product.name[unidecode(product.name.lower()).index(brand.lower()):unidecode(product.name.lower()).index(brand.lower())+len(brand)]
+                                if self._parse_brand(brand_parsed) != pg_brand.name and self._unidecode_brand(brand_parsed) == pg_brand.name:
+                                    pg_brand.name = self._parse_brand(brand_parsed)
+                                    pg_brand.save()
+                                product.brand = pg_brand
+                                result.append(product)
+                                is_done = True
+                                break
+                        if is_done:
+                            break
                         pg_brand, new = Brand.objects.get_or_create(name__iexact=brand, defaults={'name': brand})
                         if new:
                             with open('data/datasets/clean/brands.csv', 'a') as f:
-                                f.write(f"\n{pg_brand.name}")
+                                f.write(f"\n{self._unidecode_brand(pg_brand.name)}")
                         product.brand = pg_brand
                         result.append(product)
                         break
@@ -218,7 +250,14 @@ class MatchingUtil(object):
                     result.append(product)
                     
         self.products_scraped = result
-        
+
+    @staticmethod
+    def _parse_brand(brand):
+        return brand.lower().title().strip()
+
+    def _unidecode_brand(self, brand):
+        return unidecode(self._parse_brand(brand))  
+     
     # -----------------------------------------------------------------
     # ---------------------------- PHASE 4 ----------------------------
     
