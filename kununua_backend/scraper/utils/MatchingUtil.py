@@ -112,8 +112,6 @@ class MatchingUtil(object):
         self._stores_possible_matches()
         print("Done!")
         
-        
-        
     # ------------------------------- PRIVATE FUNCTIONS -------------------------------
     
     # ---------------------------- PHASE 0 ----------------------------
@@ -614,24 +612,25 @@ class MatchingUtil(object):
         return [ProductScraped(
                                             pseudo_id = int(product[0]),
                                             name=str(product[1]),
-                                            price=float(product[2]),
-                                            unit_price=str(product[3]) if product[3] else None,
-                                            weight=str(product[4]) if product[4] else None,
-                                            brand=str(product[5]) if product[5] else None,
-                                            amount=int(product[6]) if product[6] else None,
-                                            image=str(product[7]),
-                                            offer_price=float(product[8]) if product[8] else None,
-                                            is_vegetarian=bool(product[9]),
-                                            is_gluten_free=bool(product[10]),
-                                            is_freezed=bool(product[11]),
-                                            is_from_country=bool(product[12]),
-                                            is_eco=bool(product[13]),
-                                            is_without_sugar=bool(product[14]),
-                                            is_without_lactose=bool(product[15]),
-                                            url=str(product[16]) if product[16] else None,
-                                            is_pack=bool(product[17]),
-                                            category=str(product[18]),
-                                            supermarket=str(product[19]),
+                                            ean=str(product[2]),
+                                            price=float(product[3]),
+                                            unit_price=str(product[4]) if product[4] else None,
+                                            weight=str(product[5]) if product[5] else None,
+                                            brand=str(product[6]) if product[6] else None,
+                                            amount=int(product[7]) if product[7] else None,
+                                            image=str(product[8]),
+                                            offer_price=float(product[9]) if product[9] else None,
+                                            is_vegetarian=bool(product[10]),
+                                            is_gluten_free=bool(product[11]),
+                                            is_freezed=bool(product[12]),
+                                            is_from_country=bool(product[13]),
+                                            is_eco=bool(product[14]),
+                                            is_without_sugar=bool(product[15]),
+                                            is_without_lactose=bool(product[16]),
+                                            url=str(product[17]) if product[17] else None,
+                                            is_pack=bool(product[18]),
+                                            category=str(product[19]),
+                                            supermarket=str(product[20]),
                                             )
                                         for product in sqlite_products
                                     ]

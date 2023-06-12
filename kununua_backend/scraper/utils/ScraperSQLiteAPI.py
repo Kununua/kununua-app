@@ -1,5 +1,6 @@
 import os, json
 from django.utils.translation import gettext as _
+from scraper.models import PackScraped
 from scraper.utils.SQLiteAPI import SQLiteAPI
 from scraper.models import ProductScraped
 from location.models import Currency
@@ -32,7 +33,7 @@ class ScraperSQLiteAPI(SQLiteAPI):
         self.create_table(COUNTRY_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, spanish_name TEXT NOT NULL, english_name TEXT NOT NULL, code TEXT NOT NULL, phone_code TEXT, currency INTEGER NULL, FOREIGN KEY(currency) REFERENCES currencies(id)")
         self.create_table(SUPERMARKET_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, zipcode TEXT NOT NULL, main_url TEXT NOT NULL, country INTEGER NOT NULL, FOREIGN KEY(country) REFERENCES countries(id)")
         self.create_table(PRODUCT_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, ean TEXT, price REAL NOT NULL, unit_price TEXT, weight TEXT, brand TEXT, amount INTEGER, image TEXT NOT NULL, offer_price REAL, is_vegetarian INTEGER NOT NULL, is_gluten_free INTEGER NOT NULL, is_freezed INTEGER NOT NULL, is_from_country INTEGER NOT NULL, is_eco INTEGER NOT NULL, is_without_sugar INTEGER NOT NULL, is_without_lactose INTEGER NOT NULL, url TEXT, is_pack INTEGER NOT NULL, category TEXT NOT NULL, supermarket INTEGER NOT NULL, FOREIGN KEY(supermarket) REFERENCES supermarkets(id)")
-        self.create_table(PACK_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, amount INTEGER NOT NULL, price REAL NOT NULL, weight TEXT, image TEXT NOT NULL, url TEXT, product_scraped INTEGER NOT NULL, FOREIGN KEY(product_scraped) REFERENCES productsScraped(id)")
+        self.create_table(PACK_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, ean TEXT NOT NULL, amount INTEGER NOT NULL, price REAL NOT NULL, offer_price REAL, weight TEXT, image TEXT NOT NULL, url TEXT, product_scraped INTEGER NOT NULL, FOREIGN KEY(product_scraped) REFERENCES productsScraped(id)")
         if name == "mercadona_cache.db":
             self.create_table(MERCADONA_CATEGORIES_CACHE, "id INTEGER PRIMARY KEY AUTOINCREMENT, counter INTEGER NOT NULL")
 
@@ -96,6 +97,31 @@ class ScraperSQLiteAPI(SQLiteAPI):
         columns = "(name, ean, price, unit_price, weight, brand, amount, image, offer_price, is_vegetarian, is_gluten_free, is_freezed, is_from_country, is_eco, is_without_sugar, is_without_lactose, url, is_pack, category, supermarket)"
         
         self.insert_data(PRODUCT_TABLE_NAME + columns, data)
+        
+    def add_packs_scraped(self, packs):
+        if not isinstance(packs, list):
+            raise ValueError(_("Products must be a list"))
+        
+        for pack in packs:
+            self._add_pack_scraped(pack)
+    
+    def _add_pack_scraped(self, pack):
+        if not isinstance(pack, PackScraped):
+            raise ValueError(_("Product must be a PackScraped object"))
+        data = f"""
+            {self._parse_str(pack.name)},
+            {self._parse_str(pack.pack_ean)},
+            {self._handle_none(pack.amount)}, 
+            {self._handle_none(pack.price)}, 
+            {self._handle_none(pack.offer_price)}, 
+            {self._parse_str(pack.weight)}, 
+            {self._parse_str(pack.image)}, 
+            {self._parse_str(pack.url)},
+            {self._handle_none(pack.product_scraped.pseudo_id)}
+            """
+        columns = "(name, ean, amount, price, offer_price, weight, image, url, product_scraped)"
+        
+        self.insert_data(PACK_TABLE_NAME + columns, data)
         
     def _update_json_categories(self, products):
         categories_to_translate = {product.category for product in products}

@@ -1,4 +1,5 @@
-from ...models import ProductScraped
+from scraper.utils.MatchingUtil import MatchingUtil
+from ...models import PackScraped, ProductScraped
 from products.models import Supermarket, Category
 from location.models import Country
 from tqdm import tqdm
@@ -33,7 +34,7 @@ def get_products_from_category(category_id):
 
     else:
         print(f"Error: {response}")
-        raise Exception("Error getting products from category")
+        raise RuntimeError("Error getting products from category")
     
 def get_product_details(product_id):
 	
@@ -64,7 +65,7 @@ def map_product_to_model(product, category, extract_all_ean, cache_api):
             
             try:
                 amount = product["price_instructions"]["total_units"]
-            except:
+            except KeyError:
                 amount = None
             image = product["thumbnail"]
             is_pack = product["price_instructions"]["is_pack"]
@@ -75,20 +76,23 @@ def map_product_to_model(product, category, extract_all_ean, cache_api):
                 product_details = get_product_details(product["id"])
                 try:
                     ean = product_details["ean"]
-                except:
+                except KeyError:
                     print(product_details)
                     ean = None
             else:
                 try:
                     ean = cache_api.select_data("productsScraped", "ean", f"url='{product_url}'")[0][0]
-                except:
+                except Exception:
                     product_details = get_product_details(product["id"])
                     try:
                         ean = product_details["ean"]
-                    except:
+                    except KeyError:
                         print(product_details)
-                        raise Exception("Error getting EAN")
-
+                        raise KeyError("Error getting EAN")
+            if not extract_all_ean and is_pack:
+                
+                return PackScraped(name=name, pack_ean=ean, price=price, offer_price=offer_price, weight=weight, component_weight= str(product["price_instructions"]["pack_size"]) + product["price_instructions"]["reference_format"], image=image, amount=amount, url=product_url, category=category)
+            
             return ProductScraped(name=name, ean=ean, price=price, offer_price=offer_price, weight=weight, image=image, is_pack=is_pack, amount=amount, url=product_url, supermarket=supermarket, category=category)
         else:
             return None
@@ -96,7 +100,7 @@ def map_product_to_model(product, category, extract_all_ean, cache_api):
 def scraper(sqlite_api, cache_api=None, extract_all_ean=False):
 
     if not extract_all_ean and cache_api == None:
-        raise Exception("Cache API is required if not extracting all EAN")
+        raise ValueError("Cache API is required if not extracting all EAN")
 
 
     # ----------------- SAVE SUPERMARKET IF NECESARY -----------------
@@ -126,6 +130,7 @@ def scraper(sqlite_api, cache_api=None, extract_all_ean=False):
 
     if not extract_all_ean:
         products = []
+        packs = []
 
     for i in tqdm(range(current_category_counter, len(categories_to_extract))):
         
@@ -141,12 +146,15 @@ def scraper(sqlite_api, cache_api=None, extract_all_ean=False):
         for product in products_response:
 
             product_parsed = map_product_to_model(product, category["name"], extract_all_ean, cache_api)
-
-            if product_parsed.ean == None:
-                raise Exception(f"Product without EAN: {product_parsed.name}")
-
-            if product_parsed:
+            
+            if extract_all_ean or (product_parsed and isinstance(product_parsed, ProductScraped)):
+                if product_parsed.ean == None:
+                    raise ValueError(f"Product without EAN: {product_parsed.name}")
                 products.append(product_parsed)
+            elif product_parsed and isinstance(product_parsed, PackScraped):
+                if product_parsed.pack_ean == None:
+                    raise ValueError(f"Pack without EAN: {product_parsed.name}")
+                packs.append(product_parsed)
 
         if extract_all_ean:
             sqlite_api.add_products_scraped(products)
@@ -154,3 +162,44 @@ def scraper(sqlite_api, cache_api=None, extract_all_ean=False):
 
     if not extract_all_ean:
         sqlite_api.add_products_scraped(products)
+
+    packs = _perform_packs_matching(sqlite_api, packs)
+    
+    sqlite_api.add_packs_scraped(packs)    
+
+# ----------------- PACKS MATCHING -----------------
+
+def _perform_packs_matching(sqlite_api, packs):
+    
+    print("Matching packs...")
+    
+    products = sqlite_api.get_products_scraped()
+    matcher = MatchingUtil(products)
+    products = matcher._parse_classificator_sqlite_products(products)
+    supermarket_id = sqlite_api.get_supermarkets(condition="name='"+supermarket.name+"'")
+    supermarket_id = supermarket_id[0][0]
+    
+    products = list(filter(lambda p: int(p.supermarket) == int(supermarket_id), products))
+    
+    products_to_return = []
+    packs_to_return = []
+    
+    for pack in packs:
+        if not isinstance(pack, PackScraped):
+            raise ValueError("Pack is not a PackScraped")
+        
+        for product in products:
+            
+            similarity_coef = matcher.similarity.compute_string_similarity(product.name, pack.name)
+            
+            if pack.category == product.category and pack.component_weight == product.weight and similarity_coef > 0.8:
+                pack.product_scraped = product
+                packs_to_return.append(pack)
+                break
+        else:
+            print(f"Pack not matched: {pack.name}, saving as a product...")
+            products_to_return.append(ProductScraped(name=pack.name, ean=pack.pack_ean, price=pack.price, offer_price=pack.offer_price, weight=pack.weight, image=pack.image, is_pack=False, amount=None, url=pack.url, supermarket=supermarket, category=pack.category))
+    
+    print("Done!")
+    
+    return packs_to_return

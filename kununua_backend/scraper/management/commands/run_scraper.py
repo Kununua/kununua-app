@@ -14,11 +14,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         
-        API = ScraperSQLiteAPI(name="scrapers_api.db")
+        API = ScraperSQLiteAPI(name="scrapers_api_prueba.db")
         CACHE_API = ScraperSQLiteAPI(name="mercadona_cache.db")
         
         start = time.time()
-        scraper_carrefour_api.scraper(API)
-        # scraper_mercadona_api.scraper(API, CACHE_API)
+        # scraper_carrefour_api.scraper(API)
+        scraper_mercadona_api.scraper(API, CACHE_API)
         end = time.time()
         print(f"Time: {end - start}")
