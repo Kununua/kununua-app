@@ -2,6 +2,7 @@ from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from products.models import Price
 from products.models import ProductEntry
 
 @receiver(pre_save, sender=ProductEntry)

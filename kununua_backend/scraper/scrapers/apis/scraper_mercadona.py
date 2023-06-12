@@ -16,9 +16,9 @@ def supermarket_in_db(supermarket, sqlite_api):
 				return True
 		return False
 
-def get_products_from_category(category_id):
+def get_products_from_category(category):
 	
-    request_url = f"https://tienda.mercadona.es/api/categories/{category_id}/?lang=es&wh=svq1"
+    request_url = f"https://tienda.mercadona.es/api/categories/{category['id']}/?lang=es&wh=svq1"
 
     response = requests.get(request_url)
 
@@ -31,6 +31,12 @@ def get_products_from_category(category_id):
                 products.append(product)
 
         return products
+    
+    elif response.status_code == 410:
+        
+        print(f"No se ha encontrado la categoría: {category['name']}")
+        
+        return []
 
     else:
         print(f"Error: {response}")
@@ -136,7 +142,7 @@ def scraper(sqlite_api, cache_api=None, extract_all_ean=False):
         
         category = categories_to_extract[i]
           
-        products_response = get_products_from_category(category["id"])
+        products_response = get_products_from_category(category)
 
         print(f"Category: {category['name']} - Products: {len(products_response)}")
 
@@ -174,7 +180,7 @@ def _perform_packs_matching(sqlite_api, packs):
     print("Matching packs...")
     
     products = sqlite_api.get_products_scraped()
-    matcher = MatchingUtil(products)
+    matcher = MatchingUtil(products, [])
     products = matcher._parse_classificator_sqlite_products(products)
     supermarket_id = sqlite_api.get_supermarkets(condition="name='"+supermarket.name+"'")
     supermarket_id = supermarket_id[0][0]

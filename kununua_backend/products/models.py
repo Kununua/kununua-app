@@ -56,9 +56,11 @@ class Product(models.Model):
 class Price(models.Model):
     
     price = models.DecimalField(_("price"), max_digits=10, decimal_places=2)
+    offer_price = models.DecimalField(_("offer_price"), max_digits=10, decimal_places=2, null=True)
     weight = models.CharField(_("weight"), max_length=24, blank=True)
     amount = models.PositiveIntegerField(_("amount"), null=True)
     url = models.URLField(_("url"), null=True, max_length=1024)
+    image = models.ImageField(_("image"), upload_to="products/images/", null=True, max_length=1024)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     supermarket = models.ForeignKey(Supermarket, on_delete=models.DO_NOTHING)
     

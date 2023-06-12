@@ -15,6 +15,6 @@ class Command(BaseCommand):
         
         API = ScraperSQLiteAPI("scrapers_api.db")
         
-        matcher = MatchingUtil(API.get_products_scraped())
+        matcher = MatchingUtil(API.get_products_scraped(), API.get_packs_scraped())
         
         matcher.post_process_data()

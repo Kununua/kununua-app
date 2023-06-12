@@ -1,7 +1,7 @@
 import requests, os
 from tqdm import tqdm
 from django.core.management.base import BaseCommand
-from products.models import Product
+from products.models import Product, Price
 
 
 class Command(BaseCommand):
@@ -12,8 +12,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         
         products = Product.objects.all()
+        packs = Price.objects.filter(amount__gt=1)
         
         download_pictures(products)
+        download_pack_pictures(packs)
         
         remove_backgrounds(products)
         
@@ -50,6 +52,36 @@ def download_pictures(products):
                     print("Error")
                     product.image = "products/images/nodisponible.png"
                     product.save()
+                    
+def download_pack_pictures(packs):
+    
+    print("1. Downloading images...")
+        
+    for pack in tqdm(packs):
+    
+        if "products" not in pack.image.url:
+            
+            url = pack.image
+            file_name = normalize(pack.product.name.replace(' ', '_').replace(",", "_").replace("/", "")) + f"-pack-{pack.amount}.jpg"
+    
+            if picture_in_media(file_name):
+                pack.image = "products/images/%s" % (file_name)
+                pack.save()
+            else:
+                try:
+                    try:
+                        res = requests.get(url, stream = True, verify=True)
+                    except requests.exceptions.SSLError:
+                        res = requests.get(url, stream = True, verify=False)
+
+                    if res.status_code == 200:
+                        
+                        pack.image.save(file_name, res.raw, save=True)
+                    
+                except (requests.exceptions.MissingSchema, requests.exceptions.InvalidSchema):
+                    print("Error")
+                    pack.image = "products/images/nodisponible.png"
+                    pack.save()
 
 def remove_backgrounds(products):
     print("2. Removing backgrounds...")
