@@ -195,54 +195,43 @@ class MatchingUtil(object):
             if product.brand:
                 brands_list = Brand.objects.all().values_list('id', 'name')
                 brands_list = [(id, self._unidecode_brand(brand_name)) for id, brand_name in brands_list]
-                is_done = False
-                for id, brand_name in brands_list:
-                    if brand_name == self._unidecode_brand(product.brand):
-                        pg_brand = Brand.objects.get(pk=id)
-                        if self._parse_brand(product.brand) != pg_brand.name and self._unidecode_brand(product.brand) == pg_brand.name:
-                            pg_brand.name = self._parse_brand(product.brand)
-                            pg_brand.save()
-                        product.brand = pg_brand
-                        result.append(product)
-                        is_done = True
-                        break
-                if is_done:
-                    break
-                brand, new = Brand.objects.get_or_create(name__iexact=self._parse_brand(product.brand), defaults={'name': self._parse_brand(product.brand)})
-                if new:
-                    with open('data/datasets/clean/brands.csv', 'a') as f:
-                        f.write(f"\n{self._unidecode_brand(brand.name)}")
+                brand_id = self.get_brand_id(self._unidecode_brand(product.brand), brands_list)
+                
+                if brand_id:
+                    brand = Brand.objects.get(pk=brand_id)
+                else:
+                    brand, new = Brand.objects.get_or_create(name__iexact=self._parse_brand(product.brand), defaults={'name': self._parse_brand(product.brand)})
+                    if new:
+                        with open('data/datasets/clean/brands.csv', 'a') as f:
+                            f.write(f"\n{self._unidecode_brand(product.brand)}")
+                            
+                if self._parse_brand(product.brand) != brand.name and brand.name == self._unidecode_brand(product.brand):
+                    brand.name = self._parse_brand(product.brand)
+                    brand.save()
                 
                 product.brand = brand
-                
-                result.append(product)
-            
+                result.append(product) 
             else:
-                brands = get_brands_list("data/datasets/clean/brands.csv")
-                
+                brands = get_brands_list("data/datasets/clean/brands.csv")            
                 for brand in brands:
-                    
                     if brand.lower() in unidecode(product.name.lower()):
                         brands_list = Brand.objects.all().values_list('id', 'name')
                         brands_list = [(id, self._unidecode_brand(brand_name)) for id, brand_name in brands_list]
-                        is_done = False
-                        for id, brand_name in brands_list:
-                            if brand_name == brand:
-                                pg_brand = Brand.objects.get(pk=id)
-                                brand_parsed = product.name[unidecode(product.name.lower()).index(brand.lower()):unidecode(product.name.lower()).index(brand.lower())+len(brand)]
-                                if self._parse_brand(brand_parsed) != pg_brand.name and self._unidecode_brand(brand_parsed) == pg_brand.name:
-                                    pg_brand.name = self._parse_brand(brand_parsed)
-                                    pg_brand.save()
-                                product.brand = pg_brand
-                                result.append(product)
-                                is_done = True
-                                break
-                        if is_done:
-                            break
-                        pg_brand, new = Brand.objects.get_or_create(name__iexact=brand, defaults={'name': brand})
-                        if new:
-                            with open('data/datasets/clean/brands.csv', 'a') as f:
-                                f.write(f"\n{self._unidecode_brand(pg_brand.name)}")
+                        brand_parsed = product.name[unidecode(product.name.lower()).index(brand.lower()):unidecode(product.name.lower()).index(brand.lower())+len(brand)]
+                        brand_id = self.get_brand_id(brand, brands_list)
+                        
+                        if brand_id:
+                            pg_brand = Brand.objects.get(pk=brand_id)
+                        else:
+                            pg_brand, new = Brand.objects.get_or_create(name__iexact=self._parse_brand(brand_parsed), defaults={'name': self._parse_brand(brand_parsed)})
+                            if new:
+                                with open('data/datasets/clean/brands.csv', 'a') as f:
+                                    f.write(f"\n{self._unidecode_brand(pg_brand.name)}")
+                                    
+                        if self._parse_brand(brand_parsed) != pg_brand.name and pg_brand.name == brand:
+                            pg_brand.name = self._parse_brand(brand_parsed)
+                            pg_brand.save()
+                              
                         product.brand = pg_brand
                         result.append(product)
                         break
@@ -256,7 +245,14 @@ class MatchingUtil(object):
         return brand.lower().title().strip()
 
     def _unidecode_brand(self, brand):
-        return unidecode(self._parse_brand(brand))  
+        return unidecode(self._parse_brand(brand))
+    
+    @staticmethod
+    def get_brand_id(brand, brands_list):
+        for id, brand_name in brands_list:
+            if brand_name == brand:
+                return id
+        return None
      
     # -----------------------------------------------------------------
     # ---------------------------- PHASE 4 ----------------------------
