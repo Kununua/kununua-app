@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 class ProductScraped(object):
     
-    def __init__(self, pseudo_id = None, name=None, price=None, unit_price=None, weight=None, brand=None, 
+    def __init__(self, pseudo_id = None, name=None, ean=None, price=None, unit_price=None, weight=None, brand=None, 
                  amount=None, image=None, offer_price=None, 
                  is_vegetarian=False, is_gluten_free=False, 
                  is_freezed=False, is_from_country=False, is_eco=False, 
@@ -54,6 +54,7 @@ class ProductScraped(object):
         
         self.pseudo_id = pseudo_id
         self.name = name
+        self.ean = ean
         self.price = price
         self.unit_price = unit_price
         self.weight = weight
@@ -74,21 +75,26 @@ class ProductScraped(object):
         self.supermarket = supermarket
         
     def __str__(self):
-        return f"ProductScraped[name: {self.name}, price: {self.price}, unit_price: {self.unit_price}, weight: {self.weight}, offer_price: {self.offer_price}, supermarket: {self.supermarket.name}, amount={self.amount}]"
+        return f"ProductScraped[name: {self.name}, ean: {self.ean} price: {self.price}, unit_price: {self.unit_price}, weight: {self.weight}, offer_price: {self.offer_price}, supermarket: {self.supermarket.name}, amount={self.amount}]"
     
 class PackScraped(object):
     
-    def __init__(self, product_scraped=None, amount=None, price=None, weight=None, image=None, url=None):
+    def __init__(self, product_scraped=None, name=None, pack_ean=None, amount=None, price=None, weight=None, component_weight=None, image=None, url=None, offer_price=None, category=None):
         
         if product_scraped is not None and type(product_scraped) is not ProductScraped and not isinstance(product_scraped, int):
             raise ValueError(_("Pack product_scraped cannot be None and must be a ProductScraped object or int"))
         
         self.product_scraped = product_scraped
+        self.name = name
+        self.pack_ean = pack_ean
         self.amount = amount
         self.price = price
+        self.offer_price = offer_price
         self.weight = weight
+        self.component_weight = component_weight
         self.image = image
         self.url = url
+        self.category = category
         
     def __str__(self):
-        return f"PackScraped[product_scraped: {self.product_scraped}, amount: {self.amount}, price: {self.price}, weight: {self.weight}, image: {self.image}, url: {self.url}]"
+        return f"PackScraped[product_scraped: {self.product_scraped}, name: {self.name}, amount: {self.amount}, price: {self.price}, offer_price: {self.offer_price}, weight: {self.weight}, component_weight: {self.component_weight}, image: {self.image}, url: {self.url}]"

@@ -88,8 +88,10 @@ String getProductById = """
         priceSet{
           id
           price
+          offerPrice
           amount
           weight
+          image
           url
           supermarket{
             name

@@ -8,6 +8,7 @@ from scraper.utils.SimilarityCalculator import SimilarityCalculator
 from data.similarities_threshold import THRESHOLDS, NAME_SIMILARITY_THRESHOLD
 from scraper.utils.ScraperSQLiteAPI import ScraperSQLiteAPI
 from scraper.utils.ClassificatorSQLiteAPI import ClassificatorSQLiteAPI
+from unidecode import unidecode
 
 DISTANCE_UNITS = ["km", "m", "dm", "cm", "mm"]
 VOLUME_UNITS = ["kl", "l", "dl", "cl", "ml"]
@@ -61,8 +62,9 @@ UNIT_TRANSLATIONS = {
 
 
 class MatchingUtil(object):
-    def __init__(self, sqlite_products):
+    def __init__(self, sqlite_products, sqlite_packs):
         self.sqlite_products = sqlite_products
+        self.sqlite_packs = sqlite_packs
         self.classificator_api = ClassificatorSQLiteAPI()
         self.similarity = SimilarityCalculator()
         self.packs_scraped = []
@@ -78,18 +80,20 @@ class MatchingUtil(object):
         self._save_supermarkets()
         print("Phase 1: Parsing sqlite result to products objects...")
         self._parse_sqlite_products(self.sqlite_products)
-        print("Phase 2: Performing brands matching...")
+        print("Phase 2: Parsing sqlite result to packs objects...")
+        self._parse_sqlite_packs(self.sqlite_packs)
+        print("Phase 3: Performing brands matching...")
         self._brands_matching()
-        print("Phase 3: Performing packs matching...")
-        self._packs_matching()
-        print("Phase 4: Performing categories matching...")
-        self._categories_matching()
-        print("Phase 5: Performing weight unification...")
+        print("Phase 4: Performing weight unification...")
         self._weight_unification()
-        print("Phase 6: Performing products matching...")
+        print("Phase 5: Performing packs matching...")
+        self._packs_matching()
+        print("Phase 6: Performing categories matching...")
+        self._categories_matching()
+        print("Phase 7: Performing products matching...")
         self._non_semanthic_products_matching()
         #self._products_matching()
-        print("Phase 7: Translating and injecting into postgres...")
+        print("Phase 8: Translating and injecting into postgres...")
         self._build_products()
         print("Done!")
         
@@ -112,20 +116,18 @@ class MatchingUtil(object):
         self._stores_possible_matches()
         print("Done!")
         
-        
-        
     # ------------------------------- PRIVATE FUNCTIONS -------------------------------
     
     # ---------------------------- PHASE 0 ----------------------------
     
     def _save_supermarkets(self):
         
-        API = ScraperSQLiteAPI()
+        API = ScraperSQLiteAPI("scrapers_api.db")
         
         supermarkets = API.get_supermarkets(condition="supermarkets.country = countries.id")
         
         for supermarket in supermarkets:
-            pg_supermarket, _ = Supermarket.objects.get_or_create(name=supermarket[1], zipcode=supermarket[2], main_url=supermarket[3], country=Country.objects.get(code=supermarket[8]), logo="supermarkets/logos/default.png", banner="supermarkets/banners/default.png")
+            pg_supermarket, _ = Supermarket.objects.get_or_create(name=supermarket[1], zipcode=supermarket[2], main_url=supermarket[3], country=Country.objects.get(code=supermarket[8]), logo=f"supermarkets/logos/logo-{supermarket[1].lower()}.png", banner=f"supermarkets/banners/banner-{supermarket[1].lower()}.png")
             self.supermarkets.append(pg_supermarket)
             self.supermarkets_mapping[supermarket[0]] = pg_supermarket.pk
             
@@ -137,29 +139,49 @@ class MatchingUtil(object):
         self.products_scraped =  [ProductScraped(
                                             pseudo_id = int(product[0]),
                                             name=str(product[1]),
-                                            price=float(product[2]),
-                                            unit_price=str(product[3]) if product[3] else None,
-                                            weight=str(product[4]) if product[4] else None,
-                                            brand=str(product[5]) if product[5] else None,
-                                            amount=int(product[6]) if product[6] else None,
-                                            image=str(product[7]),
-                                            offer_price=float(product[8]) if product[8] else None,
-                                            is_vegetarian=bool(product[9]),
-                                            is_gluten_free=bool(product[10]),
-                                            is_freezed=bool(product[11]),
-                                            is_from_country=bool(product[12]),
-                                            is_eco=bool(product[13]),
-                                            is_without_sugar=bool(product[14]),
-                                            is_without_lactose=bool(product[15]),
-                                            url=str(product[16]) if product[16] else None,
-                                            is_pack=bool(product[17]),
-                                            category=str(product[18]),
-                                            supermarket=Supermarket.objects.get(pk=self.supermarkets_mapping[int(product[19])]),
+                                            ean=str(product[2]),
+                                            price=float(product[3]),
+                                            unit_price=str(product[4]) if product[4] else None,
+                                            weight=str(product[5]) if product[5] else None,
+                                            brand=str(product[6]) if product[6] else None,
+                                            amount=int(product[7]) if product[7] else None,
+                                            image=str(product[8]),
+                                            offer_price=float(product[9]) if product[9] else None,
+                                            is_vegetarian=bool(product[10]),
+                                            is_gluten_free=bool(product[11]),
+                                            is_freezed=bool(product[12]),
+                                            is_from_country=bool(product[13]),
+                                            is_eco=bool(product[14]),
+                                            is_without_sugar=bool(product[15]),
+                                            is_without_lactose=bool(product[16]),
+                                            url=str(product[17]) if product[17] else None,
+                                            is_pack=bool(product[18]),
+                                            category=str(product[19]),
+                                            supermarket=Supermarket.objects.get(pk=self.supermarkets_mapping[int(product[20])]),
                                             )
                                         for product in sqlite_products
                                     ]
+    
     # -----------------------------------------------------------------
     # ---------------------------- PHASE 2 ----------------------------
+    
+    def _parse_sqlite_packs(self, sqlite_packs):
+        self.packs_scraped = [PackScraped(
+                                name=str(pack[1]),
+                                pack_ean=str(pack[2]),
+                                amount=int(pack[3]),
+                                price=float(pack[4]),
+                                offer_price=float(pack[5]) if pack[5] else None,
+                                weight=str(pack[6]) if pack[6] else None,
+                                image=str(pack[7]),
+                                url=str(pack[8]) if pack[8] else None,
+                                product_scraped= next((product for product in self.products_scraped if product.pseudo_id == int(pack[9])), None),
+                                )
+                              
+                                for pack in sqlite_packs
+                            ]
+    # -----------------------------------------------------------------
+    # ---------------------------- PHASE 3 ----------------------------
     
     def _brands_matching(self):
         """
@@ -171,25 +193,45 @@ class MatchingUtil(object):
         
         for product in self.products_scraped:
             if product.brand:
-                brand, new = Brand.objects.get_or_create(name__iexact=product.brand.lower().title(), defaults={'name': product.brand.lower().title()})
-                if new:
-                    with open('data/datasets/clean/brands.csv', 'a') as f:
-                        f.write(f"\n{product.brand.lower().title()}")
+                brands_list = Brand.objects.all().values_list('id', 'name')
+                brands_list = [(id, self._unidecode_brand(brand_name)) for id, brand_name in brands_list]
+                brand_id = self.get_brand_id(self._unidecode_brand(product.brand), brands_list)
+                
+                if brand_id:
+                    brand = Brand.objects.get(pk=brand_id)
+                else:
+                    brand, new = Brand.objects.get_or_create(name__iexact=self._parse_brand(product.brand), defaults={'name': self._parse_brand(product.brand)})
+                    if new:
+                        with open('data/datasets/clean/brands.csv', 'a') as f:
+                            f.write(f"\n{self._unidecode_brand(product.brand)}")
+                            
+                if self._parse_brand(product.brand) != brand.name and brand.name == self._unidecode_brand(product.brand):
+                    brand.name = self._parse_brand(product.brand)
+                    brand.save()
                 
                 product.brand = brand
-                
-                result.append(product)
-            
+                result.append(product) 
             else:
-                brands = get_brands_list("data/datasets/clean/brands.csv")
-                
+                brands = get_brands_list("data/datasets/clean/brands.csv")            
                 for brand in brands:
-                    
-                    if brand.lower() in product.name.lower():
-                        pg_brand, new = Brand.objects.get_or_create(name__iexact=brand, defaults={'name': brand})
-                        if new:
-                            with open('data/datasets/clean/brands.csv', 'a') as f:
-                                f.write(f"\n{pg_brand.name}")
+                    if brand.lower() in unidecode(product.name.lower()):
+                        brands_list = Brand.objects.all().values_list('id', 'name')
+                        brands_list = [(id, self._unidecode_brand(brand_name)) for id, brand_name in brands_list]
+                        brand_parsed = product.name[unidecode(product.name.lower()).index(brand.lower()):unidecode(product.name.lower()).index(brand.lower())+len(brand)]
+                        brand_id = self.get_brand_id(brand, brands_list)
+                        
+                        if brand_id:
+                            pg_brand = Brand.objects.get(pk=brand_id)
+                        else:
+                            pg_brand, new = Brand.objects.get_or_create(name__iexact=self._parse_brand(brand_parsed), defaults={'name': self._parse_brand(brand_parsed)})
+                            if new:
+                                with open('data/datasets/clean/brands.csv', 'a') as f:
+                                    f.write(f"\n{self._unidecode_brand(pg_brand.name)}")
+                                    
+                        if self._parse_brand(brand_parsed) != pg_brand.name and pg_brand.name == brand:
+                            pg_brand.name = self._parse_brand(brand_parsed)
+                            pg_brand.save()
+                              
                         product.brand = pg_brand
                         result.append(product)
                         break
@@ -197,99 +239,23 @@ class MatchingUtil(object):
                     result.append(product)
                     
         self.products_scraped = result
+
+    @staticmethod
+    def _parse_brand(brand):
+        return brand.lower().title().strip()
+
+    def _unidecode_brand(self, brand):
+        return unidecode(self._parse_brand(brand))
+    
+    @staticmethod
+    def get_brand_id(brand, brands_list):
+        for id, brand_name in brands_list:
+            if brand_name == brand:
+                return id
+        return None
      
     # -----------------------------------------------------------------
-    # ---------------------------- PHASE 3 ----------------------------
-    
-    def _packs_matching(self):
-        
-        products_to_return = []
-        packs_to_return = []
-        
-        for supermarket in self.supermarkets:
-            
-            products_to_add = []
-            packs_to_add = []
-            
-            supermarket_products = [product for product in self.products_scraped if product.supermarket.name == supermarket.name and product.supermarket.zipcode == supermarket.zipcode]
-            
-            for product in supermarket_products:
-                
-                if product.is_pack:
-                    product_of_pack_id = self._search_product_of_pack(product, supermarket_products)
-                    
-                    if product_of_pack_id is not None:
-                        
-                        try:
-                            pack_amount = int(product.weight.split(' ')[0])
-                        except Exception:
-                            pack_amount = 1
-                            
-                        try:
-                            pack_weight = product.weight.split("x")[1].replace(' ', '')
-                        except Exception:
-                            pack_weight = ''
-                        
-                        packs_to_add.append(PackScraped(product_scraped=product_of_pack_id, amount=pack_amount, price=product.price, weight=pack_weight, image=product.image, url=product.url))
-                        continue
-                
-                products_to_add.append(product)
-            
-            products_to_return += products_to_add
-            packs_to_return += packs_to_add
-
-        self.products_scraped = products_to_return
-        self.packs_scraped = packs_to_return
-        
-    def _search_product_of_pack(self, product, supermarket_products):
-        
-        match = None
-        highest_similarity = 0
-        for product_to_compare in supermarket_products:
-            
-            similarity_coef = self.similarity.compute_string_similarity(product_to_compare.name, product.name)
-            try:
-                if product_to_compare.category == product.category and product_to_compare.supermarket.name == product.supermarket.name and product_to_compare.is_pack == False and similarity_coef > highest_similarity: #and product_to_compare.weight in product.weight:
-                    highest_similarity = similarity_coef
-                    match = product_to_compare
-            except Exception:
-                print(f"Error en la comparación de productos con el producto {product} y el producto a comparar {product_to_compare}")
-
-        return match
-    
-    # -----------------------------------------------------------------
     # ---------------------------- PHASE 4 ----------------------------
-    
-    def _categories_matching(self):
-        try:
-            with open('data/categories.json', 'r', encoding='utf-8') as f:
-                categories_dict = json.load(f)
-        except FileNotFoundError:
-            raise FileNotFoundError("categories.json not found in: 'data/categories.json'")
-        
-        for product in self.products_scraped:
-            
-            category = self._parse_category(categories_dict[product.category.lower().strip().capitalize()])
-            
-            product.category = category
-            
-    @staticmethod
-    def _parse_category(category):
-        
-        result = None
-        category_splitted = category.split(">")
-        
-        for i in range(len(category_splitted)):
-            image = f'categories/images/{category_splitted[i].lower().strip().replace(" ", "_")}.png'
-            if i > 0:
-                result, _ = Category.objects.get_or_create(name=category_splitted[i].strip(), parent=Category.objects.get(name=category_splitted[i-1].strip()), image=image)
-            else:
-                result, _ = Category.objects.get_or_create(name=category_splitted[i].strip(), image=image)
-                
-        return result
-    
-    # -----------------------------------------------------------------
-    # ---------------------------- PHASE 5 ----------------------------
     
     def _weight_unification(self):
         
@@ -378,11 +344,113 @@ class MatchingUtil(object):
         product.unit_price = str(unit_price_value) + " €/" + weight_unit
         
         return product
+     
+    # -----------------------------------------------------------------
+    # ---------------------------- PHASE 5 ----------------------------
+    
+    def _packs_matching(self):
         
+        products_to_return = []
+        packs_to_return = []
         
+        for supermarket in self.supermarkets:
+            
+            products_to_add = []
+            packs_to_add = []
+            
+            supermarket_products = [product for product in self.products_scraped if product.supermarket.name == supermarket.name and product.supermarket.zipcode == supermarket.zipcode]
+            
+            for product in supermarket_products:
+                
+                if product.is_pack:
+                    product_of_pack_id = self._search_product_of_pack(product, supermarket_products)
+                    
+                    if product_of_pack_id is not None:
+                        
+                        try:
+                            pack_amount = int(product.amount)
+                        except Exception:
+                            pack_amount = 1
+
+                        try:
+                            pack_weight = product.weight
+                        except Exception:
+                            print(product)
+                            pack_weight = None
+                            raise Exception("Pack weight is None")
+                        
+                        packs_to_add.append(PackScraped(product_scraped=product_of_pack_id, amount=pack_amount, price=product.price, weight=pack_weight, image=product.image, url=product.url))
+                        continue
+                
+                products_to_add.append(product)
+            
+            products_to_return += products_to_add
+            packs_to_return += packs_to_add
+
+        self.products_scraped = products_to_return
+        self.packs_scraped = packs_to_return
+        
+    def _search_product_of_pack(self, product, supermarket_products):
+        
+        match = None
+        highest_similarity = 0
+        
+        # print(self.packs_scraped)
+        
+        for pack in self.packs_scraped:
+            
+            # print(product)
+            # print(pack)
+            
+            if product.ean == pack.pack_ean:
+                print(f"Pack matcheado mediante ean")
+                return pack.product_scraped
+        
+        for product_to_compare in supermarket_products:
+            
+            similarity_coef = self.similarity.compute_string_similarity(product_to_compare.name, product.name)
+            try:
+                if product_to_compare.category == product.category and product_to_compare.supermarket.name == product.supermarket.name and product_to_compare.is_pack == False and similarity_coef > highest_similarity: #and product_to_compare.weight in product.weight:
+                    highest_similarity = similarity_coef
+                    match = product_to_compare
+            except Exception:
+                print(f"Error en la comparación de productos con el producto {product} y el producto a comparar {product_to_compare}")
+
+        return match
     
     # -----------------------------------------------------------------
     # ---------------------------- PHASE 6 ----------------------------
+    
+    def _categories_matching(self):
+        try:
+            with open('data/categories.json', 'r', encoding='utf-8') as f:
+                categories_dict = json.load(f)
+        except FileNotFoundError:
+            raise FileNotFoundError("categories.json not found in: 'data/categories.json'")
+        
+        for product in self.products_scraped:
+            
+            category = self._parse_category(categories_dict[product.category.lower().strip().capitalize()])
+            
+            product.category = category
+            
+    @staticmethod
+    def _parse_category(category):
+        
+        result = None
+        category_splitted = category.split(">")
+        
+        for i in range(len(category_splitted)):
+            image = f'categories/images/{category_splitted[i].lower().strip().replace(" ", "_")}.png'
+            if i > 0:
+                result, _ = Category.objects.get_or_create(name=category_splitted[i].strip(), parent=Category.objects.get(name=category_splitted[i-1].strip()), image=image)
+            else:
+                result, _ = Category.objects.get_or_create(name=category_splitted[i].strip(), image=image)
+                
+        return result
+        
+    # -----------------------------------------------------------------
+    # ---------------------------- PHASE 7 ----------------------------
     
     def _non_semanthic_products_matching(self):
         
@@ -395,11 +463,9 @@ class MatchingUtil(object):
             similar_products = [product]
                 
             for product_to_compare in products:
-                if product.supermarket == product_to_compare.supermarket or self._get_root_category(product.category) != self._get_root_category(product_to_compare.category) or product.brand != product_to_compare.brand or not self._same_weight(product.weight, product_to_compare.weight):
-                    continue
-                
-                total_matches += 1
-                similar_products.append(product_to_compare)
+                if product_to_compare.ean == product.ean:
+                    similar_products.append(product_to_compare)
+                    total_matches += 1
             
             products = [product for product in products if product not in similar_products]
             result.append(similar_products)
@@ -613,30 +679,31 @@ class MatchingUtil(object):
         return [ProductScraped(
                                             pseudo_id = int(product[0]),
                                             name=str(product[1]),
-                                            price=float(product[2]),
-                                            unit_price=str(product[3]) if product[3] else None,
-                                            weight=str(product[4]) if product[4] else None,
-                                            brand=str(product[5]) if product[5] else None,
-                                            amount=int(product[6]) if product[6] else None,
-                                            image=str(product[7]),
-                                            offer_price=float(product[8]) if product[8] else None,
-                                            is_vegetarian=bool(product[9]),
-                                            is_gluten_free=bool(product[10]),
-                                            is_freezed=bool(product[11]),
-                                            is_from_country=bool(product[12]),
-                                            is_eco=bool(product[13]),
-                                            is_without_sugar=bool(product[14]),
-                                            is_without_lactose=bool(product[15]),
-                                            url=str(product[16]) if product[16] else None,
-                                            is_pack=bool(product[17]),
-                                            category=str(product[18]),
-                                            supermarket=str(product[19]),
+                                            ean=str(product[2]),
+                                            price=float(product[3]),
+                                            unit_price=str(product[4]) if product[4] else None,
+                                            weight=str(product[5]) if product[5] else None,
+                                            brand=str(product[6]) if product[6] else None,
+                                            amount=int(product[7]) if product[7] else None,
+                                            image=str(product[8]),
+                                            offer_price=float(product[9]) if product[9] else None,
+                                            is_vegetarian=bool(product[10]),
+                                            is_gluten_free=bool(product[11]),
+                                            is_freezed=bool(product[12]),
+                                            is_from_country=bool(product[13]),
+                                            is_eco=bool(product[14]),
+                                            is_without_sugar=bool(product[15]),
+                                            is_without_lactose=bool(product[16]),
+                                            url=str(product[17]) if product[17] else None,
+                                            is_pack=bool(product[18]),
+                                            category=str(product[19]),
+                                            supermarket=str(product[20]),
                                             )
                                         for product in sqlite_products
                                     ]
     
     # -----------------------------------------------------------------
-    # ---------------------------- PHASE 7 ----------------------------
+    # ---------------------------- PHASE 8 ----------------------------
     
     def _build_products(self):
         
@@ -646,7 +713,7 @@ class MatchingUtil(object):
                 product, _ = Product.objects.get_or_create(
                     name=key_product.name, 
                     brand=key_product.brand, 
-                    image=key_product.image if key_product.supermarket.name != "Carrefour" and key_product.image != NO_IMAGE_CARREFOUR else "products/images/nodisponible.png", 
+                    image=key_product.image, 
                     is_vegetarian=self._get_flag(match, "is_vegetarian"),
                     is_gluten_free=self._get_flag(match, "is_gluten_free"),
                     is_eco=self._get_flag(match, "is_eco"),
@@ -663,20 +730,24 @@ class MatchingUtil(object):
                         
                         pack_price, _ = Price.objects.get_or_create(
                             price = pack.price,
+                            offer_price = pack.offer_price,
                             weight = pack.weight,
                             amount = pack.amount,
                             url = pack.url,
                             supermarket = pack.product_scraped.supermarket,
-                            product = product
+                            product = product,
+                            image = pack.image
                         )
                     
                     other_product_price, _ = Price.objects.get_or_create(
-                        price = other_product.offer_price if other_product.offer_price is not None else other_product.price,
+                        price = other_product.price,
+                        offer_price = other_product.offer_price,
                         weight = other_product.weight,
                         amount = 1 if other_product.offer_price else None,
                         url = other_product.url,
                         supermarket = other_product.supermarket,
-                        product = product
+                        product = product,
+                        image = None
                     )
                     
             except Exception as e:

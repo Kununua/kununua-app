@@ -82,7 +82,7 @@ class PriceRow extends StatelessWidget {
                       width: 150,
                       height: 100,
                       child: Image(
-                        image: price['supermarket']['logo'],
+                        image: (price['amount'] == null || price['amount'] == 1) ? price['supermarket']['logo'] : price['image'],
                         fit: BoxFit.contain,
                       )),
                   Padding(
