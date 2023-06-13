@@ -136,10 +136,10 @@ class ScraperSQLiteAPI(SQLiteAPI):
         new_categories_dict = {}
         
         for category in sorted(categories_to_translate):
-            if category not in categories_dict:
+            if category.lower().capitalize() not in categories_dict:
                 new_categories_dict[category.lower().capitalize()] = ''
             else:
-                new_categories_dict[category] = categories_dict[category]
+                new_categories_dict[category.lower().capitalize()] = categories_dict[category.lower().capitalize()]
                 
         os.remove('data/categories.json')
         

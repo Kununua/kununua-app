@@ -32,7 +32,7 @@ def download_pictures(products):
         if "products" not in product.image.url:
             
             url = product.image
-            file_name = normalize(product.name.replace(' ', '_').replace(",", "_").replace("/", "")) + '.jpg'
+            file_name = normalize(product.name.replace(' ', '_').replace(",", "_").replace("/", "")) + normalize(product.price_set.first().weight.replace(' ', '_').replace(",", "_").replace("/", "")) + '.jpg'
     
             if picture_in_media(file_name):
                 product.image = "products/images/%s" % (file_name)
@@ -62,7 +62,7 @@ def download_pack_pictures(packs):
         if "products" not in pack.image.url:
             
             url = pack.image
-            file_name = normalize(pack.product.name.replace(' ', '_').replace(",", "_").replace("/", "")) + f"-pack-{pack.amount}.jpg"
+            file_name = normalize(pack.product.name.replace(' ', '_').replace(",", "_").replace("/", "")) + normalize(pack.weight.replace(' ', '_').replace(",", "_").replace("/", "")) + f"-pack-{pack.amount}.jpg"
     
             if picture_in_media(file_name):
                 pack.image = "products/images/%s" % (file_name)
