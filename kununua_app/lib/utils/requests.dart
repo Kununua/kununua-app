@@ -287,6 +287,7 @@ String getProductsInCart = """
           id
           price
           amount
+          image
           product{
             id
             name
@@ -367,6 +368,8 @@ String getLists = """
         productPrice{
           id
           price
+          image
+          amount
           supermarket{
             name
             country{
