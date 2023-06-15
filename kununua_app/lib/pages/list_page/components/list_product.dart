@@ -101,14 +101,25 @@ class _ListProductState extends State<ListProduct> {
                   closedElevation: 0,
                   clipBehavior: Clip.none,
                   closedBuilder: (context, openDetails) {
-                    return Image(
-                      image: widget.product['product']['image'],
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                      color: Colors.black.withOpacity(_isCrossed ? 0.5 : 0),
-                      colorBlendMode: BlendMode.darken,
-                    );
+                    if (widget.product['amount'] != null &&
+                        widget.product['amount'] > 1) {
+                      return ClipRect(
+                          child: Banner(
+                              message: "PACK",
+                              location: BannerLocation.topStart,
+                              color: Colors.indigo,
+                              child: Image(
+                                  image: widget.product['image'],
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover)));
+                    } else {
+                      return Image(
+                          image: widget.product['product']['image'],
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover);
+                    }
                   },
                   openBuilder: (context, action) {
                     return ProductDetails(

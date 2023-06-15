@@ -98,7 +98,7 @@ class _CartProductState extends State<CartProduct> {
                             location: BannerLocation.topStart,
                             color: Colors.indigo,
                             child: Image(
-                                image: widget.product['product']['image'],
+                                image: widget.product['image'],
                                 width: 100,
                                 height: 100,
                                 fit: BoxFit.cover)));

@@ -14,6 +14,15 @@ class ProfilePage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        Container(
+          margin: const EdgeInsets.only(bottom: 20),
+          child: Text("¡Hola! ${globals.prefs!.getString('firstName')!}",
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: kPrimaryColor)),
+        ),
         Button(
           text: "Cerrar sesión",
           color: Colors.red,
