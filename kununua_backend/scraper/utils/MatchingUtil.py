@@ -260,6 +260,8 @@ class MatchingUtil(object):
     def _weight_unification(self):
         
         for product in self.products_scraped:
+            if product.weight:
+                product.weight = product.weight.lower()
             if not product.weight and product.unit_price or product.supermarket.name == "Carrefour":
                 product = self._unify_weight(product)
             elif product.weight and not product.unit_price:
@@ -287,7 +289,7 @@ class MatchingUtil(object):
             weight_value = str(weight_value)
         
         try:
-            weight_unit = UNIT_TRANSLATIONS[re.sub('[0-9]+', '', weight_unit.lower()).strip()]
+            weight_unit = UNIT_TRANSLATIONS[re.sub('\d+|\.', '', weight_unit.lower()).strip()]
         
             if weight_value.startswith("0."):
                 
@@ -320,7 +322,7 @@ class MatchingUtil(object):
         price = product.price
         weight = product.weight
         try:
-            weight_unit = UNIT_TRANSLATIONS[re.sub('[0-9]+', '', weight.lower()).strip()]
+            weight_unit = UNIT_TRANSLATIONS[re.sub('\d+|\.', '', weight.lower()).strip()]
         except KeyError:
             product.unit_price = f"{price} €/ud"
             product.weight = "1ud"
