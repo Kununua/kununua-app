@@ -3,7 +3,8 @@ from pulp import LpProblem, LpMinimize, LpVariable, lpSum, PULP_CBC_CMD
 from products.models import Price, Product, Supermarket
 from django.db.models import Min, Count, F, Case, When, Value, DecimalField
 import numpy as np
-from scipy.optimize import minimize
+from amplpy import AMPL, add_to_path
+from django.db.models.functions import Coalesce
 
 def repeated_locked_products(locked_products):
             
@@ -67,7 +68,7 @@ def improve_cart(items_in_cart, max_supermarkets, allowed_supermarkets=None, not
     # Get the Price objects that optimice the cart.
     # If allowed_supermarkets is given, the query is forced to find the min price only on those supermarkets
     # This first variable, product_multipliers, is used to multiply the price of each product by the quantity that exists on the cart.
-    product_multipliers = product_multipliers = Case(
+    product_multipliers = Case(
         *[When(product__pk=pk, then=Value(multiplier, output_field=DecimalField())) for pk, multiplier in products_to_optimice.items()]
     )
     
@@ -92,7 +93,7 @@ def improve_cart(items_in_cart, max_supermarkets, allowed_supermarkets=None, not
         if product['product'] in optimiced_ids:
             continue
         
-        options = Price.objects.filter(product__pk=product['product'], price=product['min_price']/products_to_optimice[product['product']])
+        options = Price.objects.filter(product__pk=product['product'], price=(product['min_price'])/products_to_optimice[product['product']])
 
         for option in options:
             
@@ -246,6 +247,131 @@ def improve_cart_optimization(items_in_cart):
     cart_optimization_problem.solve(PULP_CBC_CMD(msg=False))
     
     return lp_variables
+        
+def improve_super_cart(items_in_cart, max_supermarkets):
+    
+    UNEXISTING_COST_PENALIZATION = 1000000
+    UNEXISTING_AMOUNT_PENALIZATION = 0.0000001
+    
+    products_to_optimice_ids = [p['product'] for p in Price.objects.filter(pk__in=items_in_cart.keys()).values('product').distinct()]
+    items_to_upgrade_ids = [id for id in items_in_cart.keys() if not items_in_cart[id]["is_locked"]]
+    items_to_not_upgrade_ids = set(items_in_cart)-set(items_to_upgrade_ids)
+    possible_prices = Price.objects.filter(product__in=products_to_optimice_ids).values('product').annotate(dcount=Count('supermarket'))
+    
+    if items_to_not_upgrade_ids:
+    
+        locked_products = Price.objects.filter(pk__in=items_to_not_upgrade_ids)
+        
+        if repeated_locked_products(locked_products):
+            raise ValueError('The cart contains repeated products')
+        
+    grouped_prices = {}
+    
+    for price in possible_prices:
+        grouped_prices[price['product']] = Price.objects.filter(product=price['product']).values('pk', 'supermarket', 'price', 'amount')
+        
+    products_to_optimice = {}
+    
+    for item_id in items_in_cart:
+    
+        item_product = Product.objects.get(price__pk=item_id)
+        
+        products_to_optimice[item_product.pk] = items_in_cart[item_id]["quantity"]
+    
+    i_dimension = grouped_prices.keys()
+    j_dimension = Supermarket.objects.all().values_list('pk', flat=True)
+    k_dimension = range(max(len(lst) for lst in grouped_prices.values())-1) # Asigning the number of the biggest list in grouped_prices 
+    
+    add_to_path(r"/Users/alejandro/.pyenv/versions/kununua/lib/python3.8/site-packages/ampl_module_base/bin")
+    ampl = AMPL()
+    ampl.eval(r"""
+        set PRODUCTS;
+        set SUPERMARKETS;
+        set PRICES;
+
+        param cost {PRODUCTS, SUPERMARKETS, PRICES} > 0;
+        param quantity {PRODUCTS} > 0;
+        param quantity_aported {PRODUCTS, SUPERMARKETS, PRICES} > 0;
+        param locked {PRODUCTS, SUPERMARKETS, PRICES} binary;
+        param max_supermarkets >= 0;
+
+        var x {PRODUCTS, SUPERMARKETS, PRICES} binary;
+        var y {SUPERMARKETS} binary;
+
+        minimize Total_Cost:  sum {i in PRODUCTS, j in SUPERMARKETS, k in PRICES} (cost[i,j,k] * quantity[i] * y[j] * x[i,j,k])/quantity_aported[i,j,k];
+        
+        s.t. one_price_per_product {i in PRODUCTS}:
+            sum{j in SUPERMARKETS, k in PRICES} x[i,j,k] == 1;
+            
+        s.t. one_price_per_product_asd {i in PRODUCTS, j in SUPERMARKETS}:
+            sum{k in PRICES} x[i,j,k] <= y[j];
+            
+        s.t. not_pass_max_supermarkets:
+            sum{j in SUPERMARKETS} y[j] <= max_supermarkets;
+        
+        s.t. at_least_one_supermarket:
+            sum{j in SUPERMARKETS} y[j] >= 1;
+    """)
+    
+    ampl.set["PRODUCTS"] = list(i_dimension)
+    ampl.set["SUPERMARKETS"] = list(j_dimension)
+    ampl.set["PRICES"] = list(k_dimension)
+    
+    cost = {}
+    quantity = {}
+    quantity_aported = {}
+    locked = {}
+    
+    for i in i_dimension:
+        for j in j_dimension:
+            for k in k_dimension:
+                
+                try:
+                
+                    price_object = list(filter(lambda x: x['supermarket'] == j, grouped_prices[i]))[k]
+                    
+                    cost[i,j,k] = float(price_object['price'])
+                    
+                    if (price_object['amount'] is None or price_object['amount'] is None == 1):
+                        quantity_aported[(i,j,k)] = 1
+                    else:
+                        quantity_aported[(i,j,k)] = price_object['amount']
+                    
+                    if price_object['pk'] in items_to_not_upgrade_ids:
+                        locked[(i,j,k)] = 1
+                    
+                except IndexError:
+                    
+                    cost[(i,j,k)] = UNEXISTING_COST_PENALIZATION
+                    quantity_aported[(i,j,k)] = UNEXISTING_AMOUNT_PENALIZATION
+                    locked[(i,j,k)] = 0
+                    
+                
+        
+        quantity[i] = products_to_optimice[i]
+        
+    ampl.param["cost"] = cost
+    ampl.param["quantity"] = quantity
+    ampl.param["quantity_aported"] = quantity_aported
+    ampl.param["locked"] = locked
+    ampl.param["max_supermarkets"] = max_supermarkets
+    
+    ampl.option["solver"] = "cplex"
+    
+    ampl.solve()
+    
+    totalcost = ampl.get_objective("Total_Cost")
+    variables_x = ampl.get_variable("x")
+    variables_y = ampl.get_variable("y")
+    print("Total Cost = ", totalcost.get().value())
+    print("---------------------------")
+    print("VARIABLES X")
+    for variable in variables_x:
+        print(str(variable[0]) + ":" + str(variable[1].value()))
+    print("---------------------------")
+    print("VARIABLES Y")
+    for variable in variables_y:
+        print(str(variable[0]) + ":" + str(variable[1].value()))
         
 def translate_cart_improvement_result(users_cart, result):
     
