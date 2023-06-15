@@ -188,7 +188,7 @@ def map_product_to_model(product, category):
             amount = None
         
         image = product["image_path"]
-        product_url = supermarket.main_url[:-1] + str(product["url"])
+        product_url = supermarket.main_url + str(product["url"])
 
         return ProductScraped(name=name, ean=ean, price=price, brand=brand, offer_price=offer_price, unit_price=unit_price, image=image, is_pack=is_pack, amount=amount, url=product_url, supermarket=supermarket, category=category)
     except Exception as e:
