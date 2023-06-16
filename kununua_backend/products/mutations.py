@@ -2,7 +2,7 @@ import graphene, jwt
 from django.utils.translation import gettext_lazy as _
 from .models import Price, Product, ProductEntry, Cart, Rating, Supermarket, List, KununuaUser
 from .types import ProductType, ListType, ProductEntryType, RatingType
-from products.utils.cart_improvements_functions import improve_cart, improve_cart_optimization, translate_cart_improvement_result, translate_cart_optimization_improvement_result
+from products.utils.cart_improvements_functions import improve_super_cart, translate_cart_super_optimization_result
 
 class AddImageToProductMutation(graphene.Mutation):
 
@@ -151,12 +151,9 @@ class UpgradeCartMutation(graphene.Mutation):
         upgrading_dict[item.product_price.id]['quantity'] = item.quantity
         upgrading_dict[item.product_price.id]['is_locked'] = item.locked
       
-    if max_supermarkets and max_supermarkets < Supermarket.objects.all().count() and max_supermarkets > 0:
-      improved_cart_prices = improve_cart(upgrading_dict, max_supermarkets)
-      translate_cart_improvement_result(user_cart_items, improved_cart_prices)
-    else:
-      improved_cart_prices = improve_cart_optimization(upgrading_dict)
-      translate_cart_optimization_improvement_result(user_cart_items, improved_cart_prices)
+    
+    improved_cart_prices = improve_super_cart(upgrading_dict, max_supermarkets)
+    translate_cart_super_optimization_result(user_cart_items, improved_cart_prices)
     
     return UpgradeCartMutation(entry=ProductEntry.objects.filter(cart=Cart.objects.get(user__username=user['username']), is_list_product=False))
 

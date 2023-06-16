@@ -7,8 +7,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         
-        cesta_prueba_1 = {91: {"quantity": 1, "is_locked": False}, 153: {"quantity": 1, "is_locked": False}, 494: {"quantity": 6, "is_locked": False}}
-        cesta_prueba_2 = {91: {"quantity": 1, "is_locked": False}, 153: {"quantity": 1, "is_locked": False}, 494: {"quantity": 1, "is_locked": True}}
+        cesta_prueba_1 = {91: {"quantity": 1, "is_locked": False}, 153: {"quantity": 2, "is_locked": False}, 14565: {"quantity": 36, "is_locked": False}}
+        cesta_prueba_2 = {91: {"quantity": 1, "is_locked": False}, 153: {"quantity": 1, "is_locked": False}, 14565: {"quantity": 1, "is_locked": True}}
         
         # PRUEBA 1
         
@@ -28,8 +28,22 @@ class Command(BaseCommand):
         timer_optimizacion.stop()
         timer_super_cart.start()
         result3 = improve_super_cart(cesta_prueba_1, 1)
+
+        total_cost = result3.get_objective("Total_Cost")
+        variables_x = result3.get_variable("x")
+        variables_y = result3.get_variable("y")
+
+        print("Total Cost = ", total_cost.get().value())
+        print("---------------------------")
+        print("VARIABLES X")
+        for variable in variables_x:
+            print(str(variable[0]) + ":" + str(variable[1].value()))
+        print("---------------------------")
+        print("VARIABLES Y")
+        for variable in variables_y:
+            print(str(variable[0]) + ":" + str(variable[1].value()))
+
         timer_super_cart.stop()
-        
 
         print("----------------------------- PRUEBA 1 -----------------------------")
         
@@ -54,6 +68,21 @@ class Command(BaseCommand):
         timer_optimizacion.stop()
         timer_super_cart.start()
         result3 = improve_super_cart(cesta_prueba_2, 2)
+
+        total_cost = result3.get_objective("Total_Cost")
+        variables_x = result3.get_variable("x")
+        variables_y = result3.get_variable("y")
+
+        print("Total Cost = ", total_cost.get().value())
+        print("---------------------------")
+        print("VARIABLES X")
+        for variable in variables_x:
+            print(str(variable[0]) + ":" + str(variable[1].value()))
+        print("---------------------------")
+        print("VARIABLES Y")
+        for variable in variables_y:
+            print(str(variable[0]) + ":" + str(variable[1].value()))
+
         timer_super_cart.stop()
         
         print("----------------------------- PRUEBA 2 -----------------------------")
