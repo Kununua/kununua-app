@@ -1,4 +1,4 @@
-import itertools
+import itertools, math
 from pulp import LpProblem, LpMinimize, LpVariable, lpSum, PULP_CBC_CMD
 from products.models import Price, Product, Supermarket
 from django.db.models import Min, Count, F, Case, When, Value, DecimalField
@@ -282,7 +282,7 @@ def improve_super_cart(items_in_cart, max_supermarkets):
     j_dimension = Supermarket.objects.all().values_list('pk', flat=True)
     k_dimension = range(max(len(lst) for lst in grouped_prices.values())-1) # Asigning the number of the biggest list in grouped_prices 
     
-    add_to_path(r"/Users/alejandro/.pyenv/versions/kununua/lib/python3.8/site-packages/ampl_module_base/bin")
+    add_to_path(r"/Users/alex/.pyenv/versions/kununua/lib/python3.8/site-packages/ampl_module_base/bin")
     ampl = AMPL()
     ampl.eval(r"""
         set PRODUCTS;
@@ -303,8 +303,11 @@ def improve_super_cart(items_in_cart, max_supermarkets):
         s.t. one_price_per_product {i in PRODUCTS}:
             sum{j in SUPERMARKETS, k in PRICES} x[i,j,k] == 1;
             
-        s.t. one_price_per_product_asd {i in PRODUCTS, j in SUPERMARKETS}:
+        s.t. only_products_from_selected_supermarkets {i in PRODUCTS, j in SUPERMARKETS}:
             sum{k in PRICES} x[i,j,k] <= y[j];
+
+        s.t. use_locked_product {i in PRODUCTS, j in SUPERMARKETS, k in PRICES}:
+            locked[i,j,k] <= x[i,j,k];
             
         s.t. not_pass_max_supermarkets:
             sum{j in SUPERMARKETS} y[j] <= max_supermarkets;
@@ -339,6 +342,8 @@ def improve_super_cart(items_in_cart, max_supermarkets):
                     
                     if price_object['pk'] in items_to_not_upgrade_ids:
                         locked[(i,j,k)] = 1
+                    else:
+                        locked[(i,j,k)] = 0
                     
                 except IndexError:
                     
@@ -349,7 +354,7 @@ def improve_super_cart(items_in_cart, max_supermarkets):
                 
         
         quantity[i] = products_to_optimice[i]
-        
+
     ampl.param["cost"] = cost
     ampl.param["quantity"] = quantity
     ampl.param["quantity_aported"] = quantity_aported
@@ -359,19 +364,8 @@ def improve_super_cart(items_in_cart, max_supermarkets):
     ampl.option["solver"] = "cplex"
     
     ampl.solve()
-    
-    totalcost = ampl.get_objective("Total_Cost")
-    variables_x = ampl.get_variable("x")
-    variables_y = ampl.get_variable("y")
-    print("Total Cost = ", totalcost.get().value())
-    print("---------------------------")
-    print("VARIABLES X")
-    for variable in variables_x:
-        print(str(variable[0]) + ":" + str(variable[1].value()))
-    print("---------------------------")
-    print("VARIABLES Y")
-    for variable in variables_y:
-        print(str(variable[0]) + ":" + str(variable[1].value()))
+
+    return ampl
         
 def translate_cart_improvement_result(users_cart, result):
     
@@ -413,4 +407,42 @@ def translate_cart_optimization_improvement_result(users_cart, result):
         for price in casted_prices:
             if entry.product_price.product.name == price.product.name:
                 entry.product_price = price
+                entry.save()
+
+def translate_cart_super_optimization_result(users_cart, ampl_object):
+
+    if not isinstance(ampl_object, AMPL):
+        raise ValueError("The object passed is not an AMPL object")
+
+    variables_x = ampl_object.get_variable("x")
+
+    casted_prices = []
+
+    for variable in variables_x:
+        if variable[1].value() == 1:
+            variable_identifier = variable[0]
+            related_price = Price.objects.filter(product__pk=variable_identifier[0], supermarket__pk=variable_identifier[1])
+            
+            if len(related_price) > 1:
+                correct_price_position = 0
+                matched_variables = [v for v in variables_x if f'{v[0][0]}_{v[0][1]}' == f'{variable_identifier[0]}_{variable_identifier[1]}']
+
+                for i in range(len(matched_variables)):
+                    if matched_variables[i][0] == variable[0]:
+                        print("Found")
+                        correct_price_position = i
+                        break
+
+                related_price = related_price[correct_price_position]
+            else:
+                related_price = related_price[0]
+                
+            casted_prices.append(related_price)
+
+    for entry in users_cart:
+        for price in casted_prices:
+            if entry.product_price.product.name == price.product.name:
+                entry.product_price = price
+                if price.amount != None and price.amount > 1:
+                    entry.quantity = math.ceil(entry.quantity / price.amount)
                 entry.save()
