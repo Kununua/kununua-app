@@ -156,5 +156,5 @@ class Command(BaseCommand):
 
         df = pd.DataFrame(pandas_df_results, columns=["Nº Prueba", "Normal (ms)", "Optimizacion (ms)", "Super Optimizacion (ms)"])
 
-        #df.to_excel("/Users/alex/Desktop/resultados.xlsx", index=False)
-        df.to_csv("/Users/alex/Desktop/resultadosCSV.csv", index=False)
+        df.to_excel("./resultados.xlsx", index=False)
+        #df.to_csv("./resultadosCSV.csv", index=False)
