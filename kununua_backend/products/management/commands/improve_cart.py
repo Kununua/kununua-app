@@ -62,10 +62,13 @@ class Command(BaseCommand):
         timer_normal.start()
         result1 = improve_cart(cesta_prueba_2, 2)    
         timer_normal.stop()
+        print(result1)
         timer_optimizacion.start()
         # Sintaxis de variables: x_{id_producto}_{id_supermercado}_{id_variable}
         result2 = improve_cart_optimization(cesta_prueba_2)
         timer_optimizacion.stop()
+        for variable in result2:
+            print(variable, result2[variable].varValue)
         timer_super_cart.start()
         result3 = improve_super_cart(cesta_prueba_2, 2)
 

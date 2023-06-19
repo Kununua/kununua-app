@@ -303,8 +303,11 @@ def improve_super_cart(items_in_cart, max_supermarkets):
         s.t. one_price_per_product {i in PRODUCTS}:
             sum{j in SUPERMARKETS, k in PRICES} x[i,j,k] == 1;
             
-        s.t. one_price_per_product_asd {i in PRODUCTS, j in SUPERMARKETS}:
+        s.t. only_products_from_selected_supermarkets {i in PRODUCTS, j in SUPERMARKETS}:
             sum{k in PRICES} x[i,j,k] <= y[j];
+
+        s.t. use_locked_product {i in PRODUCTS, j in SUPERMARKETS, k in PRICES}:
+            locked[i,j,k] <= x[i,j,k];
             
         s.t. not_pass_max_supermarkets:
             sum{j in SUPERMARKETS} y[j] <= max_supermarkets;
@@ -339,6 +342,8 @@ def improve_super_cart(items_in_cart, max_supermarkets):
                     
                     if price_object['pk'] in items_to_not_upgrade_ids:
                         locked[(i,j,k)] = 1
+                    else:
+                        locked[(i,j,k)] = 0
                     
                 except IndexError:
                     
@@ -349,8 +354,6 @@ def improve_super_cart(items_in_cart, max_supermarkets):
                 
         
         quantity[i] = products_to_optimice[i]
-        
-    print(cost)
 
     ampl.param["cost"] = cost
     ampl.param["quantity"] = quantity
