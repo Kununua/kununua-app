@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:kununua_app/pages/cart_page/cart_page.dart';
 import 'package:kununua_app/screens/main_screen.dart';
 import 'package:kununua_app/utils/constants.dart';
 import 'package:kununua_app/utils/extensions/string_extension.dart';
@@ -326,9 +327,7 @@ class _AddToCartState extends State<AddToCart> {
                     if (added) {
                       Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(
-                          builder: (context) => const MainScreen(
-                            firstScreen: Screens.cart,
-                          ),
+                          builder: (context) => const CartPage()
                         ),
                         (route) => false,
                       );

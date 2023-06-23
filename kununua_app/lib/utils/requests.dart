@@ -242,6 +242,7 @@ String getProductsByName = """
           amount
           weight
           supermarket {
+            name
             country {
               currency {
                 code
@@ -263,6 +264,7 @@ String getProductsFiltered = """
         priceSet {
           price
           supermarket {
+            name
             country {
               currency {
                 code
@@ -348,6 +350,16 @@ String upgradeCart = """
             }
           }
         }
+      }
+    }
+
+""";
+
+String cleanCart = """
+
+    mutation cleanCart(\$userToken: String!){
+      cleanCart(userToken: \$userToken){
+        result
       }
     }
 

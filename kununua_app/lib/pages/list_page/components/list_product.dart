@@ -66,8 +66,6 @@ class _ListProductState extends State<ListProduct> {
       final crossResult =
           await globals.client.value.mutate(crossProductOptions);
 
-      debugPrint(crossResult.toString());
-
       if (crossResult.hasException) {
         setState(() {
           _isCrossed = !_isCrossed;

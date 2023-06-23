@@ -48,19 +48,20 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     _originalFilters = widget.isSupermarket
         ? {
             'Supermercados': [widget.supermarketName],
-      'Precio': [],
-      'Puntuación': [],
-      'Categorías': [],
-      'Marcas': []
+            'Precio': [],
+            'Puntuación': [],
+            'Categorías': [],
+            'Marcas': [],
+            'Nombres': [],
           }
         : {
-      'Supermercados': [],
-      'Precio': [],
-      'Puntuación': [],
-      'Categorías': [widget.category],
-      'Marcas': [],
-      'Nombres': [],
-    };
+            'Supermercados': [],
+            'Precio': [],
+            'Puntuación': [],
+            'Categorías': [widget.category],
+            'Marcas': [],
+            'Nombres': [],
+          };
     _productsList = [];
     _hasBeenUpdated = false;
     super.initState();
@@ -72,9 +73,9 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
     controller.addListener(() {
       if (controller.position.maxScrollExtent == controller.offset) {
         pageNumber = pageNumber + 1;
-        if(widget.isSupermarket){
+        if (widget.isSupermarket) {
           _getProductsBySupermarket(pageNumber, limit);
-        }else{
+        } else {
           _getProductsByCategory(pageNumber, limit);
         }
       }
@@ -170,19 +171,17 @@ class _ProductGridScreenState extends State<ProductGridScreen> {
                                   widget.supermarketName)
                               .toList()[0] as Map<String, dynamic>
                           : product['priceSet'][0];
-
                       String productCurrency = priceToShow['supermarket']
-                                ['country']['currency']['symbol'] ??
-                            priceToShow['supermarket']['country']
-                                ['currency']['code'];
-
+                              ['country']['currency']['symbol'] ??
+                          priceToShow['supermarket']['country']['currency']
+                              ['code'];
                       return ProductGridCell(
                         id: int.parse(product['id']),
                         image: product['image'],
                         title: product['name'],
                         price: priceToShow['price'],
                         offerPrice: '',
-                        weight:  "${priceToShow['weight']}",
+                        weight: "${priceToShow['weight']}",
                         currency: productCurrency,
                       );
                     }).toList(),
