@@ -483,8 +483,6 @@ class MatchingUtil(object):
             if len(similar_products) > 1:
                 result.append(similar_products)
 
-        print(products_aux[:10])
-
         while products_aux:
             
             product = products_aux.pop(0)
