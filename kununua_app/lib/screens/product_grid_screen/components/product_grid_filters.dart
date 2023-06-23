@@ -89,7 +89,6 @@ class _ProductGridFiltersState extends State<ProductGridFilters> {
   }
 
   void filterSearchResults(String query, String key) {
-
     Map<String, List<String>> newDataFiltered = {};
 
     for (var key in _filters.keys) {
@@ -106,7 +105,7 @@ class _ProductGridFiltersState extends State<ProductGridFilters> {
       setState(() {
         dataFiltered = _filters;
       });
-      
+
       return;
     }
 
@@ -138,12 +137,12 @@ class _ProductGridFiltersState extends State<ProductGridFilters> {
       }
     }
 
-    if(!_dataLoaded){
+    if (!_dataLoaded) {
       setState(() {
-      _filters = filtersMap;
-      dataFiltered = filtersMap;
-      _dataLoaded = true;
-    }); 
+        _filters = filtersMap;
+        dataFiltered = filtersMap;
+        _dataLoaded = true;
+      });
     }
 
     return filtersMap;
@@ -442,33 +441,37 @@ class _ProductGridFiltersState extends State<ProductGridFilters> {
                                           updateRangedSettedFilters)
                                   : widget.originalFilters[key]!.isEmpty
                                       ? snapshot.data[key]!.length > 30
-                                          ? dataFiltered[key]!.length > 30 
-                                          ? ListView.builder(
-                                              itemCount: widget.settedFilters[key]!.length,
-                                              shrinkWrap: true,
-                                              itemBuilder: (BuildContext context, int index) {
-                                                return ProductGridFiltersElement(
-                                                    name: widget.settedFilters[key]![index],
-                                                    isChecked: true,
-                                                    keyName: key,
-                                                    updateNamedSettedFilters: updateNamedSettedFilters
-                                                    );
-                                              })
-                                              :
-                                          ListView.builder(
-                                              itemCount: dataFiltered[key]!.length,
-                                              shrinkWrap: true,
-                                              itemBuilder: (BuildContext context, int index) {
-                                                return ProductGridFiltersElement(
-                                                    name: dataFiltered[key]![
-                                                        index],
-                                                    isChecked: widget
+                                          ? dataFiltered[key]!.length > 30
+                                              ? ListView.builder(
+                                                  itemCount: widget.settedFilters[key]!.length,
+                                                  shrinkWrap: true,
+                                                  itemBuilder: (BuildContext context, int index) {
+                                                    return ProductGridFiltersElement(
+                                                        name: widget
+                                                                .settedFilters[
+                                                            key]![index],
+                                                        isChecked: true,
+                                                        keyName: key,
+                                                        updateNamedSettedFilters:
+                                                            updateNamedSettedFilters);
+                                                  })
+                                              : ListView.builder(
+                                                  itemCount: dataFiltered[key]!.length,
+                                                  shrinkWrap: true,
+                                                  itemBuilder: (BuildContext context, int index) {
+                                                    return ProductGridFiltersElement(
+                                                        name: dataFiltered[
+                                                            key]![index],
+                                                        isChecked: widget
                                                             .settedFilters[key]!
-                                                            .contains(dataFiltered[key]![index]),
-                                                    keyName: key,
-                                                    updateNamedSettedFilters:
-                                                        updateNamedSettedFilters);
-                                              })
+                                                            .contains(
+                                                                dataFiltered[
+                                                                        key]![
+                                                                    index]),
+                                                        keyName: key,
+                                                        updateNamedSettedFilters:
+                                                            updateNamedSettedFilters);
+                                                  })
                                           : ListView.builder(
                                               itemCount: snapshot.data[key]!.length,
                                               shrinkWrap: true,
