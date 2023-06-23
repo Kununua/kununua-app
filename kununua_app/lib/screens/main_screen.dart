@@ -29,14 +29,13 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
   late Screens _currentScreen;
-  late int? maxSupermarkets;
-  String listName = '';
   Map<String, List<String>> _searchFiltersSetted = {};
   Map<String, List<String>> _searchOriginalFilters = {};
   List<dynamic> _searchProductsList = [];
   int _searchTotalResults = 0;
+
+
   void updateSearchProductsList(
       List<dynamic> productsList, Map<String, List<String>> filtersSetted) {
     setState(() {
@@ -62,7 +61,6 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     _currentScreen = widget.firstScreen;
     super.initState();
-    maxSupermarkets = null;
     _searchFiltersSetted = {
       'Supermercados': [],
       'Precio': [],
@@ -92,12 +90,12 @@ class _MainScreenState extends State<MainScreen> {
             productsList: _searchProductsList,
             updateFilters: updateSearchFilters,
             totalResults: _searchTotalResults);
-      case Screens.cart:
-        return const CartPage();
       case Screens.list:
         return const ListPage();
       case Screens.profile:
         return const ProfilePage();
+      case Screens.cart:
+        return Container();
     }
   }
 
@@ -109,12 +107,12 @@ class _MainScreenState extends State<MainScreen> {
         return const MainPageAppBar(text: kStatsText);
       case Screens.search:
         return MainPageAppBar(text: kSearchText, actions: [Container()]);
-      case Screens.cart:
-        return const MainPageAppBar(text: kCartText);
       case Screens.list:
         return const MainPageAppBar(text: kListText);
       case Screens.profile:
         return const MainPageAppBar(text: kProfileText);
+      case Screens.cart:
+        return null;
     }
   }
 
@@ -122,34 +120,6 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _currentScreen = screen;
     });
-  }
-
-  Future<bool> _upgradeCartRequest(int? maxSupermarkets) async {
-    final MutationOptions upgradeCartOptions = MutationOptions(
-      document: gql(upgradeCart),
-      variables: <String, dynamic>{
-        'userToken': globals.prefs!.getString('jwtToken'),
-        'maxSupermarkets': maxSupermarkets,
-      },
-    );
-
-    final entryResult = await globals.client.value.mutate(upgradeCartOptions);
-
-    return !entryResult.hasException;
-  }
-
-  Future<bool> _createList(String listName) async {
-    final MutationOptions createListMutation = MutationOptions(
-      document: gql(createList),
-      variables: <String, dynamic>{
-        'userToken': globals.prefs!.getString('jwtToken'),
-        'listName': listName,
-      },
-    );
-
-    final entryResult = await globals.client.value.mutate(createListMutation);
-
-    return !entryResult.hasException;
   }
 
   @override
@@ -164,218 +134,18 @@ class _MainScreenState extends State<MainScreen> {
             )
           : null,
       body: _loadScreen(_currentScreen),
-      floatingActionButton: _currentScreen != Screens.cart
-          ? FloatingActionButton(
+      floatingActionButton: 
+          FloatingActionButton(
               onPressed: () {
-                currentScreenCallback(Screens.cart);
+                Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const CartPage()));
               },
               backgroundColor: kPrimaryColor,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(50)),
               child: const Icon(Icons.shopping_cart),
-            )
-          : ExpandableFab(
-              backgroundColor: kPrimaryColor,
-              icon: const Icon(Icons.format_list_bulleted_outlined),
-              borderRadius: BorderRadius.circular(15),
-              children: [
-                ActionButton(
-                  onPressed: () {
-                    showModalBottomSheet<void>(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25.0),
-                      ),
-                      context: context,
-                      builder: (BuildContext context) {
-                        return Container(
-                          height: 400,
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25.0),
-                            color: Colors.white,
-                          ),
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.max,
-                              children: <Widget>[
-                                Container(
-                                  margin: const EdgeInsets.only(bottom: 20.0),
-                                  child: const Text(
-                                      "Por favor, introduzca el número máximo de supermercados entre los que optimizar, en caso de quiera limitar el número de supermercados a los que ir",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                      )),
-                                ),
-                                TextFormField(
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Por favor ingrese un valor';
-                                    } else if (int.tryParse(value) == null) {
-                                      return 'Por favor ingrese un valor numérico';
-                                    } else if (int.tryParse(value)! < 1) {
-                                      return 'Por favor ingrese un valor mayor o igual a 1';
-                                    }
-                                    return null;
-                                  },
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    labelText: "Número máximo de supermercados",
-                                    labelStyle: TextStyle(
-                                        overflow: TextOverflow.ellipsis),
-                                  ),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      maxSupermarkets = int.tryParse(value);
-                                    });
-                                  },
-                                ),
-                                Button(
-                                  text: "OPTIMIZAR",
-                                  paddingContainer:
-                                      const EdgeInsets.fromLTRB(75, 25, 75, 10),
-                                  action: () {
-                                    _upgradeCartRequest(maxSupermarkets)
-                                        .then((edited) {
-                                      Navigator.of(context).pop();
-                                      if (edited) {
-                                        Navigator.of(context).pushReplacement(
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const MainScreen(
-                                                    firstScreen: Screens.cart,
-                                                  )),
-                                        );
-                                      } else {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                                "El carrito ya es lo más optimo posible"),
-                                          ),
-                                        );
-                                      }
-                                    });
-                                  },
-                                  color: kPrimaryColor,
-                                )
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  backgroundColor: kPrimaryColor,
-                  icon: const Icon(Icons.insights_rounded),
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                ActionButton(
-                  onPressed: () {
-                    showModalBottomSheet<void>(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25.0),
-                      ),
-                      context: context,
-                      builder: (BuildContext context) {
-                        return Container(
-                          height: 400,
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25.0),
-                            color: Colors.white,
-                          ),
-                          child: Center(
-                            child: Form(
-                              key: _formkey,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  Container(
-                                    margin: const EdgeInsets.only(bottom: 20.0),
-                                    child: const Text(
-                                        "Por favor, escriba un nombre para la lista que está a punto de crear",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                        )),
-                                  ),
-                                  TextFormField(
-                                    validator: (value) {
-                                      if (value == null ||
-                                          value.isEmpty ||
-                                          value.trim().isEmpty) {
-                                        return 'Por favor ingrese un valor';
-                                      } else if (value.length > 64) {
-                                        return 'El nombre debe tener menos de 64 caracteres';
-                                      }
-                                      return null;
-                                    },
-                                    keyboardType: TextInputType.name,
-                                    decoration: const InputDecoration(
-                                      labelText: "Nombre de la lista",
-                                      labelStyle: TextStyle(
-                                          overflow: TextOverflow.ellipsis),
-                                    ),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        listName = value;
-                                      });
-                                    },
-                                    maxLines: 1,
-                                    minLines: 1,
-                                    autocorrect: true,
-                                  ),
-                                  Button(
-                                    paddingContainer: const EdgeInsets.fromLTRB(
-                                        75, 25, 75, 10),
-                                    text: "CREAR LISTA",
-                                    action: () {
-                                      final isvalid =
-                                          _formkey.currentState!.validate();
-                                      if (isvalid) {
-                                        _formkey.currentState!.save();
-                                        _createList(listName).then((edited) {
-                                          Navigator.of(context).pop();
-                                          if (edited) {
-                                            Navigator.of(context)
-                                                .pushReplacement(
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      const MainScreen(
-                                                        firstScreen:
-                                                            Screens.list,
-                                                      )),
-                                            );
-                                          } else {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                    "Ha ocurrido un error. Vuelva a intentarlo más tarde."),
-                                              ),
-                                            );
-                                          }
-                                        });
-                                      }
-                                    },
-                                    color: kPrimaryColor,
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  icon: const Icon(Icons.add),
-                  backgroundColor: kPrimaryColor,
-                  borderRadius: BorderRadius.circular(50),
-                ),
-              ],
             ),
       bottomNavigationBar: KununuaNavBar(
         screen: _currentScreen,
