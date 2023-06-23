@@ -32,6 +32,7 @@ class _SearchPageState extends State<SearchPage> {
   Timer? _debounce;
   int pageNumber = 1;
   int limit = 10;
+  bool _finish = false;
   final controller = ScrollController();
 
   @override
@@ -89,6 +90,16 @@ class _SearchPageState extends State<SearchPage> {
     setState(() {
       _query = queryParam;
     });
+
+    if (productsList.isEmpty) {
+      setState(() {
+        _finish = true;
+      });
+    } else {
+      setState(() {
+        _finish = false;
+      });
+    }
   }
 
   void _onSearchChanged(String query) {
@@ -112,8 +123,7 @@ class _SearchPageState extends State<SearchPage> {
           'Marcas': [],
           'Nombres': [],
         };
-        widget.updateFilters(
-            _productsList, _filtersSetted, _filtersOriginal);
+        widget.updateFilters(_productsList, _filtersSetted, _filtersOriginal);
         return;
       }
 
@@ -186,28 +196,52 @@ class _SearchPageState extends State<SearchPage> {
                   mainAxisSpacing: 10,
                   crossAxisCount: 2,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                      ...widget.productsList.map<Widget>((product) {
-                        Map<String, dynamic> priceToShow =
-                            product['priceSet'][0];
+                  children: !_finish
+                      ? [
+                          ...widget.productsList.map<Widget>((product) {
+                            Map<String, dynamic> priceToShow =
+                                product['priceSet'][0];
 
-                        String productCurrency = priceToShow['supermarket']
-                                ['country']['currency']['symbol'] ??
-                            priceToShow['supermarket']['country']['currency']
-                                ['code'];
+                            String productCurrency = priceToShow['supermarket']
+                                    ['country']['currency']['symbol'] ??
+                                priceToShow['supermarket']['country']
+                                    ['currency']['code'];
 
-                        return ProductGridCell(
-                          id: int.parse(product['id']),
-                          image: product['image'],
-                          title: product['name'],
-                          price: priceToShow['price'],
-                          offerPrice: '',
-                          weight: "${priceToShow['weight']}",
-                          currency: productCurrency,
-                        );
-                      }).toList(),
-                      ...[const CircularProgressIndicator()]
-                    ])
+                            return ProductGridCell(
+                              id: int.parse(product['id']),
+                              image: product['image'],
+                              title: product['name'],
+                              price: priceToShow['price'],
+                              offerPrice: '',
+                              weight: "${priceToShow['weight']}",
+                              currency: productCurrency,
+                            );
+                          }).toList(),
+                          ...[
+                            const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          ]
+                        ]
+                      : widget.productsList.map<Widget>((product) {
+                          Map<String, dynamic> priceToShow =
+                              product['priceSet'][0];
+
+                          String productCurrency = priceToShow['supermarket']
+                                  ['country']['currency']['symbol'] ??
+                              priceToShow['supermarket']['country']['currency']
+                                  ['code'];
+
+                          return ProductGridCell(
+                            id: int.parse(product['id']),
+                            image: product['image'],
+                            title: product['name'],
+                            price: priceToShow['price'],
+                            offerPrice: '',
+                            weight: "${priceToShow['weight']}",
+                            currency: productCurrency,
+                          );
+                        }).toList())
               : (inputController.text.isNotEmpty)
                   ? const Center(
                       child: CircularProgressIndicator(),
