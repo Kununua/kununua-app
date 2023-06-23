@@ -138,9 +138,11 @@ class _MainScreenState extends State<MainScreen> {
           FloatingActionButton(
               onPressed: () {
                 Navigator.of(context).pushReplacement(
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const CartPage()));
+                  PageRouteBuilder(
+                      pageBuilder: (context, animation1, animation2) => const CartPage(),
+                      transitionDuration: Duration.zero,
+                      reverseTransitionDuration: Duration.zero,
+                  ),);
               },
               backgroundColor: kPrimaryColor,
               shape: RoundedRectangleBorder(

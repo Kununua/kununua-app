@@ -84,7 +84,6 @@ class _CartPageState extends State<CartPage> {
   }
 
   Future<void> _cleanUsersCart(BuildContext context) async {
-
     final MutationOptions cleanCartOptions = MutationOptions(
       document: gql(cleanCart),
       variables: <String, dynamic>{
@@ -111,10 +110,9 @@ class _CartPageState extends State<CartPage> {
       _products = [];
     });
 
-    if(context.mounted){
+    if (context.mounted) {
       Navigator.of(context).pop();
     }
-
   }
 
   Future<void> _getProductsInCart() async {
@@ -473,10 +471,13 @@ class _CartPageState extends State<CartPage> {
       bottomNavigationBar: KununuaNavBar(
         screen: Screens.cart,
         currentScreenCallback: (Screens screen) {
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (context) => MainScreen(
-                    firstScreen: screen,
-                  )));
+          Navigator.of(context).pushReplacement(PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => MainScreen(
+              firstScreen: screen,
+            ),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ));
         },
       ),
     );
