@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kununua_app/app_bars/main_page_app_bar.dart';
 import 'package:kununua_app/pages/cart_page/components/cart_product.dart';
@@ -10,6 +11,7 @@ import 'package:kununua_app/utils/requests.dart';
 import 'package:kununua_app/widgets/button.dart';
 import 'package:kununua_app/widgets/expandable_floating_action_button/components/action_button.dart';
 import 'package:kununua_app/widgets/expandable_floating_action_button/expandable_floating_action_button.dart';
+import 'package:kununua_app/widgets/kununua_confirm.dart';
 import 'package:kununua_app/widgets/kununua_nav_bar/kununua_nav_bar.dart';
 
 class CartPage extends StatefulWidget {
@@ -41,10 +43,82 @@ class _CartPageState extends State<CartPage> {
     });
   }
 
-  Future<void> _getProductsInCart() async {
-    
-    if (!_dataFetched) {
+  Future<bool> confirmCartCleaning(BuildContext context) async {
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
+      return await showCupertinoDialog<bool>(
+            context: context,
+            builder: (context) => KununuaConfirm(
+              onConfirm: () {
+                _cleanUsersCart(context);
+              },
+              onCancel: () {
+                Navigator.of(context).pop();
+              },
+              text:
+                  "¿Estás seguro de que quieres limpiar tu cesta? Esta acción es irreversible.",
+              title: "Limpiar cesta",
+              confirmationText: 'Eliminar',
+              isDestructive: true,
+            ),
+          ) ??
+          false;
+    } else {
+      return await showDialog<bool>(
+            context: context,
+            builder: (context) => KununuaConfirm(
+              onConfirm: () {
+                _cleanUsersCart(context);
+              },
+              onCancel: () {
+                Navigator.of(context).pop(false);
+              },
+              text:
+                  "¿Estás seguro de que quieres limpiar tu cesta? Esta acción es irreversible.",
+              title: "Limpiar cesta",
+              confirmationText: 'Eliminar',
+              isDestructive: true,
+            ),
+          ) ??
+          false;
+    }
+  }
 
+  Future<void> _cleanUsersCart(BuildContext context) async {
+
+    final MutationOptions cleanCartOptions = MutationOptions(
+      document: gql(cleanCart),
+      variables: <String, dynamic>{
+        'userToken': globals.prefs!.getString('jwtToken'),
+      },
+    );
+
+    final cartResult = await globals.client.value.mutate(cleanCartOptions);
+
+    if (cartResult.hasException) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                "No ha sido posible limpiar tu cesta. Por favor, inténtalo de nuevo."),
+          ),
+        );
+      }
+    }
+
+    setState(() {
+      _cartTotal = 0;
+      _dataFetched = true;
+      _products = [];
+    });
+
+    if(context.mounted){
+      Navigator.of(context).pop();
+    }
+
+  }
+
+  Future<void> _getProductsInCart() async {
+    if (!_dataFetched) {
       List<Map<String, dynamic>> products = [];
 
       final MutationOptions getProductsInCartOptions = MutationOptions(
@@ -367,6 +441,13 @@ class _CartPageState extends State<CartPage> {
             icon: const Icon(Icons.add),
             backgroundColor: kPrimaryColor,
             borderRadius: BorderRadius.circular(50),
+          ),
+          ActionButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () {
+              confirmCartCleaning(context);
+            },
+            backgroundColor: kPrimaryColor,
           ),
         ],
       ),

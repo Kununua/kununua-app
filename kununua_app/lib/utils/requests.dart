@@ -353,6 +353,16 @@ String upgradeCart = """
 
 """;
 
+String cleanCart = """
+
+    mutation cleanCart(\$userToken: String!){
+      cleanCart(userToken: \$userToken){
+        result
+      }
+    }
+
+""";
+
 /* ------------------------------- LISTS ------------------------------- */
 
 String getLists = """
