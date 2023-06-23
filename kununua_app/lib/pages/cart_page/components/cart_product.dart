@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:kununua_app/pages/cart_page/cart_page.dart';
 import 'package:kununua_app/screens/main_screen.dart';
 import 'package:kununua_app/screens/product_details_screen/product_details_screen.dart';
 import 'package:kununua_app/utils/constants.dart';
@@ -16,12 +17,14 @@ class CartProduct extends StatefulWidget {
   final bool isLocked;
   final bool topBorder;
   final bool bottomBorder;
+  final Function addPriceToTotal;
 
   const CartProduct({
     super.key,
     required this.product,
     required this.quantity,
     required this.isLocked,
+    required this.addPriceToTotal,
     this.topBorder = false,
     this.bottomBorder = false,
   });
@@ -173,10 +176,7 @@ class _CartProductState extends State<CartProduct> {
                                                 .pushReplacement(
                                               MaterialPageRoute(
                                                   builder: (context) =>
-                                                      const MainScreen(
-                                                        firstScreen:
-                                                            Screens.cart,
-                                                      )),
+                                                      const CartPage())
                                             );
                                           } else {
                                             ScaffoldMessenger.of(context)
@@ -201,6 +201,7 @@ class _CartProductState extends State<CartProduct> {
                                           null)
                                       .then((edited) {
                                     if (edited) {
+                                      widget.addPriceToTotal(-double.parse(widget.product["price"]));
                                       setState(() {
                                         if (amount > 1) {
                                           amount--;
@@ -235,6 +236,7 @@ class _CartProductState extends State<CartProduct> {
                                         null)
                                     .then((edited) {
                                   if (edited) {
+                                    widget.addPriceToTotal(double.parse(widget.product["price"]));
                                     setState(() {
                                       amount++;
                                     });

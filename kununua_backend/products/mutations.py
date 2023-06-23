@@ -157,6 +157,30 @@ class UpgradeCartMutation(graphene.Mutation):
     
     return UpgradeCartMutation(entry=ProductEntry.objects.filter(cart=Cart.objects.get(user__username=user['username']), is_list_product=False))
 
+class CleanCartMutation(graphene.Mutation):
+  
+  class Input:
+    user_token = graphene.String(required=True)
+    
+  result = graphene.Boolean()
+  
+  @staticmethod
+  def mutate(root, info, **kwargs):
+    
+    user_token = kwargs.get('user_token', '')
+    
+    try:
+      user = jwt.decode(user_token, 'my_secret', algorithms=['HS256'])
+    except jwt.InvalidSignatureError:
+      raise ValueError(_("Invalid token"))
+    
+    user_cart_items = ProductEntry.objects.filter(cart=Cart.objects.get(user__username=user['username']), is_list_product=False)
+
+    for item in user_cart_items:
+      item.delete()
+    
+    return CleanCartMutation(result=True)
+
 class CreateListMutation(graphene.Mutation):
   class Input:
     user_token = graphene.String(required=True)
@@ -310,6 +334,7 @@ class ProductsMutation(graphene.ObjectType):
   add_entry_to_cart = AddEntryToCartMutation.Field()
   edit_cart_entry = EditCartEntryMutation.Field()
   upgrade_cart = UpgradeCartMutation.Field()
+  clean_cart = CleanCartMutation.Field()
   create_list = CreateListMutation.Field()
   delete_list = DeleteListMutation.Field()
   add_product_rating_mutation = AddProductRatingMutation.Field()
