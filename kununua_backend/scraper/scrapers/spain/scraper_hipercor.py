@@ -20,49 +20,72 @@ def supermarket_in_db(supermarket, sqlite_api):
 				return True
 		return False
 
-def get_ean(product_id):
+def get_ean_and_image(product_id):
 	
 	ix = index.open_dir("data/index", schema=PRODUCT_SCHEMA)
 
 	with ix.searcher() as searcher:
 		result = searcher.search(QueryParser("id", schema=PRODUCT_SCHEMA).parse(product_id), limit=1)
 		try:
-			return result[0]['ean']
+			return (result[0]['ean'], result[0]['image'])
 		except:
-			return None
+			try:
+				return (result[0]['ean'], "products/images/default.png")
+			except:
+				return (None, "products/images/default.png")
 
 def extract_data(url, path, driver, selenium_utils):
 	driver.get(url)
 	selenium_utils.navigate_to(path)
+
+	category_selector = "body > div.top_menu-container._supermarket > div > nav > p > span"
+	category = selenium_utils.get_element_by_css_selector(category_selector).text.strip()
+
 	products = []
+	i = 1
 
 	while True:
+		print(f"Página 1: {i}")
 		page_source = driver.page_source
 		soup = BeautifulSoup(page_source, 'lxml')
 		common_parent = soup.select('.product_tile.dataholder')
 
 		for item in common_parent:
 			id = item.get('data-product-id').strip()
-			ean = get_ean(id)
 			name = item.select('div.product_tile-right_container > div.product_tile-description_holder > h3 > a')[0].get_text().strip()
-			name_link = item.select('div.product_tile-right_container > div.product_tile-description_holder > h3 > a')[0].get('href').strip()
+			print(name)
+			ean, image = get_ean_and_image(id)
+			name_link = "https://www.hipercor.es" + item.select('div.product_tile-right_container > div.product_tile-description_holder > h3 > a')[0].get('href').strip()
 			try:
 				price = item.select('div.product_tile-right_container > div.product_tile-price_holder > div > div > div.prices-price._current')[0].get_text().strip()
 				offer_price = None
 			except:
 				price = item.select('div.product_tile-right_container > div.product_tile-price_holder > div > div > div.prices-price._before')[0].get_text().strip()
 				offer_price = item.select('div.product_tile-right_container > div.product_tile-price_holder > div > div > div.prices-price._offer')[0].get_text().strip()
+				offer_price = offer_price.replace("€", "").replace(",", ".").strip()
+				try:
+					offer_price = float(offer_price.split(".")[0] + "." + offer_price.split(".")[1][:2])
+				except:
+					offer_price = float(offer_price)
+
+			price = price.replace("€", "").replace(",", ".").strip()
+			try:
+				price = float(price.split(".")[0] + "." + price.split(".")[1][:2])
+			except:
+				price = float(price)
 
 			try:
 				unit_price = item.select('div.product_tile-right_container > div.product_tile-price_holder > div > div > div.prices-price._pum')[0].get_text().strip()
 			except:
 				unit_price = None
 
-			products.append(f"ID: {id}, name: {name}, name_link: {name_link}, price: {price}, offer_price: {offer_price}, unit_price: {unit_price}")
+			products.append(ProductScraped(name=name, ean=ean, price=price, offer_price=offer_price , unit_price=unit_price, image=image, is_pack=("pack" in name.lower()), url=name_link, supermarket=supermarket, category=category))
 
 		# Finish pagination configuration in this section
 
 		try:
+			i += 1
+			print(f"Scraped products: {len(products)}")
 			ConfigurationTools.run_pagination_hipercor(selenium_utils)
 		except Exception:
 			print(f"Scraped products: {len(products)}")
@@ -73,7 +96,7 @@ def extract_data(url, path, driver, selenium_utils):
 
 def scraper(sqlite_api):
 	driver_options = webdriver.ChromeOptions()
-	driver_options.headless = False
+	driver_options.headless = True
 	driver_options.add_argument("start-maximized")
 	driver = uc.Chrome(options=driver_options)
 	selenium_utils = SeleniumUtils(timeout=10, driver=driver)
