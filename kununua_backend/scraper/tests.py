@@ -187,11 +187,11 @@ class GeneratorCarrefourStandardCase(TestCase):
         options.headless = False # Change to True if you want to run the scraper in headless mode
         self.driver = webdriver.Chrome(options=options)
         
-        tree_mercadona = self.generate_tree_for_carrefour()
+        tree_carrefour = self.generate_tree_for_carrefour()
         
         self.generator = ScraperGenerator(url="https://www.carrefour.es/", 
                                           country="Spain",
-                                          tree=tree_mercadona, 
+                                          tree=tree_carrefour, 
                                           C=[".product-card__price", ".product-card__price-per-unit", ".product-card__detail > h2 > a", ".product-card__image"], 
                                           driver=self.driver, 
                                           elem_details=None, 
@@ -231,5 +231,43 @@ class GeneratorCarrefourStandardCase(TestCase):
             for j in range(list(number_of_subcategories.values())[i-3]):
                 grandchild = Node(selector="#app > div > nav > div.plp-food-view__nav > div.horizontal-navigation.plp-food-view__nav-level--first > div.carousel.horizontal-navigation__second-level--parent > div.carousel__elements > div > div:nth-child(%d)" % (j+1), parent=child)
                 result_tree.add(grandchild)
+
+        return result_tree
+    
+class GeneratorHipercorStandardCase(TestCase):
+    def setUp(self):
+        options = webdriver.ChromeOptions()
+        options.headless = False # Change to True if you want to run the scraper in headless mode
+        self.driver = webdriver.Chrome(options=options)
+        
+        tree_hipercor = self.generate_tree_for_hipercor()
+        
+        self.generator = ScraperGenerator(url="https://www.hipercor.es/supermercado/", 
+                                          country="Spain",
+                                          tree=tree_hipercor, 
+                                          C=["div.product_tile-right_container > div.product_tile-description_holder > h3 > a", "div.product_tile-right_container > div.product_tile-price_holder > div > div > div.prices-price._current", "div.product_tile-right_container > div.product_tile-price_holder > div > div > div.prices-price._pum"], 
+                                          driver=self.driver, 
+                                          elem_details=None, 
+                                          num_pag=None,
+                                          common_parent_selector=".product_tile.dataholder")
+    
+    def tearDown(self):           
+        super().tearDown()
+        self.driver.quit()
+    
+    def test_generate_scraper_for_hipercor(self):
+        self.driver.get(self.generator.get_url())
+        self.generator.generate()
+        
+    def generate_tree_for_hipercor(self):
+        
+        result_tree = Tree()
+        
+        root = Node(selector=None, parent=None)
+        result_tree.add(root)
+        
+        for i in range(2, 13):
+            child = Node(selector="body > div.top_menu-container._supermarket > div > nav > a:nth-child(%d)" % (i), parent=root)
+            result_tree.add(child)
 
         return result_tree

@@ -44,4 +44,14 @@ class ConfigurationTools():
         selenium_utils.get_element_by_css_selector(".pagination__main").click()
         selenium_utils.get_element_by_css_selector("#app > div > main > div.plp-food-view__main > div.plp-food-view__container > div.plp-food-view__list > div.plp-food-view__results-list-container > div.plp-food-view__pagination > div > div.pagination__container > div.pagination__expandable-content > ul > li:nth-child(%d) > a" % (current_page + 1)).click()
         print("Page passed")
-        
+    
+    # -------------------------------- DIA -------------------------------- #
+
+    @staticmethod
+    def accept_cookies_hipercor(selenium_utils):
+        selenium_utils.get_element_by_css_selector("#cookies-agree-all").click()
+
+    @staticmethod
+    def run_pagination_hipercor(selenium_utils):
+        next_page_button = selenium_utils.get_element_by_css_selector("#pagination-next > a")
+        next_page_button.click()

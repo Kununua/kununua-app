@@ -149,3 +149,6 @@ GRAPHENE = {
 
 # Whoosh index path
 WHOOSH_INDEX = BASE_DIR / "data/index"
+
+# The AMPL instalation path that is being used by amplpy
+AMPL_PATH = r"/Users/alex/.pyenv/versions/kununua/lib/python3.8/site-packages/ampl_module_base/bin"
