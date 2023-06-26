@@ -146,3 +146,6 @@ GRAPHENE = {
         "graphql_jwt.middleware.JSONWebTokenMiddleware",
     ],
 }
+
+# Whoosh index path
+WHOOSH_INDEX = BASE_DIR / "data/index"

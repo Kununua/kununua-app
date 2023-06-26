@@ -129,7 +129,7 @@ class MatchingUtil(object):
         for supermarket in supermarkets:
             pg_supermarket, _ = Supermarket.objects.get_or_create(name=supermarket[1], zipcode=supermarket[2], main_url=supermarket[3], country=Country.objects.get(code=supermarket[8]), logo=f"supermarkets/logos/logo-{supermarket[1].lower()}.png", banner=f"supermarkets/banners/banner-{supermarket[1].lower()}.png")
             self.supermarkets.append(pg_supermarket)
-            self.supermarkets_mapping[supermarket[0]] = pg_supermarket.pk
+            self.supermarkets_mapping[supermarket[0]] = pg_supermarket
             
     # -----------------------------------------------------------------
     # ---------------------------- PHASE 1 ----------------------------
@@ -157,7 +157,7 @@ class MatchingUtil(object):
                                             url=str(product[17]) if product[17] else None,
                                             is_pack=bool(product[18]),
                                             category=str(product[19]),
-                                            supermarket=Supermarket.objects.get(pk=self.supermarkets_mapping[int(product[20])]),
+                                            supermarket=self.supermarkets_mapping[int(product[20])],
                                             )
                                         for product in sqlite_products
                                     ]
