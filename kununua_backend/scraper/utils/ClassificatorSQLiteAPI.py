@@ -105,9 +105,9 @@ class ClassificatorSQLiteAPI(SQLiteAPI):
             raise ValueError(_("Product1 and Product2 must be different"))
         
         if isinstance(product1, ProductScraped):
-            product1 = product1.name
+            product1 = f"{product1.name} {product1.brand.name}, {product1.weight}"
         if isinstance(product2, ProductScraped):
-            product2 = product2.name
+            product2 = f"{product2.name} {product2.brand.name}, {product2.weight}"
         
         if not isinstance(product1, str):
             raise TypeError(_("Product1 must be an str"))

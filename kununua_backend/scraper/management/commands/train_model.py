@@ -17,7 +17,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         
         #model_name = "bert-base-uncased"
-        model_name = "distilroberta-base"
+        model_name = "dccuchile/bert-base-spanish-wwm-uncased"
 
         classificator_api = ClassificatorSQLiteAPI()
         
