@@ -102,16 +102,18 @@ class MatchingUtil(object):
         self._save_supermarkets()
         print("Phase 1: Parsing sqlite result to products objects...")
         self._parse_sqlite_products(self.sqlite_products)
-        print("Phase 2: Performing brands matching...")
+        print("Phase 2: Parsing sqlite result to packs objects...")
+        self._parse_sqlite_packs(self.sqlite_packs)
+        print("Phase 3: Performing brands matching...")
         self._brands_matching()
-        print("Phase 3: Performing packs matching...")
-        self._packs_matching()
-        print("Phase 4: Performing categories matching...")
-        self._categories_matching()
-        print("Phase 5: Performing weight unification...")
+        print("Phase 4: Performing weight unification...")
         self._weight_unification()
-        print("Phase 6: Storing products in new db...")
-        self._stores_data(self.products_scraped)
+        print("Phase 5: Performing packs matching...")
+        self._packs_matching()
+        print("Phase 6: Performing categories matching...")
+        self._categories_matching()
+        # print("Phase 7: Storing products in new db...")
+        # self._stores_data(self.products_scraped)
         print("Phase 7: Storing possible matches in new db...")
         self._stores_possible_matches()
         print("Done!")
@@ -139,7 +141,7 @@ class MatchingUtil(object):
         self.products_scraped =  [ProductScraped(
                                             pseudo_id = int(product[0]),
                                             name=str(product[1]),
-                                            ean=str(product[2]),
+                                            ean=str(product[2]) if product[2] else None,
                                             price=float(product[3]),
                                             unit_price=str(product[4]) if product[4] else None,
                                             weight=str(product[5]) if product[5] else None,
@@ -168,7 +170,7 @@ class MatchingUtil(object):
     def _parse_sqlite_packs(self, sqlite_packs):
         self.packs_scraped = [PackScraped(
                                 name=str(pack[1]),
-                                pack_ean=str(pack[2]),
+                                pack_ean=str(pack[2]) if pack[2] else None,
                                 amount=int(pack[3]),
                                 price=float(pack[4]),
                                 offer_price=float(pack[5]) if pack[5] else None,
@@ -270,9 +272,12 @@ class MatchingUtil(object):
     def _unify_weight(self, product):
         
         price = float(product.price)
-        unit_price = product.unit_price
+        unit_price = product.unit_price.replace("(", "").replace(")", "")
         weight_unit = unit_price.split("/")[1].strip()
-        weight_unit_aux_value = re.sub('[a-z]+', '', weight_unit.lower())
+        try:
+            weight_unit_aux_value = re.findall(r'\d+', weight_unit.lower())[0]
+        except IndexError:
+            weight_unit_aux_value = ""
         round_to = 1 if "ud" not in weight_unit and "unidad" not in weight_unit else 0
         unit_price_value = float(unit_price.split("/")[0].replace(".", "").replace(",", ".").replace("€", "").strip())
         
@@ -656,22 +661,32 @@ class MatchingUtil(object):
         return category
     
     def _stores_possible_matches(self):
-        sqlite_products = self.classificator_api.get_products_scraped()
-        products = self._parse_classificator_sqlite_products(sqlite_products)
-        
+
+        products = self.products_scraped
         total_matches = 0
+        cleaned_products = []
+        saved_names = set()
+
+        for product in products:
+            if not (product.name, product.ean, product.supermarket) in saved_names:
+                cleaned_products.append(product)
+                saved_names.add((product.name, product.ean, product.supermarket))
         
-        while products:
+        while cleaned_products:
+            product = cleaned_products.pop(0)
+                
+            if product.ean is None:
+                continue
+
+            for product_to_compare in cleaned_products:
+                if product.ean is not None and product_to_compare.ean is not None and product_to_compare.ean == product.ean:
+                    total_matches += 1
+                    print(f"Posible matching {total_matches}")
+                    self.classificator_api.add_match(product, product_to_compare, "True")
+                else:
+                    if product.supermarket != product_to_compare.supermarket and product.category == product_to_compare.category and product.brand == product_to_compare.brand and self._same_weight(product.weight, product_to_compare.weight):
+                        self.classificator_api.add_match(product, product_to_compare, "False")
             
-            product = products.pop(0)
-            
-            for product_to_compare in products:
-                if product.supermarket == product_to_compare.supermarket or product.category != product_to_compare.category or product.brand != product_to_compare.brand or not self._same_weight(product.weight, product_to_compare.weight):
-                    continue
-                total_matches += 1
-                print(f"Posible matching {total_matches}")
-                self.classificator_api.add_match(product, product_to_compare, None)
-        
         print("Total matches: ", total_matches)
         
     def _stores_data(self, products):
