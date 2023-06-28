@@ -5,3 +5,5 @@
 # .vscode
 
 .vscode/
+
+**/pytorch_model.bin
