@@ -1,8 +1,8 @@
 from sentence_transformers import CrossEncoder
 import itertools
 
-model_names = ["scripts/output/bert-base-kununua-model",
-               "scripts/output/beto-base-kununua-model"]
+model_names = ["Alex-GF/bert-base-kununua-model",
+               "Alex-GF/beto-base-kununua-model"]
 
 sentences = ["Refresco Coca-Cola",
              "Refresco cola lata",
