@@ -21,6 +21,7 @@ class Command(BaseCommand):
         start = time.time()
         #scraper_mercadona_api.scraper(API, CACHE_API)
         #scraper_carrefour_api.scraper(API)
-        scraper_hipercor.scraper(API)
+        #scraper_hipercor.scraper(API)
+        scraper_el_jamon.scraper(API)
         end = time.time()
         print(f"Time: {end - start}")

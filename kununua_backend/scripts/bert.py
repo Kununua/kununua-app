@@ -1,19 +1,37 @@
-model_name = "../scripts/output/kununua-2023-06-28_08-29-25"
-
 from sentence_transformers import CrossEncoder
+import itertools
 
-model = CrossEncoder(model_name)
+model_names = ["Alex-GF/bert-base-kununua-model",
+               "Alex-GF/beto-base-kununua-model"]
 
-print("Modelo cargado.")
+sentences = ["Refresco Coca-Cola",
+             "Refresco cola lata",
+             "Lata de Coca-Cola",
+             "Botella de Coca-Cola",
+             "refresco naranja",
+             "Refresco Fanta limón"
+]
 
-scores1 = model.predict([('Comida para perros con atun, cebolla y arroz', 'Eureka')])
-scores2 = model.predict([('Comida para perros con atun, cebolla y arroz', 'Comida para gatos con atun, cebolla y arroz')])
-scores3 = model.predict([('Refresco naranja botella Fanta', 'Refresco Fanta Limón')])
-scores4 = model.predict([('Refresco Coca-Cola, 1.5L', 'Refresco Coca-Cola, 2L')])
-scores5 = model.predict([('Refresco Coca-Cola, 500ml', 'Refresco Coca-Cola, 2L')])
+for model_name in model_names:
+    
+    test_cases = itertools.combinations(sentences, 2)
+    
+    exp_name = model_name.split("/")[-1]
+    
+    print(f"----------------- {exp_name} ---------------")
+    
+    model = CrossEncoder(model_name)
+    
+    i = 1
 
-print("Similarities1: " + str(scores1))
-print("Similarities2: " + str(scores2))
-print("Similarities3: " + str(scores3))
-print("Similarities4: " + str(scores4))
-print("Similarities5: " + str(scores5))
+    print("Experimento\t\tSentence_1\t\tSentence_2\t\t\tScore\t\t\tAre_Similar")
+
+    for sentence in test_cases:
+        score = model.predict([sentence])
+        
+        three_points_sentence_0 = "..." if len(sentence[0])>15 else ""
+        three_points_sentence_1 = "..." if len(sentence[1])>15 else ""
+        
+        print(f"{i}\t\t{sentence[0][:15]}{three_points_sentence_0}\t\t{sentence[1][:15]}{three_points_sentence_1}\t\t{score[0]}\t\t{score[0] > 0.9}")
+        
+        i += 1

@@ -15,7 +15,7 @@ def _new_product(id, name, ean, image):
     writer.commit()
 
 def _get_products(offset):
-    products = requests.get(f"{API_URL}&offset={offset*100}").json()["Results"]
+    products = requests.get(f"{API_URL}&offset={offset*API_LIMIT}").json()["Results"]
     _create_products(products)
 
 def _create_products(products):
