@@ -7,3 +7,4 @@
 .vscode/
 
 **/pytorch_model.bin
+**/output/
