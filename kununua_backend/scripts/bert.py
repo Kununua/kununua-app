@@ -7,7 +7,6 @@ model_names = ["Alex-GF/bert-base-kununua-model",
 sentences = ["Refresco Coca-Cola",
              "Refresco cola lata",
              "Lata de Coca-Cola",
-             "Botella de Coca-Cola",
              "refresco naranja",
              "Refresco Fanta limón"
 ]
