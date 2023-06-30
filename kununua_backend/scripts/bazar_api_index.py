@@ -1,4 +1,3 @@
-from django.conf import settings
 from whoosh import fields, index
 from tqdm import tqdm
 import requests, math
@@ -33,8 +32,4 @@ def main():
         _get_products(i)
             
 if __name__ == "__main__":
-    #main()
-
-    ix = index.open_dir("../data/index", schema=PRODUCT_SCHEMA)
-
-    print(ix.reader().doc_count())
+    main()
