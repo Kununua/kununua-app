@@ -5,6 +5,7 @@ from django.db.models import Min, Count, F, Case, When, Value, DecimalField
 import numpy as np
 from amplpy import AMPL, add_to_path
 from django.db.models.functions import Coalesce
+from django.conf import settings
 
 def repeated_locked_products(locked_products):
             
@@ -282,7 +283,7 @@ def improve_super_cart(items_in_cart, max_supermarkets):
     j_dimension = Supermarket.objects.all().values_list('pk', flat=True)
     k_dimension = range(max(len(lst) for lst in grouped_prices.values())-1) # Asigning the number of the biggest list in grouped_prices 
     
-    add_to_path(r"/Users/alex/.pyenv/versions/kununua/lib/python3.8/site-packages/ampl_module_base/bin")
+    add_to_path(settings.AMPL_PATH)
     ampl = AMPL()
     ampl.eval(r"""
         set PRODUCTS;

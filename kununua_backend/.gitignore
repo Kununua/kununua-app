@@ -133,4 +133,6 @@ dmypy.json
 
 # Media files
 
-media/**
+media/products/**
+
+**/output/

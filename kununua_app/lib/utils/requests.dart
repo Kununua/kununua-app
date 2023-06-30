@@ -263,6 +263,8 @@ String getProductsFiltered = """
         image
         priceSet {
           price
+          amount
+          weight
           supermarket {
             name
             country {

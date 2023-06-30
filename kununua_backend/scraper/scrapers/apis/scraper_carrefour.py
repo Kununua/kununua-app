@@ -104,7 +104,6 @@ def supermarket_in_db(supermarket, sqlite_api):
 def get_products_from_category(category, category_parent):
 	
     request_url = f"https://www.carrefour.es/search-api/query/v1/search?query={category}&lang=es&catalog=food&rows=50000&start=0&origin=linked&f.op=OR&filter={CATEGORIES_IDS[category_parent]}"
-    print(request_url)
 
     headers = {
          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15",

@@ -16,8 +16,8 @@ class ClassificatorSQLiteAPI(SQLiteAPI):
         if not os.path.exists(dir_path):
             os.makedirs(dir_path, exist_ok=True)
         super().__init__(DB_PATH)
-        self.create_table(PRODUCT_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, price REAL NOT NULL, unit_price TEXT, weight TEXT, brand TEXT, amount INTEGER, image TEXT NOT NULL, offer_price REAL, is_vegetarian INTEGER NOT NULL, is_gluten_free INTEGER NOT NULL, is_freezed INTEGER NOT NULL, is_from_country INTEGER NOT NULL, is_eco INTEGER NOT NULL, is_without_sugar INTEGER NOT NULL, is_without_lactose INTEGER NOT NULL, url TEXT, is_pack INTEGER NOT NULL, category TEXT NOT NULL, supermarket TEXT NOT NULL")
-        self.create_table(MATCH_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, product1 INTEGER NOT NULL, product2 INTEGER NOT NULL, is_match INTEGER, FOREIGN KEY(product1) REFERENCES productsScraped(id), FOREIGN KEY(product2) REFERENCES productsScraped(id)")
+        self.create_table(PRODUCT_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, ean TEXT, price REAL NOT NULL, unit_price TEXT, weight TEXT, brand TEXT, amount INTEGER, image TEXT NOT NULL, offer_price REAL, is_vegetarian INTEGER NOT NULL, is_gluten_free INTEGER NOT NULL, is_freezed INTEGER NOT NULL, is_from_country INTEGER NOT NULL, is_eco INTEGER NOT NULL, is_without_sugar INTEGER NOT NULL, is_without_lactose INTEGER NOT NULL, url TEXT, is_pack INTEGER NOT NULL, category TEXT NOT NULL, supermarket TEXT NOT NULL")
+        self.create_table(MATCH_TABLE_NAME, "id INTEGER PRIMARY KEY AUTOINCREMENT, product1 TEXT NOT NULL, product2 TEXT NOT NULL, is_match INTEGER")
 
     def add_products_scraped(self, products):
         if not isinstance(products, list):
@@ -105,17 +105,17 @@ class ClassificatorSQLiteAPI(SQLiteAPI):
             raise ValueError(_("Product1 and Product2 must be different"))
         
         if isinstance(product1, ProductScraped):
-            product1 = product1.pseudo_id
+            product1 = f"{product1.name} {product1.brand.name}, {product1.weight}"
         if isinstance(product2, ProductScraped):
-            product2 = product2.pseudo_id
+            product2 = f"{product2.name} {product2.brand.name}, {product2.weight}"
         
-        if not isinstance(product1, int):
-            raise TypeError(_("Product1 must be an int"))
-        if not isinstance(product2, int):
-            raise TypeError(_("Product2 must be an int"))
+        if not isinstance(product1, str):
+            raise TypeError(_("Product1 must be an str"))
+        if not isinstance(product2, str):
+            raise TypeError(_("Product2 must be an str"))
         
         columns = "(product1, product2, is_match)"
-        return self.insert_data(MATCH_TABLE_NAME+columns, f"{product1}, {product2}, {self._parse_is_match(is_match)}")
+        return self.insert_data(MATCH_TABLE_NAME+columns, f"'{product1}', '{product2}', {self._parse_is_match(is_match)}")
 
     def update_match(self, product1_id, product2_id, is_match):
-        return self.update_data(MATCH_TABLE_NAME, f"is_match={self._parse_is_match(is_match)}", f"product1={product1_id} AND product2={product2_id}")
+        return self.update_data(MATCH_TABLE_NAME, f"is_match={self._parse_is_match(is_match)}", f"product1='{product1_id}' AND product2='{product2_id}'")
