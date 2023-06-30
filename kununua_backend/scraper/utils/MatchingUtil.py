@@ -320,7 +320,7 @@ class MatchingUtil(object):
             product.weight = weight
             
         except KeyError:
-            product.weight = weight_value + weight_unit
+            product.weight = str(round(float(weight_value), round_to)) + weight_unit
             
         return product
     
