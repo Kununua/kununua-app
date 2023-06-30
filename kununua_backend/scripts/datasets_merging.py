@@ -34,7 +34,7 @@ def merge_datasets(countries_currency, countries_iso, currencies):
             
         f.write("spanish_name;english_name;iso3;phone_code;currency_name;currency_code;currency_symbol\n")
         
-        for index, country in countries_iso.iterrows():
+        for _, country in countries_iso.iterrows():
             
             spanish_name = country['nombre'].strip()
             english_name = country['name'].strip()

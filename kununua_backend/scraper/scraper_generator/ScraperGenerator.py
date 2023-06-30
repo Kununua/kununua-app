@@ -33,7 +33,7 @@ class ScraperGenerator(object):
         
         # zipcode configuration section
         
-        ConfigurationTools.zipcode_carrefour(selenium_utils, self.driver)
+        #ConfigurationTools.zipcode_carrefour(selenium_utils, self.driver)
         
         # -----------------------------
         
