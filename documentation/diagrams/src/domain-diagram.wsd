@@ -1,0 +1,147 @@
+@startuml KununuaDomainModel
+
+' --------------- CONFIG ----------------
+
+title Kununua Domain Model
+skinparam defaultFontName Serif
+
+' --------------- CLASSES ----------------
+
+class AbstractUser{}
+
+class KununuaUser{
+    +email: String {not null, unique}
+    +profile_picture: Image
+    +phone_number: String {not null, lenght=20}
+}
+
+class Country{
+    +spanish_name: String {not null, lenght=64, unique}
+    +english_name: String {not null, lenght=64, unique}
+    +code: String {not null, lenght=3, unique}
+    +phone_code: String {lenght=6, unique}
+}
+
+class Currency{
+    +name: String {not null, lenght=64, unique}
+    +code: String {not null, lenght=3, unique}
+    +symbol: String {lenght=3}
+}
+
+class Address{
+    +name: String {not null, lenght=64}
+    +value: String {not null, lenght=256}
+    +zipcode: String {not null, lenght=10}
+    +default: bool {not null}
+}
+
+class Product{
+    +name: String {not null, lenght=256}
+    +image: Image {not null}
+    +is_vegetarian: bool
+    +is_gluten_free: bool
+    +is_freezed: bool
+    +is_eco: bool
+    +is_without_sugar: bool
+    +is_without_lactose: bool
+    +is_from_country: bool
+    ..
+    +get_average_rating(): float {Transient}
+}
+
+class Price{
+    +price: float {not null}
+    +offer_price: float
+    +weight: String {lenght=24}
+    +amount: int {min=1}
+    +url: URL {length=1024}
+    +image: Image
+}
+
+class Brand{
+    +name: String {not null, lenght=64, unique}
+}
+
+class Category{
+    +name: String {not null, lenght=64, unique}
+    +image: Image {not null}
+}
+
+class Supermarket{
+    +name: String {not null, lenght=64}
+    +zipcode: String {not null, lenght=10}
+    +main_url: url {not null}
+    +logo: Image {not null}
+    +banner: Image {not null}
+}
+
+class Rating{
+    +rating: int {min=1, max=5}
+}
+
+class List{
+    +name: String {not null, lenght=64}
+    +date: datetime {not null}
+}
+
+class Cart{}
+
+class ProductEntry{
+    +quantity: int {not null, min=1}
+    +locked: bool {not null}
+    +is_list_product: bool {not null}
+    +is_crossed: bool {not null}
+}
+
+' --------------- NOTES ----------------
+note top of Address 
+An user can only have 
+one Address set as default
+end note
+
+note bottom of Address 
+Unique (user,value)
+Unique (user,name)
+end note
+
+note top of Supermarket
+Unique (name,country,zipcode)
+end note
+
+note right of Rating
+Unique (user,product)
+end note
+
+note bottom of ProductEntry
+if is_list_product == true --> class related to List. Cart relation is null
+else --> class related to Cart. List relation is null
+end note
+
+note bottom of Price
+if amount == null --> the product is not a pack
+else if amount == 1 --> the product has an offer
+else --> the product is a pack
+end note
+
+' --------------- RELATIONS ----------------
+
+AbstractUser <|-- KununuaUser
+KununuaUser *-- Address
+KununuaUser "*" --> "1" Country: lives in
+KununuaUser "1" <-- "0..*" Rating: gives
+KununuaUser "1" --> "0..*" List: writes
+KununuaUser "1" --> "1" Cart: has
+Country "*" --> "0..1" Currency: has
+Product "*" --> "0..1" Category: has
+Product "*" --> "0..1" Brand: has
+Category "*" --> "0..1" Category: has
+Product "1" <-- "*" Price: of
+Product "*" --> "1" Supermarket: is in
+Supermarket "*" --> "1" Country: is in
+Supermarket "1" <-- "*" Price: of
+Rating "*" --> "1" Product: rates
+List *-- ProductEntry
+Cart *-- ProductEntry
+ProductEntry "*" --> "1" Price: appears in
+
+@enduml
