@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "145411164671",
+    "project_id": "kununua-25cc6",
+    "storage_bucket": "kununua-25cc6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:145411164671:android:c7a5870a7b6325e46e7fca",
+        "android_client_info": {
+          "package_name": "com.example.kununua_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "145411164671-j754chtp45d3eid11q5msd5r6ngb2di5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.kununua_app",
+            "certificate_hash": "aa97e2df11738092c9f8e9b6ddb6900441cb6085"
+          }
+        },
+        {
+          "client_id": "145411164671-olb15huuda7relusla91b2s2etacok9c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBq2-EtbqTVnTDsqZv4f4nHMWVTfXebdNU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "145411164671-olb15huuda7relusla91b2s2etacok9c.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "145411164671-e3qslq7h1nc9g9hgf819hc6su4mloaf1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.kununuaApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

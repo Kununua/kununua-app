@@ -1,0 +1,100 @@
+from django.db import models
+from products.models import Category, Supermarket, Brand
+from django.utils.translation import gettext_lazy as _
+
+class ProductScraped(object):
+    
+    def __init__(self, pseudo_id = None, name=None, ean=None, price=None, unit_price=None, weight=None, brand=None, 
+                 amount=None, image=None, offer_price=None, 
+                 is_vegetarian=False, is_gluten_free=False, 
+                 is_freezed=False, is_from_country=False, is_eco=False, 
+                 is_without_sugar=False, is_without_lactose=False, url=None, 
+                 is_pack=False, category=None, supermarket=None):
+        
+        if pseudo_id is not None and type(pseudo_id) is not int:
+            raise ValueError(_("Product pseudo_id must be None or float"))
+        if type(name) is not str:
+            raise ValueError(_("Product name cannot be None and must be a string"))
+        if type(price) is not float:
+            raise ValueError(_("Product price cannot be None and must be a float"))
+        if unit_price is not None and type(unit_price) is not str:
+            raise ValueError(_("Product unit_price must be None or string"))
+        if weight is not None and type(weight) is not str:
+            raise ValueError(_("Product weight must be None or string"))
+        if brand is not None and type(brand) is not str and not isinstance(brand, Brand):
+            raise ValueError(_("Product brand must be None or string or Brand object"))
+        if amount is not None and type(amount) is not int:
+            raise ValueError(_("Product amount must be None or int"))
+        if type(image) is not str:
+            raise ValueError(_("Product image cannot be None and must be a string"))
+        if offer_price is not None and type(offer_price) is not float:
+            raise ValueError(_("Product offer_price must be None or float"))
+        if type(is_vegetarian) is not bool:
+            raise ValueError(_("Product is_vegetarian cannot be None and must be a boolean"))
+        if type(is_gluten_free) is not bool:
+            raise ValueError(_("Product is_gluten_free cannot be None and must be a boolean"))
+        if type(is_freezed) is not bool:
+            raise ValueError(_("Product is_freezed cannot be None and must be a boolean"))
+        if type(is_from_country) is not bool:
+            raise ValueError(_("Product is_from_country cannot be None and must be a boolean"))
+        if type(is_eco) is not bool:
+            raise ValueError(_("Product is_eco cannot be None and must be a boolean"))
+        if type(is_without_sugar) is not bool:
+            raise ValueError(_("Product is_without_sugar cannot be None and must be a boolean"))
+        if type(is_without_lactose) is not bool:
+            raise ValueError(_("Product is_without_lactose cannot be None and must be a boolean"))
+        if url is not None and type(url) is not str:
+            raise ValueError(_("Product url must be None or string"))
+        if type(is_pack) is not bool:
+            raise ValueError(_("Product is_pack flag must be boolean"))
+        if type(category) is not str and not isinstance(category, Category):
+            raise ValueError(_("Product category cannot be None and must be a string or Category object"))
+        if type(supermarket) is not Supermarket and not isinstance(supermarket, str):
+            raise ValueError(_("Product supermarket cannot be None and must be a Supermarket object"))
+        
+        self.pseudo_id = pseudo_id
+        self.name = name
+        self.ean = ean
+        self.price = price
+        self.unit_price = unit_price
+        self.weight = weight
+        self.brand = brand
+        self.amount = amount
+        self.image = image
+        self.offer_price = offer_price
+        self.is_vegetarian = is_vegetarian
+        self.is_gluten_free = is_gluten_free
+        self.is_freezed = is_freezed
+        self.is_from_country = is_from_country
+        self.is_eco = is_eco
+        self.is_without_sugar = is_without_sugar
+        self.is_without_lactose = is_without_lactose
+        self.url = url
+        self.is_pack = is_pack
+        self.category = category
+        self.supermarket = supermarket
+        
+    def __str__(self):
+        return f"ProductScraped[name: {self.name}, ean: {self.ean} price: {self.price}, unit_price: {self.unit_price}, weight: {self.weight}, offer_price: {self.offer_price}, supermarket: {self.supermarket.name}, amount={self.amount}]"
+    
+class PackScraped(object):
+    
+    def __init__(self, product_scraped=None, name=None, pack_ean=None, amount=None, price=None, weight=None, component_weight=None, image=None, url=None, offer_price=None, category=None):
+        
+        if product_scraped is not None and type(product_scraped) is not ProductScraped and not isinstance(product_scraped, int):
+            raise ValueError(_("Pack product_scraped cannot be None and must be a ProductScraped object or int"))
+        
+        self.product_scraped = product_scraped
+        self.name = name
+        self.pack_ean = pack_ean
+        self.amount = amount
+        self.price = price
+        self.offer_price = offer_price
+        self.weight = weight
+        self.component_weight = component_weight
+        self.image = image
+        self.url = url
+        self.category = category
+        
+    def __str__(self):
+        return f"PackScraped[product_scraped: {self.product_scraped}, name: {self.name}, amount: {self.amount}, price: {self.price}, offer_price: {self.offer_price}, weight: {self.weight}, component_weight: {self.component_weight}, image: {self.image}, url: {self.url}]"

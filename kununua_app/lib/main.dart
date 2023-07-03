@@ -1,127 +1,82 @@
-// Copyright 2018 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
+import 'package:flutter/services.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:kununua_app/screens/new_login_screen/login_screen.dart';
+import 'package:kununua_app/screens/main_screen.dart';
+import 'package:kununua_app/utils/constants.dart';
+import 'package:kununua_app/utils/globals.dart' as globals;
+import 'package:kununua_app/utils/requests.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() {
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      systemNavigationBarColor:
+          SystemUiOverlayStyle.dark.systemNavigationBarColor,
+    ),
+  );
+  initializeDateFormatting('es', null);
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(  
-      debugShowCheckedModeBanner: false,        // MODIFY with const
-      title: 'Startup Name Generator',
-      theme: ThemeData(          // Add the 5 lines from here... 
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-        ),
-      ), 
-      home: const RandomWords(),             // REMOVE Scaffold
-    );
-  }
-}
+  Future<bool> checkToken() async {
+    bool validToken = false;
 
-class RandomWords extends StatefulWidget {
-  const RandomWords({super.key});
+    var prefs = await SharedPreferences.getInstance();
 
-  @override
-  State<RandomWords> createState() => _RandomWordsState();
-}
+    globals.prefs = prefs;
 
-class _RandomWordsState extends State<RandomWords> {
-  final _suggestions = <WordPair>[];
-  final _saved = <WordPair>{};
-  final _biggerFont = const TextStyle(fontSize: 18);
-
-   void _pushSaved() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) {
-          final tiles = _saved.map(
-            (pair) {
-              return ListTile(
-                title: Text(
-                  pair.asPascalCase,
-                  style: _biggerFont,
-                ),
-              );
-            },
-          );
-          final divided = tiles.isNotEmpty
-              ? ListTile.divideTiles(
-                  context: context,
-                  tiles: tiles,
-                ).toList()
-              : <Widget>[];
-
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Saved Suggestions'),
-            ),
-            body: ListView(children: divided),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _BuildSuggetions() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemBuilder: (context, i) {
-        if (i.isOdd) return const Divider();
-
-        final index = i ~/ 2;
-        if (index >= _suggestions.length) {
-          _suggestions.addAll(generateWordPairs().take(10));
-        }
-
-        final alreadySaved = _saved.contains(_suggestions[index]);
-        return ListTile(
-          title: Text(
-            _suggestions[index].asPascalCase,
-            style: _biggerFont,
-          ),
-          trailing: Icon(
-            alreadySaved ? Icons.favorite : Icons.favorite_border,
-            color: alreadySaved ? Colors.red : null,
-            semanticLabel: alreadySaved ? 'Remove from saved' : 'Save',
-          ),
-          onTap: () {
-            setState(() {
-              if (alreadySaved) {
-                _saved.remove(_suggestions[index]);
-              } else {
-                _saved.add(_suggestions[index]);
-              }
-            }); 
-          },
-        );
+    final MutationOptions refreshTokenOptions = MutationOptions(
+      document: gql(refreshToken),
+      variables: <String, dynamic>{
+        'token': globals.prefs!.getString('jwtToken') ?? '',
       },
     );
+
+    final tokenResult = await globals.client.value.mutate(refreshTokenOptions);
+
+    if (!tokenResult.hasException) {
+      validToken = true;
+      globals.prefs!
+          .setString('jwtToken', tokenResult.data!['refreshToken']['token']);
+    }
+
+    return validToken;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(  
-        title: const Text('Startup Name Generator'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.list),
-            onPressed: _pushSaved,
-            tooltip: 'Saved Suggestions',
+    return GraphQLProvider(
+        client: globals.client,
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Kununua',
+          theme: ThemeData(
+            scaffoldBackgroundColor: kBackgroundColor,
+            textTheme: Theme.of(context)
+                .textTheme
+                .apply(bodyColor: kPrimaryColor, fontFamily: 'Montserrat'),
           ),
-        ],
-      ),               
-      body: _BuildSuggetions()
-    );
+          home: FutureBuilder(
+            future: checkToken(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                if (snapshot.data!) {
+                  return const MainScreen();
+                } else {
+                  return const LoginScreen();
+                }
+              } else {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            },
+          ),
+        ));
   }
 }

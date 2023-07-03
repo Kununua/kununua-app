@@ -1,0 +1,1 @@
+const backendMediaBaseUrl = '{BACKEND MEDIA BASE URL}';
